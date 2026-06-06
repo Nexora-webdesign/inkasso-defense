@@ -163,6 +163,101 @@
   }
 
   /* ============================================================
+   * Kontext-Onboarding (3 Fragen -> sessionStorage 'inkassoOnboarding')
+   * ============================================================ */
+  (function initOnboarding() {
+    const onbSection = document.getElementById('onboarding-section');
+    const uploadSection = document.getElementById('upload-section');
+    const continueBtn = document.getElementById('onb-continue');
+    const amountWrap = document.getElementById('onb-amount-wrap');
+    const amountInput = document.getElementById('onb-amount');
+    if (!onbSection || !continueBtn) return;
+
+    const OPT_ON = 'onb-opt rounded-full px-5 py-2 text-sm font-semibold transition bg-mint text-white shadow-sm';
+    const OPT_OFF = 'onb-opt rounded-full px-5 py-2 text-sm font-semibold transition text-ink-700/70 dark:text-slate-300';
+
+    const state = { ersterBrief: null, bereitsWidersprochen: null, bereitsGezahlt: null };
+
+    function parseEur(s) {
+      s = String(s == null ? '' : s).trim().replace(/[€\s]/g, '');
+      if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function validate() {
+      const answered = state.ersterBrief !== null && state.bereitsWidersprochen !== null && state.bereitsGezahlt !== null;
+      const amountOk = state.bereitsGezahlt !== true || parseEur(amountInput && amountInput.value) > 0;
+      continueBtn.disabled = !(answered && amountOk);
+    }
+
+    function selectInQuestion(q, val) {
+      q.querySelectorAll('.onb-opt').forEach((b) => {
+        b.className = b.dataset.val === String(val) ? OPT_ON : OPT_OFF;
+      });
+    }
+
+    document.querySelectorAll('.onb-q').forEach((q) => {
+      const key = q.dataset.key;
+      q.querySelectorAll('.onb-opt').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const val = btn.dataset.val === 'true';
+          selectInQuestion(q, btn.dataset.val);
+          if (key === 'bereitsGezahlt') {
+            state.bereitsGezahlt = val;
+            if (amountWrap) {
+              amountWrap.classList.toggle('hidden', !val);
+              if (val) { if (amountInput) amountInput.focus(); }
+              else if (amountInput) amountInput.value = '';
+            }
+          } else {
+            state[key] = val;
+          }
+          validate();
+        });
+      });
+    });
+
+    if (amountInput) amountInput.addEventListener('input', validate);
+
+    try {
+      const prev = JSON.parse(sessionStorage.getItem('inkassoOnboarding') || 'null');
+      if (prev) {
+        state.ersterBrief = prev.ersterBrief !== false;
+        state.bereitsWidersprochen = prev.bereitsWidersprochen === true;
+        state.bereitsGezahlt = Number(prev.bereitsGezahltEur) > 0;
+        document.querySelectorAll('.onb-q').forEach((q) => {
+          const k = q.dataset.key;
+          if (k === 'bereitsGezahlt') selectInQuestion(q, state.bereitsGezahlt);
+          else selectInQuestion(q, state[k]);
+        });
+        if (state.bereitsGezahlt && amountWrap) {
+          amountWrap.classList.remove('hidden');
+          if (amountInput) amountInput.value = String(prev.bereitsGezahltEur).replace('.', ',');
+        }
+        validate();
+      }
+    } catch (_) {}
+
+    continueBtn.addEventListener('click', () => {
+      const onboarding = {
+        ersterBrief: state.ersterBrief,
+        bereitsWidersprochen: state.bereitsWidersprochen,
+        bereitsGezahltEur: state.bereitsGezahlt ? Math.round(parseEur(amountInput.value) * 100) / 100 : 0,
+      };
+      try { sessionStorage.setItem('inkassoOnboarding', JSON.stringify(onboarding)); } catch (_) {}
+
+      onbSection.classList.add('hidden');
+      if (uploadSection) {
+        uploadSection.classList.remove('hidden');
+        uploadSection.classList.add('reveal');
+        if (typeof reveal === 'function') reveal(uploadSection);
+        uploadSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  })();
+
+  /* ============================================================
    * 4) Upload-Zone (Drag & Drop + API + Lade-Choreografie)
    * ============================================================ */
   (function initUpload() {
@@ -269,6 +364,18 @@
     const raw = sessionStorage.getItem('inkassoResult');
     if (!raw) { window.location.href = 'index.html'; return; }
     let d; try { d = JSON.parse(raw); } catch (_) { window.location.href = 'index.html'; return; }
+
+    // Server-Hinweise transparent anzeigen
+    const hinweise = Array.isArray(d.hinweise) ? d.hinweise : [];
+    const hbox = document.getElementById('hinweise-box');
+    const hlist = document.getElementById('hinweise-list');
+    if (hbox && hlist && hinweise.length) {
+      hlist.innerHTML = hinweise
+        .map((h) => `<li class="flex gap-2"><span aria-hidden="true">•</span><span>${esc(h)}</span></li>`)
+        .join('');
+      hbox.classList.remove('hidden');
+      if (typeof reveal === 'function') reveal(hbox);
+    }
 
     const stamm = d.stammdaten || {};
     const ber = d.berechnung || {};

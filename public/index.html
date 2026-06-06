@@ -96,6 +96,54 @@
         und berechnen, wie viel du <span class="font-semibold text-ink-900 dark:text-white">wirklich</span> zahlen musst.
       </p>
 
+      <!-- Kontext-Onboarding: gatet den Upload -->
+      <section id="onboarding-section" class="reveal mx-auto max-w-xl">
+        <div class="rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface sm:p-8">
+          <h2 class="text-lg font-bold text-ink-950 dark:text-white">Kurz vorab: 3 Fragen</h2>
+          <p class="mt-1 text-sm text-ink-700/70 dark:text-slate-400">Damit ordnen wir deinen Fall korrekt ein. Dauert 10 Sekunden.</p>
+
+          <div class="mt-6 space-y-5">
+            <div class="onb-q" data-key="ersterBrief">
+              <p class="text-sm font-semibold text-ink-950 dark:text-white">Ist das der erste Brief, den du in dieser Sache erhältst?</p>
+              <div class="mt-2 inline-flex rounded-full bg-black/5 p-1 dark:bg-white/5" role="group" aria-label="Erstes Schreiben?">
+                <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="true">Ja</button>
+                <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="false">Nein</button>
+              </div>
+            </div>
+
+            <div class="onb-q" data-key="bereitsWidersprochen">
+              <p class="text-sm font-semibold text-ink-950 dark:text-white">Hast du dem Gläubiger/Inkassobüro bereits widersprochen?</p>
+              <div class="mt-2 inline-flex rounded-full bg-black/5 p-1 dark:bg-white/5" role="group" aria-label="Bereits widersprochen?">
+                <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="true">Ja</button>
+                <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="false">Nein</button>
+              </div>
+            </div>
+
+            <div class="onb-q" data-key="bereitsGezahlt">
+              <p class="text-sm font-semibold text-ink-950 dark:text-white">Hast du bereits eine (Teil-)Zahlung geleistet?</p>
+              <div class="mt-2 inline-flex rounded-full bg-black/5 p-1 dark:bg-white/5" role="group" aria-label="Bereits gezahlt?">
+                <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="true">Ja</button>
+                <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="false">Nein</button>
+              </div>
+              <div id="onb-amount-wrap" class="mt-3 hidden">
+                <label for="onb-amount" class="text-xs font-medium text-ink-700/60 dark:text-slate-400">Bereits gezahlter Betrag</label>
+                <div class="relative mt-1 max-w-[12rem]">
+                  <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/60 dark:text-slate-400">€</span>
+                  <input id="onb-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="50,00"
+                    class="w-full rounded-2xl border border-white/70 bg-white/70 py-2.5 pl-8 pr-4 text-ink-950 transition focus:outline-none focus:ring-2 focus:ring-mint/40 dark:border-white/10 dark:bg-white/5 dark:text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="onb-continue" type="button" disabled
+            class="mt-7 w-full rounded-full bg-mint px-6 py-3.5 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-40">
+            Weiter zum Upload
+          </button>
+        </div>
+      </section>
+
+      <section id="upload-section" class="hidden">
       <!-- Upload-Island -->
       <section id="upload" class="reveal mx-auto mt-10 w-full max-w-xl scroll-mt-28" style="--reveal-delay:180ms">
         <form id="upload-form" class="rounded-[2.25rem] border border-white/70 bg-white/85 p-2 bezel-soft dark:border-white/10 dark:bg-night-surface">
@@ -145,6 +193,7 @@
           </div>
         </div>
       </section>
+      </section><!-- /#upload-section -->
     </section>
 
     <!-- So funktioniert's -->
