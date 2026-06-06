@@ -13,6 +13,7 @@ export type PostenArt =
   | "einigungsgebuehr"
   | "mahnkosten"
   | "verzugszinsen"
+  | "verzugspauschale"
   | "auslagen"
   | "sonstiges";
 
@@ -23,6 +24,7 @@ export const POSTEN_ARTEN: PostenArt[] = [
   "einigungsgebuehr",
   "mahnkosten",
   "verzugszinsen",
+  "verzugspauschale",
   "auslagen",
   "sonstiges",
 ];
@@ -37,6 +39,8 @@ export interface Faktenposten {
   betrag_eur: number;
   /** Gebührensatz (z. B. 1.3) – 0, wenn im Dokument nicht ausdrücklich genannt. */
   gebuehrensatz: number;
+  /** true NUR, wenn der Posten ausdrücklich als Verwaltungs-/Bearbeitungs-/IT-/Personalkostenpauschale beschrieben ist. */
+  pauschale_aus_verwaltungskosten: boolean;
   /** Kurzer wörtlicher Beleg/Fundstelle aus dem Dokument. */
   beleg: string;
 }
@@ -54,6 +58,14 @@ export interface Fakten {
   nur_ratenzahlung_kein_vergleich: boolean;
   /** true nur, wenn besondere Umstände (z. B. für erhöhte Gebühr) ausdrücklich belegt sind. */
   besondere_umstaende_belegt: boolean;
+  /** true nur, wenn das Schreiben erkennen lässt, dass der Schuldner die Forderung bestritten hat. */
+  forderung_bestritten: boolean;
+  /** true = Verbraucher (Default); false nur, wenn der Schuldner klar ein Unternehmen/Gewerbe ist. */
+  ist_verbraucher: boolean;
+  /** Ausgewiesener jährlicher Verzugszinssatz in % – 0, wenn nicht genannt. */
+  verzugszins_prozent: number;
+  /** true nur, wenn zusätzlich zur Inkasso-Geschäftsgebühr eine separate Anwalts-Geschäftsgebühr für dieselbe Sache berechnet wird. */
+  zweite_anwalts_geschaeftsgebuehr: boolean;
   vertrauensgrad: Vertrauensgrad;
 }
 
@@ -85,6 +97,10 @@ export const FACTS_JSON_SCHEMA = {
     "telekommunikationssperre_belegt",
     "nur_ratenzahlung_kein_vergleich",
     "besondere_umstaende_belegt",
+    "forderung_bestritten",
+    "ist_verbraucher",
+    "verzugszins_prozent",
+    "zweite_anwalts_geschaeftsgebuehr",
     "vertrauensgrad",
   ],
   properties: {
@@ -98,7 +114,14 @@ export const FACTS_JSON_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["art", "bezeichnung_im_text", "betrag_eur", "gebuehrensatz", "beleg"],
+        required: [
+          "art",
+          "bezeichnung_im_text",
+          "betrag_eur",
+          "gebuehrensatz",
+          "pauschale_aus_verwaltungskosten",
+          "beleg",
+        ],
         properties: {
           art: {
             type: "string",
@@ -109,6 +132,7 @@ export const FACTS_JSON_SCHEMA = {
               "einigungsgebuehr",
               "mahnkosten",
               "verzugszinsen",
+              "verzugspauschale",
               "auslagen",
               "sonstiges",
             ],
@@ -116,6 +140,7 @@ export const FACTS_JSON_SCHEMA = {
           bezeichnung_im_text: { type: "string" },
           betrag_eur: { type: "number" },
           gebuehrensatz: { type: "number" },
+          pauschale_aus_verwaltungskosten: { type: "boolean" },
           beleg: { type: "string" },
         },
       },
@@ -123,6 +148,10 @@ export const FACTS_JSON_SCHEMA = {
     telekommunikationssperre_belegt: { type: "boolean" },
     nur_ratenzahlung_kein_vergleich: { type: "boolean" },
     besondere_umstaende_belegt: { type: "boolean" },
+    forderung_bestritten: { type: "boolean" },
+    ist_verbraucher: { type: "boolean" },
+    verzugszins_prozent: { type: "number" },
+    zweite_anwalts_geschaeftsgebuehr: { type: "boolean" },
     vertrauensgrad: { type: "string", enum: ["hoch", "mittel", "niedrig"] },
   },
 } as const;
@@ -138,12 +167,17 @@ REGELN:
 - Erfasse jeden einzelnen Geldposten als Eintrag in "posten" mit "art", "bezeichnung_im_text" (Wortlaut), "betrag_eur" (Zahl), "gebuehrensatz" und "beleg" (kurze wörtliche Fundstelle).
 - "gebuehrensatz": nur eintragen, wenn im Dokument ausdrücklich ein Satz genannt ist (z. B. 1,3). Andernfalls 0.
 - "betrag_eur" und "forderungssumme_eur": exakt wie im Dokument. Rechne KEINE Summen selbst nach – das übernimmt das System.
-- Ordne "art" einem der erlaubten Werte zu; wenn unklar, nutze "sonstiges".
+- Ordne "art" einem der erlaubten Werte zu; wenn unklar, nutze "sonstiges". Nutze "verzugspauschale" für eine pauschale Verzugs-/Schadenspauschale (z. B. 40 EUR), NICHT für laufende Verzugszinsen.
+- "pauschale_aus_verwaltungskosten": pro Posten nur true, wenn der Posten ausdrücklich als Verwaltungs-, Bearbeitungs-, IT- oder Personalkostenpauschale bezeichnet ist. Im Zweifel false.
 
 SACHVERHALTS-FLAGS (true NUR bei ausdrücklichem Beleg im Dokument, sonst false):
 - "telekommunikationssperre_belegt": nur true, wenn eine vollständige Sperrung des Telekommunikations-/Internetanschlusses ausdrücklich erwähnt ist.
 - "nur_ratenzahlung_kein_vergleich": nur true, wenn ausdrücklich von einer reinen Ratenzahlung OHNE echten Vergleich/gegenseitiges Nachgeben die Rede ist.
 - "besondere_umstaende_belegt": nur true, wenn besondere Umstände (z. B. zur Rechtfertigung einer erhöhten Gebühr) ausdrücklich dargelegt sind.
+- "forderung_bestritten": nur true, wenn das Schreiben erkennen lässt, dass der Schuldner die Forderung bereits bestritten hat. Im Zweifel false.
+- "ist_verbraucher": Default true. Nur false, wenn der Schuldner klar ein Unternehmen/Gewerbe ist (z. B. Firmenbezeichnung, Gewerbeadresse, Anrede als Firma). Im Zweifel true.
+- "verzugszins_prozent": der ausdrücklich ausgewiesene jährliche Verzugszinssatz in Prozent (nur die Zahl, z. B. 5 oder 9). Wenn kein Satz genannt ist, 0.
+- "zweite_anwalts_geschaeftsgebuehr": nur true, wenn zusätzlich zur Inkasso-Geschäftsgebühr eine SEPARATE Anwalts-Geschäftsgebühr für dieselbe Sache berechnet wird. Im Zweifel false.
 
 UNSICHERHEIT:
 - Im Zweifel ein Flag auf false setzen und "vertrauensgrad" auf "niedrig".
@@ -178,6 +212,10 @@ export function isFakten(x: unknown): x is Fakten {
     typeof o.telekommunikationssperre_belegt === "boolean" &&
     typeof o.nur_ratenzahlung_kein_vergleich === "boolean" &&
     typeof o.besondere_umstaende_belegt === "boolean" &&
+    typeof o.forderung_bestritten === "boolean" &&
+    typeof o.ist_verbraucher === "boolean" &&
+    typeof o.verzugszins_prozent === "number" &&
+    typeof o.zweite_anwalts_geschaeftsgebuehr === "boolean" &&
     (o.vertrauensgrad === "hoch" || o.vertrauensgrad === "mittel" || o.vertrauensgrad === "niedrig")
   );
 }

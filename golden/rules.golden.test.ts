@@ -35,6 +35,30 @@ describe("Golden-Suite: Rule-Engine", () => {
     });
   });
 
+  // Dokument-Hinweis: doppelte Geschäftsgebühr (Inkasso + Anwalt).
+  describe("Hinweis: zweite Anwalts-Geschäftsgebühr", () => {
+    const HINWEIS =
+      "Es werden Geschäftsgebühren von Inkasso UND Anwalt für dieselbe Sache geltend gemacht – regelmäßig ist nur eine geschuldet (Anrechnung, § 13e RDG).";
+
+    it("POSITIV: Flag true -> Hinweis erscheint", () => {
+      const f = makeFakten({
+        forderungssumme_eur: 60,
+        zweite_anwalts_geschaeftsgebuehr: true,
+        posten: [posten("hauptforderung", 60)],
+      });
+      expect(evaluate(f).hinweise).toContain(HINWEIS);
+    });
+
+    it("NEGATIV: Flag false -> kein Hinweis", () => {
+      const f = makeFakten({
+        forderungssumme_eur: 60,
+        zweite_anwalts_geschaeftsgebuehr: false,
+        posten: [posten("hauptforderung", 60)],
+      });
+      expect(evaluate(f).hinweise).not.toContain(HINWEIS);
+    });
+  });
+
   it("ist deterministisch (zweimaliges evaluate liefert identisches Ergebnis)", () => {
     const f = makeFakten({
       forderungssumme_eur: 130,

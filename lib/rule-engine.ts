@@ -37,23 +37,28 @@ export interface EvaluateOptions {
   requireApproved: boolean;
 }
 
+/** Kontext, den jede Regel zusätzlich zu den Fakten erhält. */
+export interface RegelContext {
+  onboarding: Onboarding;
+}
+
 // --- Geld-Mathematik in Cent (gegen Float-Drift) ----------------------------
 const toCents = (eur: number) => Math.round((Number.isFinite(eur) ? eur : 0) * 100);
 const toEur = (cents: number) => cents / 100;
 const clamp = (n: number, lo: number, hi: number) => Math.min(Math.max(n, lo), hi);
 
 // trifft_zu defensiv gekapselt -> eine fehlerhafte Regel crasht nie die Analyse.
-function matches(r: Regel, f: Fakten, p: Faktenposten): boolean {
+function safeMatch(r: Regel, f: Fakten, p: Faktenposten, ctx: RegelContext): boolean {
   try {
-    return r.trifft_zu(f, p);
+    return r.trifft_zu(f, p, ctx);
   } catch {
     return false;
   }
 }
 
 // Erste passende Regel aus der übergebenen (aktiven) Regelmenge.
-function findRule(regeln: Regel[], f: Fakten, p: Faktenposten): Regel | undefined {
-  return regeln.find((r) => matches(r, f, p));
+function findRule(regeln: Regel[], f: Fakten, p: Faktenposten, ctx: RegelContext): Regel | undefined {
+  return regeln.find((r) => safeMatch(r, f, p, ctx));
 }
 
 export function evaluate(
@@ -63,6 +68,7 @@ export function evaluate(
 ): FrontendPayload {
   // "geprueft"-Gate: bei requireApproved nur anwaltlich freigegebene Regeln anwenden.
   const aktiveRegeln = REGELN.filter((r) => !options.requireApproved || r.geprueft);
+  const ctx: RegelContext = { onboarding };
 
   const eintraege: AuditEintrag[] = [];
   const hinweise: string[] = [];
@@ -75,15 +81,15 @@ export function evaluate(
     const betragC = Math.max(0, toCents(p.betrag_eur));
     postenSumC += betragC;
 
-    const regel = findRule(aktiveRegeln, fakten, p);
-    if (options.requireApproved && !regel && REGELN.some((r) => !r.geprueft && matches(r, fakten, p))) {
+    const regel = findRule(aktiveRegeln, fakten, p, ctx);
+    if (options.requireApproved && !regel && REGELN.some((r) => !r.geprueft && safeMatch(r, fakten, p, ctx))) {
       zurueckgehalten = true;
     }
     let kuerzC = 0;
     if (regel) {
       let roh = 0;
       try {
-        roh = regel.kuerzungEur(p);
+        roh = regel.kuerzungEur(fakten, p, ctx);
       } catch {
         roh = 0;
       }
@@ -139,6 +145,11 @@ export function evaluate(
   }
   if (zurueckgehalten) {
     hinweise.push("Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.");
+  }
+  if (fakten.zweite_anwalts_geschaeftsgebuehr) {
+    hinweise.push(
+      "Es werden Geschäftsgebühren von Inkasso UND Anwalt für dieselbe Sache geltend gemacht – regelmäßig ist nur eine geschuldet (Anrechnung, § 13e RDG).",
+    );
   }
 
   const bestritten = posten.filter((x) => x.status !== "RECHTENS");
