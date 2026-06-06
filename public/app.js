@@ -499,6 +499,48 @@
       });
     }
 
+    // PDF-Download (serverseitig via /api/widerspruch-pdf)
+    const dlBtn = $('download-pdf');
+    if (dlBtn) {
+      const dlSpan = dlBtn.querySelector('span');
+      let absender = {};
+      try { absender = JSON.parse(sessionStorage.getItem('inkassoAbsender') || '{}') || {}; } catch (_) {}
+      dlBtn.addEventListener('click', async () => {
+        const prev = dlSpan ? dlSpan.textContent : '';
+        dlBtn.disabled = true; if (dlSpan) dlSpan.textContent = 'Erzeuge …';
+        try {
+          const res = await fetch('/api/widerspruch-pdf', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              empfaenger: stamm.inkassoName || stamm.glaeubiger || 'Inkassobüro',
+              aktenzeichen: az,
+              betreff: subject,
+              body: body,
+              absender: absender,
+            }),
+          });
+          const ct = res.headers.get('content-type') || '';
+          if (!res.ok || !ct.includes('application/pdf')) {
+            let msg = 'Das PDF konnte nicht erstellt werden.';
+            try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (_) {}
+            throw new Error(msg);
+          }
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Widerspruch_${String(az || 'Forderung').replace(/[^\w.-]+/g, '_').slice(0, 40) || 'Forderung'}.pdf`;
+          document.body.appendChild(link); link.click(); link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+        } catch (err) {
+          alert(err.message || 'PDF-Download fehlgeschlagen. Bitte erneut versuchen.');
+        } finally {
+          dlBtn.disabled = false; if (dlSpan) dlSpan.textContent = prev;
+        }
+      });
+    }
+
     // Raten-Slider (mit KI-Vorschlag vorbelegt)
     const slider = $('rate-slider');
     if (slider) {

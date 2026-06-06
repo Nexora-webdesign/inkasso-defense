@@ -192,12 +192,18 @@
       <div class="rounded-[1.6rem] bg-white/85 p-7 bezel-core dark:bg-night-inset">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <h2 class="font-display text-xl font-semibold tracking-tightest text-ink-950 dark:text-white">Fertige Antwort-E-Mail</h2>
-          <button id="copy-mail" class="group btn-press flex items-center gap-2 rounded-full bg-mint py-2.5 pl-5 pr-3 text-sm font-bold text-ink-950 shadow-[0_12px_30px_-10px_rgba(18,184,134,0.7)]">
-            <span>E-Mail kopieren</span>
-            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-ink-950/10">
-              <svg class="btn-icon h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-            </span>
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="download-pdf" class="btn-press flex items-center gap-2 rounded-full border border-ink-100 bg-white px-4 py-2.5 text-sm font-bold text-ink-950 disabled:opacity-50 dark:border-white/10 dark:bg-night-surface dark:text-white">
+              <svg class="h-4 w-4 text-mint-dark dark:text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+              <span>Als PDF</span>
+            </button>
+            <button id="copy-mail" class="group btn-press flex items-center gap-2 rounded-full bg-mint py-2.5 pl-5 pr-3 text-sm font-bold text-ink-950 shadow-[0_12px_30px_-10px_rgba(18,184,134,0.7)]">
+              <span>E-Mail kopieren</span>
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-ink-950/10">
+                <svg class="btn-icon h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              </span>
+            </button>
+          </div>
         </div>
         <div class="mt-5 rounded-2xl border border-ink-100 bg-[#f7f8fb] p-4 dark:border-white/10 dark:bg-night">
           <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-400">Betreff</p>
