@@ -1,15 +1,15 @@
-# Inkasso-Defense – Deployment-Leitfaden
+# Inkasso-Defense – Deployment-Leitfaden (Next.js)
 
 ## Architektur
 
 | Teil | Lokal (Entwicklung) | Produktion (Vercel) |
 |---|---|---|
-| Frontend (`public/`) | Express liefert statisch aus | Vercel-CDN (statisch) |
-| API `/api/analyze`, `/api/health` | Express-Routen in `server.js` | Serverless Functions in `api/*.js` |
-| Analyse-Logik | `lib/analyze.js` (geteilt) | `lib/analyze.js` (geteilt) |
-| CSS | `npm run build:css` → `public/styles.css` | `buildCommand` aus `vercel.json` |
+| Frontend | statisch in `public/` (HTML + Tailwind-Build + Vanilla-JS), von Next ausgeliefert | Vercel-CDN (statisch) |
+| API `/api/analyze`, `/api/health` | Next.js Route Handlers (`app/api/**/route.ts`) | Serverless Functions (Next.js) |
+| Analyse-Logik | `lib/inkasso-analysis.ts` (Schema, neutraler Prompt, serverseitige Mathematik, E-Mail-Vorlage) | dito |
+| CSS | `npm run build:css` → `public/styles.css` | im `buildCommand` enthalten |
 
-`server.js` ist nur für die lokale Entwicklung. In Produktion übernehmen die Functions in `api/` – beide nutzen dieselbe `lib/analyze.js`.
+Die API liefert IMMER eine stabile Hülle: `{ ok: true, data }` oder `{ ok: false, error }`. `"/"` wird per `next.config.js`-Rewrite auf `public/index.html` gemappt.
 
 ---
 
@@ -17,63 +17,53 @@
 
 ```bash
 npm install
-# .env anlegen (siehe unten) mit ANTHROPIC_API_KEY
-npm run build:css        # einmalig, oder: npm run watch:css (separat laufen lassen)
-npm start                # baut CSS via prestart und startet http://localhost:3000
+# .env mit ANTHROPIC_API_KEY (Next lädt .env automatisch)
+npm run build:css        # einmalig, oder parallel: npm run watch:css
+npm run dev              # Next.js Dev-Server auf http://localhost:3000
 ```
 
-`.env` (lokal, wird **nicht** committet – steht in `.gitignore`):
+Produktions-Build lokal testen:
+```bash
+npm run build            # build:css + next build
+npm start                # next start
+```
 
+`.env` (lokal, gitignored):
 ```
 ANTHROPIC_API_KEY=sk-ant-...
-PORT=3000
+# optional: ANALYZE_MODEL=claude-sonnet-4-6   (Default: claude-haiku-4-5)
 ```
 
 ---
 
 ## Deployment auf Vercel
 
-### A) Über GitHub (empfohlen)
+### Wichtig nach der Migration zu Next.js
+Das Projekt war zuvor als statische Site eingerichtet. Stelle in Vercel sicher:
+- **Settings → General → Framework Preset = Next.js** (wird durch `vercel.json` `"framework": "nextjs"` erzwungen, aber zur Sicherheit prüfen).
+- **Output Directory** NICHT auf `public` überschrieben lassen (Next nutzt `.next`). Override ggf. entfernen.
+- **Settings → Functions → Fluid Compute = ON** (empfohlen; erlaubt bis 300 s). Die Route setzt zusätzlich `maxDuration = 60`.
 
-1. **Repo pushen**
-   ```bash
-   git remote add origin https://github.com/<user>/inkasso-defense.git
-   git push -u origin main
-   ```
-2. **In Vercel importieren**: vercel.com → *Add New… → Project* → GitHub-Repo wählen.
-   - Framework Preset: **Other** (wird durch `vercel.json` korrekt gesetzt).
-   - Build & Output werden aus `vercel.json` übernommen (Build: `npm run build:css`, Output: `public`).
-3. **Environment Variable setzen**: *Project → Settings → Environment Variables*
-   - `ANTHROPIC_API_KEY` = dein Key → für **Production** (und **Preview**) hinzufügen.
-4. **Deploy** klicken. Fertig – die App läuft unter `https://<projekt>.vercel.app`.
+### Ablauf
+1. Push nach `main` (GitHub-Integration deployt automatisch) – oder Dashboard → Redeploy.
+2. **Environment Variable** `ANTHROPIC_API_KEY` muss gesetzt sein (Production + Preview). Optional `ANALYZE_MODEL`.
+3. Build läuft via `vercel.json` → `npm run build:css && next build`.
 
-### B) Über die Vercel CLI
-
-```bash
-npm i -g vercel
-vercel login
-vercel link                       # Projekt anlegen/verknüpfen
-vercel env add ANTHROPIC_API_KEY  # Wert eingeben, Scope Production (+ Preview)
-vercel --prod                     # Production-Deploy
-```
+### Verifizieren
+- `https://<projekt>.vercel.app/api/health` → `{ "ok": true, "model": "claude-haiku-4-5", "keyConfigured": true }`
+- App öffnen, Foto/PDF hochladen → Analyse landet im Dark-Dashboard.
 
 ---
 
-## Wichtige Hinweise
+## Hinweise
 
-- **Request-Limit (4,5 MB):** Serverless Functions auf Vercel akzeptieren max. ~4,5 MB Request-Body. Das Frontend verkleinert Foto-Uploads daher automatisch (längste Kante 2000 px, JPEG) – Handy-Fotos bleiben sicher darunter. Sehr große PDFs ggf. vorher komprimieren.
-- **Function-Timeout / Fluid Compute (wichtig!):** Aktiviere **Fluid Compute** unter *Project → Settings → Functions* – damit erlaubt der Hobby-Plan bis **300 s** Laufzeit (sonst nur 10 s Default / 60 s Max). `vercel.json` setzt zusätzlich `maxDuration: 60` für `api/analyze.js`. Ohne diese Einstellung läuft die Analyse ins 10-s-Timeout.
-- **Modell & Tempo:** Standardmodell ist das schnelle **`claude-haiku-4-5`** (Vision + Structured Outputs), Thinking aus, knappe Ausgabe → typ. ~10–15 s (im Warmbetrieb schneller, da das JSON-Schema 24 h gecacht wird). Über die Env-Var **`ANALYZE_MODEL`** (z. B. `claude-sonnet-4-6` oder `claude-opus-4-8`) auf mehr juristische Tiefe umstellbar – dann ggf. Fluid Compute zwingend nötig.
-- **Kosten/Tokens:** Jede Analyse ist ein Anthropic-API-Call (Vision). Haiku ist am günstigsten/schnellsten.
-- **`public/styles.css`** ist generiert (gitignored) und wird im Vercel-Build erzeugt – nie direkt editieren, sondern `src/input.css` / `tailwind.config.js`.
+- **Modell & Tempo:** Default `claude-haiku-4-5` (~10–15 s, im Warmbetrieb schneller dank 24-h-Schema-Cache). Über Env **`ANALYZE_MODEL`** auf `claude-sonnet-4-6` (≈30–45 s) oder `claude-opus-4-8` umstellbar – dann ist **Fluid Compute Pflicht**.
+- **Upload-Limit:** Serverless-Body ~4,5 MB; das Frontend skaliert Fotos clientseitig herunter. Sehr große PDFs ggf. vorher komprimieren.
+- **`public/styles.css`** ist generiert (gitignored) und wird im Build erzeugt – nie direkt editieren, sondern `src/input.css` / `tailwind.config.js`.
 
 ---
 
 ## PWA – „Zum Home-Bildschirm hinzufügen"
-
-Die App ist installierbar (Manifest + Service Worker + Icons, Dark-Theme `#0b0f19`):
-
-- **Android (Chrome):** Menü ⋮ → *App installieren* bzw. *Zum Startbildschirm hinzufügen* (oder automatischer Banner).
-- **iOS (Safari):** Teilen-Symbol → *Zum Home-Bildschirm*.
-
-Nach der Installation startet sie im Standalone-Modus (ohne Browser-Leiste) wie eine native App.
+Installierbar via `public/manifest.webmanifest` + `public/sw.js` + Icons (`public/icons/`), Dark-Theme `#0b0f19`.
+- **Android (Chrome):** Menü ⋮ → *App installieren*.
+- **iOS (Safari):** Teilen → *Zum Home-Bildschirm*.

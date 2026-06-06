@@ -6,3 +6,8 @@ uploads/
 
 # Generiertes Tailwind-Build-Artefakt (Quelle: src/input.css)
 public/styles.css
+
+# Next.js
+.next/
+next-env.d.ts
+.vercel

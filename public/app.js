@@ -230,6 +230,7 @@
           throw new Error('Die Datei ist nach der Komprimierung noch zu groß (max. ~4 MB). Bitte ein kleineres Foto oder ein komprimiertes PDF hochladen.');
         }
         const fd = new FormData(); fd.append('file', toSend);
+        try { const onb = sessionStorage.getItem('inkassoOnboarding'); if (onb) fd.append('onboarding', onb); } catch (_) {}
         const res = await fetch('/api/analyze', { method: 'POST', body: fd });
 
         // Robust: Body als Text lesen und tolerant parsen. Verhindert den kryptischen
@@ -239,15 +240,14 @@
         let data = null;
         try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
 
-        if (!res.ok || !data || typeof data !== 'object') {
+        if (!res.ok || !data || data.ok !== true || !data.data) {
           const msg = (data && data.error)
             || (res.status === 413 ? 'Die Datei ist zu groß. Bitte kleiner hochladen.'
               : res.status === 504 ? 'Die Analyse hat zu lange gedauert. Bitte mit einem kleineren, scharfen Bild erneut versuchen.'
               : `Die Analyse ist fehlgeschlagen (Status ${res.status || '–'}). Bitte erneut versuchen.`);
           throw new Error(msg);
         }
-
-        sessionStorage.setItem('inkassoResult', JSON.stringify(data));
+        sessionStorage.setItem('inkassoResult', JSON.stringify(data.data));
         const go = () => { window.location.href = 'dashboard.html'; };
         if (loader) loader.finish(go); else go();
       } catch (err) {
@@ -371,7 +371,7 @@
       ? `Maßgeblich sind u. a.: ${paras.join(' · ')}.`
       : 'Die geforderten Beträge sind rechtlich nicht zu beanstanden.');
 
-    set('exp-warum', 'Mit einem sofortigen Teilwiderspruch zahlst du nur den unstrittigen fairen Kern. Die fertige E-Mail enthält eine Tilgungsbestimmung (§ 366 Abs. 1 BGB) und untersagt einen SCHUFA-Eintrag (§ 31 BDSG) – so vermeidest du einen negativen Eintrag.');
+    set('exp-warum', 'Mit einem sofortigen Teilwiderspruch zahlst du nur den unstrittigen fairen Kern. Die fertige E-Mail enthält eine Tilgungsbestimmung (§ 366 Abs. 1 BGB) und widerspricht der Übermittlung der bestrittenen Forderung an die SCHUFA (§ 31 BDSG) – so vermeidest du einen negativen Eintrag.');
 
     // E-Mail
     const subject = az ? `Teilwiderspruch – Aktenzeichen ${az}` : 'Teilwiderspruch gegen Ihre Forderung';
