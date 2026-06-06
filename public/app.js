@@ -184,10 +184,10 @@
     // 4,5-MB-Body-Limit und spart Vision-Tokens. PDFs bleiben unverändert.
     async function maybeDownscale(f) {
       if (!f.type || !f.type.startsWith('image/')) return f;
-      if (f.size < 1.4 * 1024 * 1024) return f;
+      if (f.size < 0.4 * 1024 * 1024) return f;
       try {
         const bmp = await createImageBitmap(f);
-        const maxEdge = 2000;
+        const maxEdge = 1600; // reicht fürs OCR, spart Vision-Tokens & Zeit
         const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
         const w = Math.round(bmp.width * scale);
         const h = Math.round(bmp.height * scale);
@@ -195,7 +195,7 @@
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
         if (bmp.close) bmp.close();
-        const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.85));
+        const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.8));
         if (!blob) return f;
         return new File([blob], f.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
       } catch (_) {

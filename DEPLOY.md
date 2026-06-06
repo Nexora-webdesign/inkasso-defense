@@ -62,8 +62,9 @@ vercel --prod                     # Production-Deploy
 ## Wichtige Hinweise
 
 - **Request-Limit (4,5 MB):** Serverless Functions auf Vercel akzeptieren max. ~4,5 MB Request-Body. Das Frontend verkleinert Foto-Uploads daher automatisch (längste Kante 2000 px, JPEG) – Handy-Fotos bleiben sicher darunter. Sehr große PDFs ggf. vorher komprimieren.
-- **Function-Timeout:** `api/analyze.js` ist in `vercel.json` auf `maxDuration: 60` gesetzt (Hobby-Plan-Maximum). Claude-Vision-Analysen liegen typisch darunter. Bei Bedarf (Pro-Plan) erhöhbar.
-- **Kosten/Tokens:** Jede Analyse ruft die Anthropic-API mit `claude-opus-4-8` (Vision + adaptive Thinking, Effort `high`). Für günstigere Läufe `effort` in `lib/analyze.js` auf `medium` senken.
+- **Function-Timeout / Fluid Compute (wichtig!):** Aktiviere **Fluid Compute** unter *Project → Settings → Functions* – damit erlaubt der Hobby-Plan bis **300 s** Laufzeit (sonst nur 10 s Default / 60 s Max). `vercel.json` setzt zusätzlich `maxDuration: 60` für `api/analyze.js`. Ohne diese Einstellung läuft die Analyse ins 10-s-Timeout.
+- **Modell & Tempo:** Standardmodell ist das schnelle **`claude-haiku-4-5`** (Vision + Structured Outputs), Thinking aus, knappe Ausgabe → typ. ~10–15 s (im Warmbetrieb schneller, da das JSON-Schema 24 h gecacht wird). Über die Env-Var **`ANALYZE_MODEL`** (z. B. `claude-sonnet-4-6` oder `claude-opus-4-8`) auf mehr juristische Tiefe umstellbar – dann ggf. Fluid Compute zwingend nötig.
+- **Kosten/Tokens:** Jede Analyse ist ein Anthropic-API-Call (Vision). Haiku ist am günstigsten/schnellsten.
 - **`public/styles.css`** ist generiert (gitignored) und wird im Vercel-Build erzeugt – nie direkt editieren, sondern `src/input.css` / `tailwind.config.js`.
 
 ---
