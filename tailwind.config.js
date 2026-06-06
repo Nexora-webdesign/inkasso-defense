@@ -7,6 +7,10 @@ module.exports = {
   content: [
     './public/**/*.html',
     './public/app.js',
+    // Next.js-Blog (App Router + MDX) – damit die Utility-Klassen in styles.css landen.
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './content/**/*.mdx',
   ],
 
   theme: {
