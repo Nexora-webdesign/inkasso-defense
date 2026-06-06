@@ -6,7 +6,9 @@
 |---|---|---|
 | Frontend | statisch in `public/` (HTML + Tailwind-Build + Vanilla-JS), von Next ausgeliefert | Vercel-CDN (statisch) |
 | API `/api/analyze`, `/api/health` | Next.js Route Handlers (`app/api/**/route.ts`) | Serverless Functions (Next.js) |
-| Analyse-Logik | `lib/inkasso-analysis.ts` (Schema, neutraler Prompt, serverseitige Mathematik, E-Mail-Vorlage) | dito |
+| Faktenextraktion | `lib/facts.ts` (Schema + Prompt; KI liefert NUR Fakten) | dito |
+| Juristische Wertung | `lib/rule-engine.ts` + `lib/rules.ts` (deterministisch, Cent-Mathematik, Audit) | dito |
+| Golden-Suite (CI-Gate) | `golden/` via `npm test` (vitest) | – |
 | CSS | `npm run build:css` → `public/styles.css` | im `buildCommand` enthalten |
 
 Die API liefert IMMER eine stabile Hülle: `{ ok: true, data }` oder `{ ok: false, error }`. `"/"` wird per `next.config.js`-Rewrite auf `public/index.html` gemappt.
@@ -52,6 +54,17 @@ Das Projekt war zuvor als statische Site eingerichtet. Stelle in Vercel sicher:
 ### Verifizieren
 - `https://<projekt>.vercel.app/api/health` → `{ "ok": true, "model": "claude-haiku-4-5", "keyConfigured": true }`
 - App öffnen, Foto/PDF hochladen → Analyse landet im Dark-Dashboard.
+
+---
+
+## „geprueft"-Gate (anwaltliche Freigabe)
+
+Jede Regel in `lib/rules.ts` trägt ein Flag `geprueft`. Über `RULES_REQUIRE_APPROVAL` steuert die Route, ob nur freigegebene Regeln angewendet werden:
+
+- **Produktion (Vercel): `RULES_REQUIRE_APPROVAL` NICHT auf `false` setzen** (am besten gar nicht setzen → Default = Gate aktiv). Solange alle Regeln in `rules.ts` `geprueft:false` sind, zeigt die Produktion bewusst **KEINE Kürzungen**.
+- **Lokal:** `RULES_REQUIRE_APPROVAL=false` in `.env.local` schaltet das Gate aus, sodass auch ungeprüfte Regeln getestet werden können.
+
+Erst nach anwaltlicher Freigabe wird die jeweilige Regel in `lib/rules.ts` auf `geprueft:true` gesetzt – ab dann greift sie auch in Produktion. Greift eine noch ungeprüfte Regel auf einen Posten, blendet die App den Hinweis „Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe." ein.
 
 ---
 

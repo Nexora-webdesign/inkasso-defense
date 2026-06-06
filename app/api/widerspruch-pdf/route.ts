@@ -14,6 +14,7 @@ function bad(error: string, status = 400) {
 }
 
 export async function POST(req: Request) {
+  // hier Premium-/Bezahl-Prüfung vor dem Rendern
   let payload: {
     empfaenger?: string;
     aktenzeichen?: string;

@@ -8,7 +8,8 @@
     "watch:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
     "dev": "next dev",
     "build": "npm run build:css && next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run"
   },
   "engines": {
     "node": "22.x"
@@ -33,5 +34,8 @@
     "react-dom": "^19.2.7",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.8"
   }
 }

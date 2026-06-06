@@ -1,5 +1,6 @@
 node_modules/
 .env
+.env*.local
 uploads/
 *.log
 .DS_Store
@@ -11,3 +12,6 @@ public/styles.css
 .next/
 next-env.d.ts
 .vercel
+
+# TypeScript incremental cache
+*.tsbuildinfo

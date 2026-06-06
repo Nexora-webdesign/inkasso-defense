@@ -1,37 +1,36 @@
 // app/api/analyze/route.ts
 // -----------------------------------------------------------------------------
-// Nimmt das vom Frontend gesendete FormData (Feld "file", optional "onboarding"),
-// ruft Claude mit Structured Outputs auf und liefert IMMER eine stabile Hülle:
-//   { ok: true, data: <FrontendPayload> }  oder  { ok: false, error: "..." }
-// Das Frontend muss dadurch nie JSON "raten" – der "string did not match"-Fehler
-// kann nicht mehr entstehen.
+// Flow: KI extrahiert NUR Fakten (Structured Outputs, temperature 0) ->
+// deterministische Bewertung in lib/rule-engine.ts. Antwort immer als
+// stabile Hülle { ok, data } / { ok, error } (siehe CLAUDE.md).
 // -----------------------------------------------------------------------------
-
 import Anthropic from "@anthropic-ai/sdk";
 import {
-  ANALYSIS_JSON_SCHEMA,
-  SYSTEM_PROMPT,
+  EXTRACTION_SYSTEM_PROMPT,
+  FACTS_JSON_SCHEMA,
   DEFAULT_ONBOARDING,
-  buildUserContext,
-  buildPayload,
-  isWellFormed,
+  buildExtractionContext,
+  isFakten,
   type Onboarding,
-} from "@/lib/inkasso-analysis";
+} from "@/lib/facts";
+import { evaluate } from "@/lib/rule-engine";
 
-// Vision + längere Dokumente brauchen mehr als 10s -> Node-Runtime, erhöhtes Limit.
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const client = new Anthropic(); // ANTHROPIC_API_KEY aus der Env
 
-// Free-Tier günstig/schnell (Haiku), Premium/Härtefälle genauer (Sonnet/Opus).
-// Default schnell, damit es sicher unter dem Vercel-Limit bleibt; via Env umschaltbar.
-const MODEL = process.env.ANALYZE_MODEL || "claude-haiku-4-5";
+// MODELL: für reproduzierbare Ergebnisse vor Produktiveinsatz auf einen
+// datierten Snapshot pinnen (z. B. "claude-haiku-4-5-YYYYMMDD").
+const MODEL = "claude-haiku-4-5";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+}
+function bad(error: string, status = 400) {
+  return json({ ok: false, error }, status);
 }
 
 function parseOnboarding(raw: unknown): Onboarding {
@@ -53,18 +52,18 @@ export async function POST(req: Request) {
   try {
     form = await req.formData();
   } catch {
-    return json({ ok: false, error: "Ungültiger Upload." }, 400);
+    return bad("Ungültiger Upload.");
   }
 
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return json({ ok: false, error: "Es wurde kein Dokument übermittelt." }, 400);
+    return bad("Es wurde kein Dokument übermittelt.");
   }
 
   const mediaType = file.type || "application/octet-stream";
   const isPdf = mediaType === "application/pdf";
   if (!isPdf && !IMAGE_TYPES.includes(mediaType)) {
-    return json({ ok: false, error: "Bitte ein Foto (JPG/PNG/WebP) oder PDF hochladen." }, 415);
+    return bad("Bitte ein Foto (JPG/PNG/WebP/GIF) oder PDF hochladen.", 415);
   }
 
   const onboarding = parseOnboarding(form.get("onboarding"));
@@ -72,43 +71,64 @@ export async function POST(req: Request) {
 
   const documentBlock = isPdf
     ? { type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data: base64 } }
-    : { type: "image" as const, source: { type: "base64" as const, media_type: mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif", data: base64 } };
+    : {
+        type: "image" as const,
+        source: {
+          type: "base64" as const,
+          media_type: mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+          data: base64,
+        },
+      };
 
+  let res;
   try {
-    const res = await client.messages.create({
+    res = await client.messages.create({
       model: MODEL,
       max_tokens: 8192,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: [documentBlock, { type: "text", text: buildUserContext(onboarding) }] }],
-      // DER Punkt: schemakonformes JSON per constrained decoding erzwingen.
-      output_config: { format: { type: "json_schema", schema: ANALYSIS_JSON_SCHEMA } },
+      temperature: 0,
+      system: EXTRACTION_SYSTEM_PROMPT,
+      messages: [
+        { role: "user", content: [documentBlock, { type: "text", text: buildExtractionContext(onboarding) }] },
+      ],
+      // Structured Outputs: schemakonformes JSON per constrained decoding erzwingen.
+      output_config: { format: { type: "json_schema", schema: FACTS_JSON_SCHEMA } },
     });
-
-    if (res.stop_reason === "refusal") {
-      return json({ ok: false, error: "Das Dokument konnte aus Sicherheitsgründen nicht verarbeitet werden." }, 422);
-    }
-    if (res.stop_reason === "max_tokens") {
-      return json({ ok: false, error: "Das Dokument ist zu umfangreich für eine vollständige Analyse." }, 413);
-    }
-
-    const textBlock = res.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      return json({ ok: false, error: "Leere Modellantwort." }, 502);
-    }
-
-    const parsed = JSON.parse(textBlock.text); // dank Structured Outputs garantiert valide
-    if (!isWellFormed(parsed)) {
-      return json({ ok: false, error: "Die Analyse hatte ein unerwartetes Format." }, 502);
-    }
-    if (!parsed.dokument_erkannt) {
-      return json({ ok: false, error: "Auf dem Bild war kein Inkasso- oder Forderungsschreiben erkennbar." }, 422);
-    }
-
-    // Modell -> Frontend-Schema, Mathematik serverseitig erzwungen.
-    const data = buildPayload(parsed, onboarding);
-    return json({ ok: true, data });
   } catch (err) {
-    console.error("[/api/analyze] Fehler:", err);
-    return json({ ok: false, error: "Die Analyse ist fehlgeschlagen. Bitte erneut versuchen." }, 500);
+    console.error("[/api/analyze] LLM-Fehler:", err);
+    return bad("Die Analyse ist fehlgeschlagen. Bitte erneut versuchen.", 502);
   }
+
+  if (res.stop_reason === "refusal") {
+    return bad("Das Dokument konnte aus Sicherheitsgründen nicht verarbeitet werden.", 422);
+  }
+  if (res.stop_reason === "max_tokens") {
+    return bad("Das Dokument ist zu umfangreich für eine vollständige Analyse.", 413);
+  }
+
+  const textBlock = res.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    return bad("Leere Modellantwort.", 502);
+  }
+
+  let fakten: unknown;
+  try {
+    fakten = JSON.parse(textBlock.text); // dank Structured Outputs valide
+  } catch {
+    return bad("Die Analyse hatte ein unerwartetes Format.", 502);
+  }
+  if (!isFakten(fakten)) {
+    return bad("Die Analyse hatte ein unerwartetes Format.", 502);
+  }
+  if (!fakten.dokument_erkannt) {
+    return bad("Auf dem Dokument war kein Inkasso- oder Forderungsschreiben erkennbar.", 422);
+  }
+
+  // Deterministische Bewertung – die KI hat NICHT gewertet.
+  // Gate: in Produktion nur anwaltlich freigegebene Regeln (geprueft:true).
+  // Nur ein explizites "false" deaktiviert das Gate (lokale Entwicklung).
+  const requireApproved = process.env.RULES_REQUIRE_APPROVAL !== "false";
+  const data = evaluate(fakten, onboarding, { requireApproved });
+  console.info("[/api/analyze] audit:", JSON.stringify(data.audit));
+
+  return json({ ok: true, data });
 }
