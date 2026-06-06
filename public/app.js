@@ -377,6 +377,14 @@
       if (typeof reveal === 'function') reveal(hbox);
     }
 
+    // Dynamisches Badge: "Anwaltlich geprüft" nur, wenn alle angewendeten
+    // Regeln freigegeben sind – sonst "Regelbasierte Analyse".
+    const audit = d.audit || {};
+    const badgeEl = document.getElementById('analyse-badge-text');
+    if (badgeEl) {
+      badgeEl.textContent = audit.alleAngewendetenGeprueft ? 'Anwaltlich geprüft' : 'Regelbasierte Analyse';
+    }
+
     const stamm = d.stammdaten || {};
     const ber = d.berechnung || {};
     const posten = Array.isArray(d.posten) ? d.posten : [];

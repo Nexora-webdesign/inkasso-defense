@@ -25,16 +25,13 @@ export interface FrontendPayload {
   hinweise: string[];
   audit: {
     rulesVersion: string;
-    requireApproved: boolean;
-    regelnAktiv: number;
     regelnGesamt: number;
     eintraege: AuditEintrag[];
+    /** Summe der Kürzungen aus noch NICHT freigegebenen Regeln (geprueft:false), in EUR. */
+    ungepruefteErsparnis: number;
+    /** true nur, wenn mind. eine Regel gegriffen hat UND alle angewendeten geprueft:true sind. */
+    alleAngewendetenGeprueft: boolean;
   };
-}
-
-export interface EvaluateOptions {
-  /** Nur anwaltlich freigegebene Regeln (geprueft:true) anwenden. */
-  requireApproved: boolean;
 }
 
 /** Kontext, den jede Regel zusätzlich zu den Fakten erhält. */
@@ -61,30 +58,24 @@ function findRule(regeln: Regel[], f: Fakten, p: Faktenposten, ctx: RegelContext
   return regeln.find((r) => safeMatch(r, f, p, ctx));
 }
 
-export function evaluate(
-  fakten: Fakten,
-  onboarding: Onboarding = DEFAULT_ONBOARDING,
-  options: EvaluateOptions = { requireApproved: false },
-): FrontendPayload {
-  // "geprueft"-Gate: bei requireApproved nur anwaltlich freigegebene Regeln anwenden.
-  const aktiveRegeln = REGELN.filter((r) => !options.requireApproved || r.geprueft);
+export function evaluate(fakten: Fakten, onboarding: Onboarding = DEFAULT_ONBOARDING): FrontendPayload {
+  // Informations-Modus: ALLE Regeln berechnen das Ergebnis – auch noch nicht
+  // freigegebene (geprueft:false). Das geprueft-Flag unterdrückt nichts mehr,
+  // sondern kennzeichnet die Kürzung nur (Audit, Hinweis, dynamisches Badge).
   const ctx: RegelContext = { onboarding };
 
   const eintraege: AuditEintrag[] = [];
   const hinweise: string[] = [];
   const posten: FrontendPayload["posten"] = [];
   let ersparnisC = 0;
+  let ungepruefteC = 0; // Summe der Kürzungen aus noch ungeprüften Regeln
   let postenSumC = 0;
-  let zurueckgehalten = false; // eine noch ungeprüfte Regel hätte gepasst
 
   for (const p of fakten.posten) {
     const betragC = Math.max(0, toCents(p.betrag_eur));
     postenSumC += betragC;
 
-    const regel = findRule(aktiveRegeln, fakten, p, ctx);
-    if (options.requireApproved && !regel && REGELN.some((r) => !r.geprueft && safeMatch(r, fakten, p, ctx))) {
-      zurueckgehalten = true;
-    }
+    const regel = findRule(REGELN, fakten, p, ctx);
     let kuerzC = 0;
     if (regel) {
       let roh = 0;
@@ -96,6 +87,7 @@ export function evaluate(
       kuerzC = clamp(toCents(roh), 0, betragC);
     }
     ersparnisC += kuerzC;
+    if (regel && kuerzC > 0 && !regel.geprueft) ungepruefteC += kuerzC;
 
     let status: FrontendStatus = "RECHTENS";
     if (kuerzC > 0 && kuerzC >= betragC && betragC > 0) status = "NICHT_RECHTENS";
@@ -143,7 +135,7 @@ export function evaluate(
   if (fakten.vertrauensgrad === "niedrig") {
     hinweise.push("Die automatische Erfassung war unsicher. Bitte lass das Ergebnis anwaltlich prüfen.");
   }
-  if (zurueckgehalten) {
+  if (ungepruefteC > 0) {
     hinweise.push("Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.");
   }
   if (fakten.zweite_anwalts_geschaeftsgebuehr) {
@@ -169,10 +161,10 @@ export function evaluate(
     hinweise,
     audit: {
       rulesVersion: RULES_VERSION,
-      requireApproved: options.requireApproved,
-      regelnAktiv: aktiveRegeln.length,
       regelnGesamt: REGELN.length,
       eintraege,
+      ungepruefteErsparnis: toEur(ungepruefteC),
+      alleAngewendetenGeprueft: eintraege.length > 0 && eintraege.every((e) => e.geprueft),
     },
   };
 }

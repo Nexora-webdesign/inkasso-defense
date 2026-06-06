@@ -57,14 +57,16 @@ Das Projekt war zuvor als statische Site eingerichtet. Stelle in Vercel sicher:
 
 ---
 
-## „geprueft"-Gate (anwaltliche Freigabe)
+## Informations-Modus & `geprueft`-Kennzeichnung
 
-Jede Regel in `lib/rules.ts` trägt ein Flag `geprueft`. Über `RULES_REQUIRE_APPROVAL` steuert die Route, ob nur freigegebene Regeln angewendet werden:
+Jede Regel in `lib/rules.ts` trägt ein Flag `geprueft`. Die App läuft als **Orientierungshilfe im Informations-Modus**:
 
-- **Produktion (Vercel): `RULES_REQUIRE_APPROVAL` NICHT auf `false` setzen** (am besten gar nicht setzen → Default = Gate aktiv). Solange alle Regeln in `rules.ts` `geprueft:false` sind, zeigt die Produktion bewusst **KEINE Kürzungen**.
-- **Lokal:** `RULES_REQUIRE_APPROVAL=false` in `.env.local` schaltet das Gate aus, sodass auch ungeprüfte Regeln getestet werden können.
+- **Alle Regeln berechnen das Ergebnis** – auch noch nicht anwaltlich freigegebene (`geprueft:false`). Der Nutzer sieht die *potenzielle* Ersparnis.
+- Stammt eine Kürzung aus einer ungeprüften Regel, erscheint der Hinweis „Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe." und das Audit weist `ungepruefteErsparnis` aus.
+- Das Dashboard-Badge ist dynamisch: **„Anwaltlich geprüft"** nur, wenn alle angewendeten Regeln `geprueft:true` sind, sonst **„Regelbasierte Analyse"**.
+- Abgesichert wird über Haftungsausschluss + Warnhinweis (keine Rechtsberatung, RDG) – nicht über das Unterdrücken der Anzeige.
 
-Erst nach anwaltlicher Freigabe wird die jeweilige Regel in `lib/rules.ts` auf `geprueft:true` gesetzt – ab dann greift sie auch in Produktion. Greift eine noch ungeprüfte Regel auf einen Posten, blendet die App den Hinweis „Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe." ein.
+> Hinweis: Die frühere Env **`RULES_REQUIRE_APPROVAL` ist obsolet** und wird nicht mehr ausgewertet. Sie kann in Vercel/`.env.local` entfernt werden.
 
 ---
 

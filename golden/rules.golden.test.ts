@@ -2,36 +2,46 @@
 // CI-Gate: kein Merge bei rotem Test (siehe CLAUDE.md).
 import { describe, it, expect } from "vitest";
 import { evaluate } from "@/lib/rule-engine";
-import { CASES, GATE_CASE_A, makeFakten, posten } from "@/golden/cases";
+import { CASES, makeFakten, posten } from "@/golden/cases";
 import { REGELN } from "@/lib/rules";
 
+const FREIGABE_HINWEIS = "Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.";
+
 describe("Golden-Suite: Rule-Engine", () => {
-  // Standard: requireApproved=false -> alle Regeln aktiv, bisherige Erwartungen.
+  // Informations-Modus: alle Regeln rechnen; Werte wie in den Golden-Fällen.
   for (const c of CASES) {
     it(c.name, () => {
-      const res = evaluate(c.fakten, c.onboarding, { requireApproved: false });
+      const res = evaluate(c.fakten, c.onboarding);
       expect(res.berechnung.ersparnis).toBeCloseTo(c.erwartet.ersparnis, 2);
       expect(res.berechnung.fairerKern).toBeCloseTo(c.erwartet.fairerKern, 2);
       expect(res.posten.map((p) => p.status)).toEqual(c.erwartet.status);
     });
   }
 
-  // "geprueft"-Gate: bei requireApproved=true zählen nur freigegebene Regeln.
-  describe("geprueft-Gate (requireApproved=true)", () => {
-    it("wendet KEINE noch ungeprüfte Regel an: " + GATE_CASE_A.name, () => {
-      const res = evaluate(GATE_CASE_A.fakten, undefined, { requireApproved: true });
-      expect(res.berechnung.ersparnis).toBeCloseTo(GATE_CASE_A.erwartet.ersparnis, 2);
-      expect(res.berechnung.fairerKern).toBeCloseTo(GATE_CASE_A.erwartet.fairerKern, 2);
-      expect(res.posten.map((p) => p.status)).toEqual(GATE_CASE_A.erwartet.status);
+  // Informations-Modus: ungeprüfte Regeln berechnen das Ergebnis, werden aber
+  // im Audit markiert und mit Hinweis versehen (statt unterdrückt).
+  describe("Informations-Modus (ungeprüfte Regeln)", () => {
+    it("berechnet die Kürzung einer ungeprüften Regel (Fall A: 20 € / GEKUERZT)", () => {
+      const res = evaluate(CASES[0].fakten); // grundgebuehr + Sperre, Regel geprueft:false
+      expect(res.berechnung.ersparnis).toBeCloseTo(20, 2);
+      expect(res.berechnung.fairerKern).toBeCloseTo(20, 2);
+      expect(res.posten.map((p) => p.status)).toEqual(["GEKUERZT"]);
     });
 
-    it("weist auf eine zurückgehaltene Kürzung hin und protokolliert das Gate", () => {
-      const res = evaluate(GATE_CASE_A.fakten, undefined, { requireApproved: true });
-      expect(res.hinweise).toContain("Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.");
-      expect(res.audit.requireApproved).toBe(true);
+    it("markiert die ungeprüfte Ersparnis im Audit und zeigt den Freigabe-Hinweis", () => {
+      const res = evaluate(CASES[0].fakten);
+      expect(res.hinweise).toContain(FREIGABE_HINWEIS);
+      expect(res.audit.ungepruefteErsparnis).toBeCloseTo(20, 2);
+      expect(res.audit.alleAngewendetenGeprueft).toBe(false);
       expect(res.audit.regelnGesamt).toBe(REGELN.length);
-      // Solange alle Regeln geprueft:false sind, ist keine Regel aktiv.
-      expect(res.audit.regelnAktiv).toBe(REGELN.filter((r) => r.geprueft).length);
+    });
+
+    it("ohne greifende Regel: kein Hinweis, keine ungeprüfte Ersparnis (Fall B)", () => {
+      const res = evaluate(CASES[1].fakten); // grundgebuehr ohne Sperre
+      expect(res.hinweise).not.toContain(FREIGABE_HINWEIS);
+      expect(res.audit.ungepruefteErsparnis).toBeCloseTo(0, 2);
+      expect(res.audit.eintraege.length).toBe(0);
+      expect(res.audit.alleAngewendetenGeprueft).toBe(false);
     });
   });
 
