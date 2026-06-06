@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta id="meta-theme-color" name="theme-color" content="#f7f8fb" />
+  <title>Dein Ergebnis – Inkasso-Defense</title>
+
+  <!-- No-Flash: Theme vor dem ersten Paint setzen -->
+  <script>
+    (function () {
+      try {
+        // Dark ist Standard – nur eine ausdrückliche Light-Wahl deaktiviert ihn.
+        if (localStorage.getItem('theme') !== 'light') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="relative min-h-[100dvh] overflow-x-hidden bg-[#f7f8fb] font-sans text-ink-900 antialiased transition-colors dark:bg-night dark:text-slate-100">
+
+  <!-- Atmosphäre -->
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-40 right-0 h-[30rem] w-[30rem] rounded-full bg-mint/15 blur-[130px] dark:bg-mint/10"></div>
+    <div class="absolute bottom-0 -left-40 h-[28rem] w-[28rem] rounded-full bg-indigo-300/20 blur-[130px] dark:bg-indigo-500/10"></div>
+  </div>
+  <div class="grain"></div>
+
+  <!-- Fluid-Island-Nav -->
+  <header class="fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
+    <nav class="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border border-white/60 bg-white/85 py-2 pl-4 pr-2 shadow-float backdrop-blur-xl dark:border-white/10 dark:bg-night-surface/80">
+      <a href="/" class="flex items-center gap-2.5">
+        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-ink-950 dark:bg-mint/15">
+          <svg class="h-4 w-4 text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z" /><path d="M9 12l2 2 4-4" />
+          </svg>
+        </span>
+        <span class="whitespace-nowrap text-[15px] font-extrabold tracking-tightest text-ink-950 dark:text-white">Inkasso<span class="text-mint-dark dark:text-mint-light">·Defense</span></span>
+      </a>
+      <div class="flex items-center gap-2">
+        <button id="theme-toggle" type="button" aria-label="Farbschema wechseln" aria-pressed="false"
+          class="btn-press flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-ink-900 dark:border-white/10 dark:bg-night-surface dark:text-slate-100">
+          <span class="relative block h-4 w-4">
+            <svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4l1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          </span>
+        </button>
+        <a href="index.html" class="group btn-press flex flex-shrink-0 items-center gap-2 rounded-full border border-ink-100 bg-white py-2 pl-4 pr-2 text-sm font-bold text-ink-950 dark:border-white/10 dark:bg-night-surface dark:text-white">
+          <span class="whitespace-nowrap">Neue Prüfung</span>
+          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-mint-tint text-mint-dark dark:bg-mint/15 dark:text-mint-light">
+            <svg class="btn-icon h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg>
+          </span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="dashboard" class="relative z-10 mx-auto max-w-5xl px-5 pb-16 pt-28 sm:pt-32">
+
+    <!-- Kopf -->
+    <div class="reveal flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <span class="text-[10px] font-semibold uppercase tracking-[0.25em] text-mint-dark dark:text-mint-light">Dein Prüfergebnis</span>
+        <h1 class="font-display mt-2 text-3xl font-semibold tracking-tightest text-ink-950 sm:text-4xl dark:text-white">Das musst du wirklich zahlen.</h1>
+        <p class="mt-2 text-sm text-ink-700/70 dark:text-slate-400">
+          <span id="meta-glaeubiger" class="font-semibold text-ink-900 dark:text-slate-200">—</span>
+          <span id="meta-az" class="ml-2"></span>
+        </p>
+      </div>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-3 py-1 text-xs font-semibold text-mint-dark dark:text-mint-light">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z"/></svg>
+        Geprüft nach BGB & BGH
+      </span>
+    </div>
+
+    <!-- Kennzahlen-Bento -->
+    <section class="mt-7 grid gap-4 md:grid-cols-6">
+      <div class="reveal relative overflow-hidden rounded-4xl border border-white/70 bg-white/85 p-2 bezel-soft md:col-span-3 dark:border-white/10 dark:bg-night-surface">
+        <div class="rounded-[1.6rem] bg-gradient-to-br from-ink-950 to-ink-800 p-7 text-white bezel-core dark:from-night-inset dark:to-[#1a2540]">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-mint-light">Dein fairer Kern</p>
+          <p id="val-fair" class="tabular font-display mt-3 text-5xl font-semibold tracking-tightest sm:text-6xl">—</p>
+          <div class="mt-5 h-2.5 w-full overflow-hidden rounded-full bg-white/15">
+            <div id="fair-bar" class="fair-bar h-full rounded-full bg-mint"></div>
+          </div>
+          <p class="mt-2 text-xs text-white/55">Anteil an der ursprünglichen Forderung</p>
+        </div>
+      </div>
+
+      <div class="reveal flex flex-col gap-4 md:col-span-3" style="--reveal-delay:90ms">
+        <div class="rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-400">Ursprünglich gefordert</p>
+          <p id="val-original" class="tabular font-display mt-2 text-3xl font-semibold text-ink-700/45 line-through dark:text-slate-500">—</p>
+        </div>
+        <div class="relative overflow-hidden rounded-4xl border border-mint/30 bg-mint-tint p-6 bezel-soft dark:bg-mint/10">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-mint-dark dark:text-mint-light">Deine Ersparnis</p>
+          <div class="mt-2 flex items-end gap-3">
+            <p id="val-saving" class="tabular font-display text-3xl font-semibold text-mint-dark dark:text-mint-light">—</p>
+            <span id="val-saving-pct" class="mb-1 rounded-full bg-mint/20 px-2.5 py-0.5 text-xs font-bold text-mint-dark dark:text-mint-light"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wieso, Weshalb, Warum -->
+    <section class="mt-12">
+      <h2 class="reveal font-display text-2xl font-semibold tracking-tightest text-ink-950 dark:text-white">Wieso, weshalb, warum?</h2>
+      <div class="mt-5 grid gap-4 md:grid-cols-3">
+        <div class="reveal rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-mint-tint text-mint-dark dark:bg-mint/15 dark:text-mint-light">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7"/><path d="M12 17h.01"/></svg>
+          </div>
+          <p class="mt-4 text-sm font-extrabold text-ink-950 dark:text-white">Wieso?</p>
+          <p id="exp-wieso" class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300"></p>
+        </div>
+        <div class="reveal rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface" style="--reveal-delay:80ms">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-mint-tint text-mint-dark dark:bg-mint/15 dark:text-mint-light">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.4.9 1 .9 1.7v.5h5.4v-.5c0-.7.3-1.3.9-1.7A6 6 0 0 0 12 3z"/></svg>
+          </div>
+          <p class="mt-4 text-sm font-extrabold text-ink-950 dark:text-white">Weshalb?</p>
+          <p id="exp-weshalb" class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300"></p>
+        </div>
+        <div class="reveal rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface" style="--reveal-delay:160ms">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-mint-tint text-mint-dark dark:bg-mint/15 dark:text-mint-light">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <p class="mt-4 text-sm font-extrabold text-ink-950 dark:text-white">Warum sicher?</p>
+          <p id="exp-warum" class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Posten -->
+    <section class="mt-12">
+      <h2 class="reveal font-display text-2xl font-semibold tracking-tightest text-ink-950 dark:text-white">Die Forderung – Posten für Posten</h2>
+      <div id="posten-list" class="mt-5 grid gap-3"></div>
+    </section>
+
+    <!-- Raten-Slider -->
+    <section class="reveal mt-12 rounded-4xl border border-white/70 bg-white/85 p-2 bezel-soft dark:border-white/10 dark:bg-night-surface">
+      <div class="rounded-[1.6rem] bg-white/80 p-7 bezel-core dark:bg-night-inset">
+        <h2 class="font-display text-xl font-semibold tracking-tightest text-ink-950 dark:text-white">Ratenzahlung planen</h2>
+        <p class="mt-1 text-sm text-ink-700/70 dark:text-slate-400">Teile deinen fairen Kern bequem in Monatsraten auf.</p>
+        <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-400">Monatliche Rate</p>
+            <p id="rate-amount" class="tabular font-display mt-1 text-4xl font-semibold text-mint-dark dark:text-mint-light">—</p>
+          </div>
+          <div class="text-right">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-400">Laufzeit</p>
+            <p id="rate-months" class="font-display mt-1 text-xl font-semibold text-ink-950 dark:text-white">—</p>
+          </div>
+        </div>
+        <input id="rate-slider" type="range" min="1" max="12" value="3" step="1" class="rangepro mt-6 w-full" />
+        <div class="mt-2 flex justify-between text-xs text-ink-700/50 dark:text-slate-500">
+          <span>1 Monat</span><span>12 Monate</span>
+        </div>
+        <p id="rate-suggest" class="mt-4 inline-flex items-center gap-2 rounded-full bg-mint-tint px-3 py-1.5 text-xs font-medium text-mint-dark dark:bg-mint/15 dark:text-mint-light"></p>
+      </div>
+    </section>
+
+    <!-- E-Mail-Generator -->
+    <section class="reveal mt-12 rounded-4xl border border-white/70 bg-white/85 p-2 bezel-soft dark:border-white/10 dark:bg-night-surface">
+      <div class="rounded-[1.6rem] bg-white/85 p-7 bezel-core dark:bg-night-inset">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="font-display text-xl font-semibold tracking-tightest text-ink-950 dark:text-white">Fertige Antwort-E-Mail</h2>
+          <button id="copy-mail" class="group btn-press flex items-center gap-2 rounded-full bg-mint py-2.5 pl-5 pr-3 text-sm font-bold text-ink-950 shadow-[0_12px_30px_-10px_rgba(18,184,134,0.7)]">
+            <span>E-Mail kopieren</span>
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-ink-950/10">
+              <svg class="btn-icon h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            </span>
+          </button>
+        </div>
+        <div class="mt-5 rounded-2xl border border-ink-100 bg-[#f7f8fb] p-4 dark:border-white/10 dark:bg-night">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-400">Betreff</p>
+          <p id="mail-subject" class="mt-1 font-semibold text-ink-950 dark:text-white"></p>
+        </div>
+        <textarea id="mail-text" rows="16" readonly
+          class="mt-3 w-full resize-y rounded-2xl border border-ink-100 bg-white p-4 text-sm leading-relaxed text-ink-800 focus:border-mint focus:outline-none focus:ring-2 focus:ring-mint/25 dark:border-white/10 dark:bg-night dark:text-slate-200"></textarea>
+      </div>
+    </section>
+
+    <p id="hinweis" class="reveal mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-ink-700/55 dark:text-slate-500">
+      Inkasso-Defense ist ein automatisiertes Informations-Tool und ersetzt keine Rechtsberatung im Einzelfall. Bei Unsicherheit oder gerichtlichen Schritten wende dich an einen Rechtsanwalt oder eine Verbraucherzentrale.
+    </p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

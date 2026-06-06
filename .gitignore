@@ -1,0 +1,8 @@
+node_modules/
+.env
+uploads/
+*.log
+.DS_Store
+
+# Generiertes Tailwind-Build-Artefakt (Quelle: src/input.css)
+public/styles.css

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta id="meta-theme-color" name="theme-color" content="#f7f8fb" />
+  <title>Inkasso-Defense – Inkasso-Forderung kostenlos prüfen</title>
+  <meta name="description" content="Inkasso-Brief erhalten? Lade ihn hoch und prüfe in Sekunden nach BGH-Rechtsprechung und BGB, wie viel du wirklich zahlen musst." />
+
+  <!-- No-Flash: Theme vor dem ersten Paint setzen -->
+  <script>
+    (function () {
+      try {
+        // Dark ist Standard – nur eine ausdrückliche Light-Wahl deaktiviert ihn.
+        if (localStorage.getItem('theme') !== 'light') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="relative min-h-[100dvh] overflow-x-hidden bg-[#f7f8fb] font-sans text-ink-900 antialiased transition-colors selection:bg-mint/25 dark:bg-night dark:text-slate-100">
+
+  <!-- Atmosphäre -->
+  <canvas id="bg-canvas" class="pointer-events-none fixed inset-0 -z-10 h-full w-full"></canvas>
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-40 -right-32 h-[34rem] w-[34rem] rounded-full bg-mint/20 blur-[120px] dark:bg-mint/10"></div>
+    <div class="absolute top-1/3 -left-40 h-[30rem] w-[30rem] rounded-full bg-indigo-300/25 blur-[130px] dark:bg-indigo-500/10"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-white/60 via-[#f7f8fb]/30 to-[#f7f8fb] dark:from-night/40 dark:via-night/60 dark:to-night"></div>
+  </div>
+  <div class="grain"></div>
+
+  <!-- Fluid-Island-Nav -->
+  <header class="fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
+    <nav class="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border border-white/60 bg-white/85 py-2 pl-4 pr-2 shadow-float backdrop-blur-xl dark:border-white/10 dark:bg-night-surface/80">
+      <a href="/" class="flex items-center gap-2.5">
+        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-ink-950 dark:bg-mint/15">
+          <svg class="h-4 w-4 text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z" /><path d="M9 12l2 2 4-4" />
+          </svg>
+        </span>
+        <span class="whitespace-nowrap text-[15px] font-extrabold tracking-tightest text-ink-950 dark:text-white">Inkasso<span class="text-mint-dark dark:text-mint-light">·Defense</span></span>
+      </a>
+      <div class="flex items-center gap-2">
+        <button id="theme-toggle" type="button" aria-label="Farbschema wechseln" aria-pressed="false"
+          class="btn-press flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-ink-900 dark:border-white/10 dark:bg-night-surface dark:text-slate-100">
+          <span class="relative block h-4 w-4">
+            <svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4l1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          </span>
+        </button>
+        <a href="#upload" class="group btn-press flex flex-shrink-0 items-center gap-2 rounded-full bg-ink-950 py-2 pl-4 pr-2 text-sm font-bold text-white dark:bg-mint dark:text-ink-950">
+          <span class="whitespace-nowrap">Jetzt prüfen</span>
+          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-mint text-ink-950 dark:bg-ink-950/10">
+            <svg class="btn-icon h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+          </span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="relative z-10 mx-auto max-w-6xl px-5">
+
+    <!-- Hero -->
+    <section class="flex min-h-[100dvh] flex-col justify-center pb-10 pt-28 text-center sm:pt-32">
+      <div class="reveal">
+        <span class="inline-flex items-center gap-2 rounded-full border border-mint/30 bg-mint/10 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-mint-dark dark:text-mint-light">
+          <span class="h-1.5 w-1.5 rounded-full bg-mint"></span>
+          Kostenlose Erstprüfung · unter 60 Sekunden
+        </span>
+      </div>
+
+      <h1 class="reveal font-display mx-auto mt-7 max-w-4xl text-[2.6rem] font-semibold leading-[1.04] tracking-tightest text-ink-950 sm:text-6xl md:text-7xl dark:text-white" style="--reveal-delay:60ms">
+        Inkasso-Brief erhalten?
+        <span class="mt-2 block italic text-mint-dark dark:text-mint-light">Zahle nur den fairen Kern.</span>
+      </h1>
+
+      <p class="reveal mx-auto mt-7 max-w-xl text-base leading-relaxed text-ink-700/80 sm:text-lg dark:text-slate-300" style="--reveal-delay:120ms">
+        Lade ein Foto oder PDF deiner Forderung hoch. Wir prüfen jeden Posten nach
+        aktueller <span class="font-semibold text-ink-900 dark:text-white">BGH-Rechtsprechung</span> und dem BGB –
+        und berechnen, wie viel du <span class="font-semibold text-ink-900 dark:text-white">wirklich</span> zahlen musst.
+      </p>
+
+      <!-- Upload-Island -->
+      <section id="upload" class="reveal mx-auto mt-10 w-full max-w-xl scroll-mt-28" style="--reveal-delay:180ms">
+        <form id="upload-form" class="rounded-[2.25rem] border border-white/70 bg-white/85 p-2 bezel-soft dark:border-white/10 dark:bg-night-surface">
+          <label id="dropzone"
+            class="group flex cursor-pointer flex-col items-center justify-center rounded-[1.85rem] border-2 border-dashed border-mint/50 bg-white/85 px-6 py-12 text-center dark:bg-white/5">
+            <input id="file-input" type="file" accept="image/*,application/pdf" class="sr-only" />
+
+            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-mint-tint text-mint-dark transition-transform duration-500 ease-out group-hover:-translate-y-1 dark:bg-mint/15 dark:text-mint-light">
+              <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 16V4m0 0L8 8m4-4l4 4" /><path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2" />
+              </svg>
+            </span>
+
+            <span class="mt-5 block text-lg font-bold text-ink-950 dark:text-white">
+              Brief hierher ziehen oder <span class="text-mint-dark underline decoration-mint/40 underline-offset-4 dark:text-mint-light">auswählen</span>
+            </span>
+            <span class="mt-1.5 block text-sm text-ink-700/70 dark:text-slate-400">Foto (JPG/PNG) oder PDF · max. 10 MB</span>
+
+            <span id="file-pill" class="mt-5 hidden items-center gap-2 rounded-full bg-ink-950 px-4 py-2 text-sm font-medium text-white dark:bg-mint dark:text-ink-950">
+              <svg class="h-4 w-4 text-mint-light dark:text-ink-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <span id="file-name" class="max-w-[14rem] truncate">datei.pdf</span>
+            </span>
+          </label>
+
+          <button id="analyze-btn" type="submit" disabled
+            class="group btn-press mt-2 flex w-full items-center justify-center gap-2.5 rounded-[1.85rem] bg-mint py-4 pl-6 pr-4 text-base font-bold text-ink-950 shadow-[0_12px_30px_-10px_rgba(18,184,134,0.7)] disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-ink-700/40 disabled:shadow-none dark:disabled:bg-white/10 dark:disabled:text-slate-500">
+            <span>Forderung jetzt analysieren</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-ink-950/10">
+              <svg class="btn-icon h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+            </span>
+          </button>
+        </form>
+
+        <!-- Trust-Badges -->
+        <div class="mt-5 grid gap-3 text-left sm:grid-cols-3">
+          <div class="flex items-start gap-2.5 rounded-2xl border border-white/70 bg-white/80 p-3.5 bezel-soft dark:border-white/10 dark:bg-night-surface">
+            <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-mint-dark dark:text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z"/></svg>
+            <p class="text-xs font-medium leading-snug text-ink-700 dark:text-slate-300"><span class="font-bold text-ink-950 dark:text-white">Kein SCHUFA-Eintrag</span> durch sofortigen Teilwiderspruch (§ 31 BDSG)</p>
+          </div>
+          <div class="flex items-start gap-2.5 rounded-2xl border border-white/70 bg-white/80 p-3.5 bezel-soft dark:border-white/10 dark:bg-night-surface">
+            <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-mint-dark dark:text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <p class="text-xs font-medium leading-snug text-ink-700 dark:text-slate-300"><span class="font-bold text-ink-950 dark:text-white">100 % DSGVO-konform</span> & verschlüsselt übertragen</p>
+          </div>
+          <div class="flex items-start gap-2.5 rounded-2xl border border-white/70 bg-white/80 p-3.5 bezel-soft dark:border-white/10 dark:bg-night-surface">
+            <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-mint-dark dark:text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M6 7l1.5 13h9L18 7M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+            <p class="text-xs font-medium leading-snug text-ink-700 dark:text-slate-300"><span class="font-bold text-ink-950 dark:text-white">Geprüft nach BGH</span> & BGB-Rechtsprechung</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- So funktioniert's -->
+    <section class="py-24 sm:py-32">
+      <div class="reveal mx-auto max-w-2xl text-center">
+        <span class="text-[10px] font-semibold uppercase tracking-[0.25em] text-mint-dark dark:text-mint-light">So funktioniert's</span>
+        <h2 class="font-display mt-3 text-3xl font-semibold tracking-tightest text-ink-950 sm:text-4xl dark:text-white">In drei Schritten zur fairen Forderung</h2>
+      </div>
+
+      <div class="mt-14 grid gap-4 md:grid-cols-6">
+        <article class="reveal group rounded-4xl border border-white/70 bg-white/85 p-7 bezel-soft md:col-span-3 lg:col-span-2 dark:border-white/10 dark:bg-night-surface">
+          <span class="font-display block text-4xl font-semibold text-mint-dark dark:text-mint-light">01</span>
+          <h3 class="mt-4 text-lg font-bold text-ink-950 dark:text-white">Hochladen</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300">Foto oder PDF deiner Forderung hochladen. Der Text wird automatisch per KI-Vision erkannt.</p>
+        </article>
+        <article class="reveal group rounded-4xl border border-white/70 bg-white/85 p-7 bezel-soft md:col-span-3 lg:col-span-2 dark:border-white/10 dark:bg-night-surface" style="--reveal-delay:90ms">
+          <span class="font-display block text-4xl font-semibold text-mint-dark dark:text-mint-light">02</span>
+          <h3 class="mt-4 text-lg font-bold text-ink-950 dark:text-white">Analysieren</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300">Jeder Posten wird gegen BGH-Urteile und § 254 BGB geprüft. Unzulässiges wird gestrichen oder gekürzt.</p>
+        </article>
+        <article class="reveal group rounded-4xl border border-mint/30 bg-ink-950 p-7 text-white md:col-span-6 lg:col-span-2 dark:bg-mint/10" style="--reveal-delay:180ms">
+          <span class="font-display block text-4xl font-semibold text-mint-light">03</span>
+          <h3 class="mt-4 text-lg font-bold">Reagieren</h3>
+          <p class="mt-2 text-sm leading-relaxed text-white/70 dark:text-slate-300">Du erhältst den fairen Kern, eine verständliche Erklärung und eine fertige E-Mail zum Kopieren.</p>
+        </article>
+      </div>
+
+      <!-- Rechtliche Autorität -->
+      <div class="reveal mt-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+        <span class="text-xs font-medium text-ink-700/60 dark:text-slate-400">Geprüft nach:</span>
+        <span class="rounded-full border border-ink-100 bg-white/60 px-3 py-1 text-xs font-semibold text-ink-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">BGH III ZR 57/14</span>
+        <span class="rounded-full border border-ink-100 bg-white/60 px-3 py-1 text-xs font-semibold text-ink-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">§ 254 BGB</span>
+        <span class="rounded-full border border-ink-100 bg-white/60 px-3 py-1 text-xs font-semibold text-ink-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">§ 288 BGB</span>
+        <span class="rounded-full border border-ink-100 bg-white/60 px-3 py-1 text-xs font-semibold text-ink-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">§ 31 BDSG</span>
+        <span class="rounded-full border border-ink-100 bg-white/60 px-3 py-1 text-xs font-semibold text-ink-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">RDGEG / RVG</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-ink-100/70 dark:border-white/10">
+    <div class="mx-auto max-w-6xl px-5 py-10 text-center text-xs text-ink-700/60 dark:text-slate-400">
+      <p class="font-display text-base font-semibold text-ink-950 dark:text-white">Inkasso·Defense</p>
+      <p class="mx-auto mt-2 max-w-lg leading-relaxed">Inkasso-Defense ist ein automatisiertes Informations-Tool und ersetzt keine Rechtsberatung im Einzelfall.</p>
+      <p class="mt-4">&copy; 2026 Inkasso-Defense</p>
+    </div>
+  </footer>
+
+  <!-- Lade-Choreografie -->
+  <div id="loading-overlay" class="fixed inset-0 z-50 hidden items-center justify-center px-5" role="status" aria-live="polite" aria-hidden="true">
+    <div class="absolute inset-0 bg-[#f7f8fb]/80 backdrop-blur-xl dark:bg-night/85"></div>
+    <div class="relative w-full max-w-md rounded-[2.25rem] border border-white/70 bg-white/90 p-2 shadow-float bezel-soft dark:border-white/10 dark:bg-night-surface">
+      <div class="rounded-[1.85rem] bg-white p-7 bezel-core dark:bg-night-inset">
+
+        <div class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-ink-950 dark:bg-mint/15">
+            <svg class="h-5 w-5 text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </span>
+          <div>
+            <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-mint-dark dark:text-mint-light">Inkasso·Defense</p>
+            <p class="font-display text-xl font-semibold tracking-tightest text-ink-950 dark:text-white">Wir prüfen deine Forderung</p>
+          </div>
+        </div>
+
+        <ul class="mt-6 space-y-3">
+          <li id="lstep-1" class="lstep is-active flex items-center gap-3 text-sm font-semibold">
+            <span class="dot"><svg class="check h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Dokument wird sicher gelesen</span>
+          </li>
+          <li id="lstep-2" class="lstep flex items-center gap-3 text-sm font-semibold">
+            <span class="dot"><svg class="check h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Posten werden nach BGH &amp; BGB geprüft</span>
+          </li>
+          <li id="lstep-3" class="lstep flex items-center gap-3 text-sm font-semibold">
+            <span class="dot"><svg class="check h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>Fairer Kern &amp; E-Mail werden erstellt</span>
+          </li>
+        </ul>
+
+        <div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-ink-50 dark:bg-white/10">
+          <div id="load-bar" class="load-bar h-full rounded-full bg-mint"></div>
+        </div>
+
+        <div class="mt-6 space-y-2.5" aria-hidden="true">
+          <div class="sk h-9 w-2/3"></div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="sk col-span-2 h-16"></div>
+            <div class="sk h-16"></div>
+          </div>
+          <div class="sk h-4 w-full"></div>
+          <div class="sk h-4 w-5/6"></div>
+        </div>
+
+        <p class="mt-5 text-center text-xs text-ink-700/55 dark:text-slate-400">Im Schnitt unter 30 Sekunden · verschlüsselte Verarbeitung.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

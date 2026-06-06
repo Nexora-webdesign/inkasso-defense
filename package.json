@@ -1,0 +1,37 @@
+{
+  "name": "inkasso-defense",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Intelligentes Analyse- & Kalkulations-Tool zur Prüfung unberechtigter Inkasso-Forderungen nach deutschem Verbraucherrecht.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
+    "build": "npm run build:css",
+    "prestart": "npm run build:css",
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "inkasso",
+    "verbraucherrecht",
+    "anthropic",
+    "claude",
+    "ocr"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.101.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "multer": "^2.0.1"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
