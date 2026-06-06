@@ -211,6 +211,20 @@
         </div>
         <textarea id="mail-text" rows="16" readonly
           class="mt-3 w-full resize-y rounded-2xl border border-ink-100 bg-white p-4 text-sm leading-relaxed text-ink-800 focus:border-mint focus:outline-none focus:ring-2 focus:ring-mint/25 dark:border-white/10 dark:bg-night dark:text-slate-200"></textarea>
+
+        <!-- Absender für den PDF-Briefkopf (nur lokal in sessionStorage) -->
+        <div class="mt-5 rounded-2xl border border-ink-100 bg-[#f7f8fb] p-4 dark:border-white/10 dark:bg-night">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-400">Dein Absender (für das PDF)</p>
+          <div class="mt-3 grid gap-3 sm:grid-cols-3">
+            <input id="abs-name" type="text" autocomplete="name" placeholder="Name"
+              class="w-full rounded-xl border border-ink-100 bg-white px-3 py-2.5 text-sm text-ink-950 focus:border-mint focus:outline-none focus:ring-2 focus:ring-mint/25 dark:border-white/10 dark:bg-night-surface dark:text-white" />
+            <input id="abs-strasse" type="text" autocomplete="street-address" placeholder="Straße & Hausnr."
+              class="w-full rounded-xl border border-ink-100 bg-white px-3 py-2.5 text-sm text-ink-950 focus:border-mint focus:outline-none focus:ring-2 focus:ring-mint/25 dark:border-white/10 dark:bg-night-surface dark:text-white" />
+            <input id="abs-plzort" type="text" autocomplete="postal-code" placeholder="PLZ & Ort"
+              class="w-full rounded-xl border border-ink-100 bg-white px-3 py-2.5 text-sm text-ink-950 focus:border-mint focus:outline-none focus:ring-2 focus:ring-mint/25 dark:border-white/10 dark:bg-night-surface dark:text-white" />
+          </div>
+          <p class="mt-2 text-xs text-ink-700/55 dark:text-slate-500">Wird nur lokal gespeichert und erscheint im PDF-Briefkopf.</p>
+        </div>
       </div>
     </section>
 

@@ -499,13 +499,33 @@
       });
     }
 
+    // Absender-Formular: laden + bei Eingabe in sessionStorage 'inkassoAbsender' persistieren
+    (function initAbsender() {
+      const fields = { name: $('abs-name'), strasse: $('abs-strasse'), plzOrt: $('abs-plzort') };
+      if (!fields.name && !fields.strasse && !fields.plzOrt) return;
+      let saved = {};
+      try { saved = JSON.parse(sessionStorage.getItem('inkassoAbsender') || '{}') || {}; } catch (_) {}
+      if (fields.name) fields.name.value = saved.name || '';
+      if (fields.strasse) fields.strasse.value = saved.strasse || '';
+      if (fields.plzOrt) fields.plzOrt.value = saved.plzOrt || '';
+      const persist = () => {
+        const data = {
+          name: fields.name ? fields.name.value.trim() : '',
+          strasse: fields.strasse ? fields.strasse.value.trim() : '',
+          plzOrt: fields.plzOrt ? fields.plzOrt.value.trim() : '',
+        };
+        try { sessionStorage.setItem('inkassoAbsender', JSON.stringify(data)); } catch (_) {}
+      };
+      Object.keys(fields).forEach((k) => { if (fields[k]) fields[k].addEventListener('input', persist); });
+    })();
+
     // PDF-Download (serverseitig via /api/widerspruch-pdf)
     const dlBtn = $('download-pdf');
     if (dlBtn) {
       const dlSpan = dlBtn.querySelector('span');
-      let absender = {};
-      try { absender = JSON.parse(sessionStorage.getItem('inkassoAbsender') || '{}') || {}; } catch (_) {}
       dlBtn.addEventListener('click', async () => {
+        let absender = {};
+        try { absender = JSON.parse(sessionStorage.getItem('inkassoAbsender') || '{}') || {}; } catch (_) {}
         const prev = dlSpan ? dlSpan.textContent : '';
         dlBtn.disabled = true; if (dlSpan) dlSpan.textContent = 'Erzeuge …';
         try {

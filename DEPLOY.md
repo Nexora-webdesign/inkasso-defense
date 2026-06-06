@@ -6,7 +6,9 @@
 |---|---|---|
 | Frontend | statisch in `public/` (HTML + Tailwind-Build + Vanilla-JS), von Next ausgeliefert | Vercel-CDN (statisch) |
 | API `/api/analyze`, `/api/health` | Next.js Route Handlers (`app/api/**/route.ts`) | Serverless Functions (Next.js) |
-| Analyse-Logik | `lib/inkasso-analysis.ts` (Schema, neutraler Prompt, serverseitige Mathematik, E-Mail-Vorlage) | dito |
+| Faktenextraktion | `lib/facts.ts` (Schema + Prompt; KI liefert NUR Fakten) | dito |
+| Juristische Wertung | `lib/rule-engine.ts` + `lib/rules.ts` (deterministisch, Cent-Mathematik, Audit) | dito |
+| Golden-Suite (CI-Gate) | `golden/` via `npm test` (vitest) | – |
 | CSS | `npm run build:css` → `public/styles.css` | im `buildCommand` enthalten |
 
 Die API liefert IMMER eine stabile Hülle: `{ ok: true, data }` oder `{ ok: false, error }`. `"/"` wird per `next.config.js`-Rewrite auf `public/index.html` gemappt.
