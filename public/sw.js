@@ -1,5 +1,5 @@
 /* Inkasso-Defense – Service Worker (PWA-Installierbarkeit + Offline-Shell) */
-const CACHE = 'inkasso-v1';
+const CACHE = 'inkasso-v2';
 const SHELL = [
   '/',
   '/index.html',
