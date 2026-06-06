@@ -123,11 +123,9 @@ export async function POST(req: Request) {
     return bad("Auf dem Dokument war kein Inkasso- oder Forderungsschreiben erkennbar.", 422);
   }
 
-  // Deterministische Bewertung – die KI hat NICHT gewertet.
-  // Gate: in Produktion nur anwaltlich freigegebene Regeln (geprueft:true).
-  // Nur ein explizites "false" deaktiviert das Gate (lokale Entwicklung).
-  const requireApproved = process.env.RULES_REQUIRE_APPROVAL !== "false";
-  const data = evaluate(fakten, onboarding, { requireApproved });
+  // Deterministische Bewertung – die KI hat NICHT gewertet. Informations-Modus:
+  // alle Regeln rechnen, ungeprüfte Kürzungen werden im Audit markiert.
+  const data = evaluate(fakten, onboarding);
   console.info("[/api/analyze] audit:", JSON.stringify(data.audit));
 
   return json({ ok: true, data });
