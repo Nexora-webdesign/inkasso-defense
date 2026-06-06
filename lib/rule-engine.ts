@@ -23,7 +23,18 @@ export interface FrontendPayload {
   posten: { name: string; status: FrontendStatus; betrag: number; paragraph: string; wieso: string }[];
   emailTemplate: string;
   hinweise: string[];
-  audit: { rulesVersion: string; eintraege: AuditEintrag[] };
+  audit: {
+    rulesVersion: string;
+    requireApproved: boolean;
+    regelnAktiv: number;
+    regelnGesamt: number;
+    eintraege: AuditEintrag[];
+  };
+}
+
+export interface EvaluateOptions {
+  /** Nur anwaltlich freigegebene Regeln (geprueft:true) anwenden. */
+  requireApproved: boolean;
 }
 
 // --- Geld-Mathematik in Cent (gegen Float-Drift) ----------------------------
@@ -31,29 +42,43 @@ const toCents = (eur: number) => Math.round((Number.isFinite(eur) ? eur : 0) * 1
 const toEur = (cents: number) => cents / 100;
 const clamp = (n: number, lo: number, hi: number) => Math.min(Math.max(n, lo), hi);
 
-// Erste passende Regel; trifft_zu defensiv gekapselt -> nie Crash der Analyse.
-function findRule(f: Fakten, p: Faktenposten): Regel | undefined {
-  return REGELN.find((r) => {
-    try {
-      return r.trifft_zu(f, p);
-    } catch {
-      return false;
-    }
-  });
+// trifft_zu defensiv gekapselt -> eine fehlerhafte Regel crasht nie die Analyse.
+function matches(r: Regel, f: Fakten, p: Faktenposten): boolean {
+  try {
+    return r.trifft_zu(f, p);
+  } catch {
+    return false;
+  }
 }
 
-export function evaluate(fakten: Fakten, onboarding: Onboarding = DEFAULT_ONBOARDING): FrontendPayload {
+// Erste passende Regel aus der übergebenen (aktiven) Regelmenge.
+function findRule(regeln: Regel[], f: Fakten, p: Faktenposten): Regel | undefined {
+  return regeln.find((r) => matches(r, f, p));
+}
+
+export function evaluate(
+  fakten: Fakten,
+  onboarding: Onboarding = DEFAULT_ONBOARDING,
+  options: EvaluateOptions = { requireApproved: false },
+): FrontendPayload {
+  // "geprueft"-Gate: bei requireApproved nur anwaltlich freigegebene Regeln anwenden.
+  const aktiveRegeln = REGELN.filter((r) => !options.requireApproved || r.geprueft);
+
   const eintraege: AuditEintrag[] = [];
   const hinweise: string[] = [];
   const posten: FrontendPayload["posten"] = [];
   let ersparnisC = 0;
   let postenSumC = 0;
+  let zurueckgehalten = false; // eine noch ungeprüfte Regel hätte gepasst
 
   for (const p of fakten.posten) {
     const betragC = Math.max(0, toCents(p.betrag_eur));
     postenSumC += betragC;
 
-    const regel = findRule(fakten, p);
+    const regel = findRule(aktiveRegeln, fakten, p);
+    if (options.requireApproved && !regel && REGELN.some((r) => !r.geprueft && matches(r, fakten, p))) {
+      zurueckgehalten = true;
+    }
     let kuerzC = 0;
     if (regel) {
       let roh = 0;
@@ -112,6 +137,9 @@ export function evaluate(fakten: Fakten, onboarding: Onboarding = DEFAULT_ONBOAR
   if (fakten.vertrauensgrad === "niedrig") {
     hinweise.push("Die automatische Erfassung war unsicher. Bitte lass das Ergebnis anwaltlich prüfen.");
   }
+  if (zurueckgehalten) {
+    hinweise.push("Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.");
+  }
 
   const bestritten = posten.filter((x) => x.status !== "RECHTENS");
   const az = fakten.aktenzeichen && fakten.aktenzeichen.toLowerCase() !== "unbekannt" ? fakten.aktenzeichen : "";
@@ -128,7 +156,13 @@ export function evaluate(fakten: Fakten, onboarding: Onboarding = DEFAULT_ONBOAR
     posten,
     emailTemplate,
     hinweise,
-    audit: { rulesVersion: RULES_VERSION, eintraege },
+    audit: {
+      rulesVersion: RULES_VERSION,
+      requireApproved: options.requireApproved,
+      regelnAktiv: aktiveRegeln.length,
+      regelnGesamt: REGELN.length,
+      eintraege,
+    },
   };
 }
 

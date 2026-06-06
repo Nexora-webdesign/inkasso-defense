@@ -84,3 +84,12 @@ export const CASES: GoldenCase[] = [
     erwartet: { ersparnis: 0, fairerKern: 100, status: ["RECHTENS"] },
   },
 ];
+
+// Gate-Festschreibung: Solange ALLE Regeln in lib/rules.ts geprueft:false sind,
+// liefert das "geprueft"-Gate (requireApproved:true) keinerlei Kürzung. Fall A
+// (sonst GEKUERZT, 20 € Ersparnis) wird damit zu RECHTENS ohne Ersparnis.
+export const GATE_CASE_A: GoldenCase = {
+  name: "A) unter requireApproved=true (nur geprüfte Regeln) -> keine Kürzung",
+  fakten: CASES[0].fakten,
+  erwartet: { ersparnis: 0, fairerKern: 40, status: ["RECHTENS"] },
+};

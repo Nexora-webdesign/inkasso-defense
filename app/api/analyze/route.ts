@@ -124,7 +124,10 @@ export async function POST(req: Request) {
   }
 
   // Deterministische Bewertung – die KI hat NICHT gewertet.
-  const data = evaluate(fakten, onboarding);
+  // Gate: in Produktion nur anwaltlich freigegebene Regeln (geprueft:true).
+  // Nur ein explizites "false" deaktiviert das Gate (lokale Entwicklung).
+  const requireApproved = process.env.RULES_REQUIRE_APPROVAL !== "false";
+  const data = evaluate(fakten, onboarding, { requireApproved });
   console.info("[/api/analyze] audit:", JSON.stringify(data.audit));
 
   return json({ ok: true, data });
