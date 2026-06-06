@@ -8,6 +8,15 @@ export const metadata: Metadata = {
   title: "Blog – Inkasso, Gebühren & Verbraucherrecht",
   description:
     "Artikel rund um Inkasso-Forderungen, Gebühren und Verbraucherrecht – verständlich erklärt, damit du weißt, was du wirklich zahlen musst.",
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    type: "website",
+    title: "Blog – Inkasso, Gebühren & Verbraucherrecht",
+    description:
+      "Artikel rund um Inkasso-Forderungen, Gebühren und Verbraucherrecht – verständlich erklärt.",
+    url: "/blog",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function BlogIndexPage() {
@@ -22,7 +31,7 @@ export default function BlogIndexPage() {
         {/* Hero */}
         <div className="mx-auto max-w-3xl text-center">
           <span className="text-xs font-bold uppercase tracking-[0.25em] text-mint-light">Blog</span>
-          <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] tracking-tightest text-white sm:text-6xl">
+          <h1 className="font-display mt-4 text-4xl font-semibold leading-[1.05] tracking-tightest text-white sm:text-6xl">
             Inkasso, Gebühren &amp;{" "}
             <span className="bg-gradient-to-r from-mint-light to-mint bg-clip-text text-transparent">
               Verbraucher-Wissen

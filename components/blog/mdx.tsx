@@ -41,12 +41,18 @@ export function Chart({
   values?: number[];
 }) {
   const max = Math.max(1, ...values);
+  // Screen-Reader-Zusammenfassung statt rein visueller Balken (WCAG).
+  const summary = [title, caption, `Werte: ${values.join(", ")}.`].filter(Boolean).join(" ");
   return (
-    <figure className="not-prose my-9 overflow-hidden rounded-3xl border border-white/10 bg-night-surface p-6 bezel-soft">
+    <figure
+      role="img"
+      aria-label={summary || "Balkendiagramm"}
+      className="not-prose my-9 overflow-hidden rounded-3xl border border-white/10 bg-night-surface p-6 bezel-soft"
+    >
       {title ? (
         <p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-mint-light">{title}</p>
       ) : null}
-      <div className="flex h-44 items-end gap-3">
+      <div className="flex h-44 items-end gap-3" aria-hidden="true">
         {values.map((v, i) => (
           <div key={i} className="flex flex-1 flex-col items-center justify-end gap-2">
             <div
@@ -59,6 +65,27 @@ export function Chart({
       </div>
       {caption ? <figcaption className="mt-4 text-sm text-slate-500">{caption}</figcaption> : null}
     </figure>
+  );
+}
+
+/** Rechtlicher Hinweis (RDG) – wiederverwendbar in jedem Artikel. */
+export function Disclaimer() {
+  return (
+    <aside
+      role="note"
+      className="not-prose my-10 flex gap-3 rounded-3xl border border-white/10 bg-night-inset/60 p-5 text-sm leading-relaxed text-slate-400"
+    >
+      <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8h.01M11 12h1v4h1" />
+      </svg>
+      <p>
+        <strong className="font-semibold text-slate-300">Rechtlicher Hinweis:</strong> Dieser Beitrag ist
+        eine allgemeine, technische Orientierungshilfe und stellt <strong className="font-semibold text-slate-300">keine
+        Rechtsberatung</strong> dar. Er ersetzt nicht die Prüfung des Einzelfalls durch eine fachkundige Stelle
+        oder einen Rechtsanwalt. Die Nutzung erfolgt auf eigene Gefahr.
+      </p>
+    </aside>
   );
 }
 
@@ -86,7 +113,7 @@ export const mdxComponents = {
   ),
   a: (p: { children?: ReactNode; href?: string }) => (
     <a
-      className="font-semibold text-mint-light underline decoration-mint/40 underline-offset-2 transition hover:decoration-mint"
+      className="rounded font-semibold text-mint-light underline decoration-mint/40 underline-offset-2 outline-none transition hover:decoration-mint focus-visible:ring-2 focus-visible:ring-mint/60 focus-visible:ring-offset-2 focus-visible:ring-offset-night"
       {...p}
     />
   ),
@@ -98,4 +125,5 @@ export const mdxComponents = {
   // In MDX direkt verfügbar:
   Figure,
   Chart,
+  Disclaimer,
 };

@@ -3,8 +3,10 @@
 // in public/ (index.html, dashboard.html) werden davon NICHT berührt.
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { SITE_URL } from "@/lib/blog-shared";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: "Inkasso·Defense", template: "%s – Inkasso·Defense" },
   description:
     "Wissen rund um Inkasso, Gebühren und Verbraucherrecht – verständlich erklärt vom Team hinter dem Inkasso-Analyse-Tool.",

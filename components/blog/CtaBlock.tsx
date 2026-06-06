@@ -16,16 +16,17 @@ export function CtaBlock() {
           Inkasso-Schreiben erhalten? Prüfe in Sekunden, was du wirklich zahlen musst.
         </h2>
         <p className="mt-3 max-w-2xl text-slate-300">
-          Lade dein Schreiben hoch – das Tool erkennt die Posten, berechnet den fairen Kern
-          regelbasiert nach BGB &amp; RVG und erstellt dir einen fertigen Widerspruch.
+          Lade dein Schreiben hoch – die <strong className="font-semibold text-white">regelbasierte Analyse</strong>{" "}
+          erkennt die Posten, berechnet den fairen Kern nach BGB &amp; RVG und erstellt dir einen
+          fertigen Widerspruch.
         </p>
 
         <div className="mt-7 flex flex-wrap items-center gap-4">
           <a
             href="/"
-            className="btn-press group inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3 text-base font-bold text-night shadow-float"
+            className="btn-press group inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3 text-base font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60 focus-visible:ring-offset-2 focus-visible:ring-offset-night"
           >
-            Forderung jetzt prüfen
+            Jetzt Inkassoschreiben sicher analysieren
             <svg className="btn-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>

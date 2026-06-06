@@ -46,7 +46,7 @@ export function BlogExplorer({ posts, categories }: { posts: PostMeta[]; categor
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Artikel suchen…"
           aria-label="Artikel suchen"
-          className="w-full rounded-full border border-white/10 bg-night-surface/70 py-3.5 pl-12 pr-5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-mint/50 focus:ring-2 focus:ring-mint/20"
+          className="w-full rounded-full border border-white/10 bg-night-surface/70 py-3.5 pl-12 pr-5 text-base text-slate-100 placeholder:text-slate-500 outline-none transition focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40 sm:text-sm"
         />
       </div>
 
@@ -61,7 +61,7 @@ export function BlogExplorer({ posts, categories }: { posts: PostMeta[]; categor
               onClick={() => setActive(cat)}
               aria-pressed={on}
               className={
-                "btn-press rounded-full px-4 py-2 text-sm font-semibold transition " +
+                "btn-press inline-flex min-h-[2.75rem] cursor-pointer items-center rounded-full px-4 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-mint/60 focus-visible:ring-offset-2 focus-visible:ring-offset-night " +
                 (on
                   ? "bg-mint text-night shadow-float"
                   : "border border-white/10 bg-night-surface/60 text-slate-300 hover:border-mint/40 hover:text-white")

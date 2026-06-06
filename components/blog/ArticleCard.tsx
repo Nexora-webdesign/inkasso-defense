@@ -3,13 +3,13 @@ import Link from "next/link";
 import type { PostMeta } from "@/lib/blog-shared";
 import { formatDate } from "@/lib/blog-shared";
 
-// Stabiler Verlauf als Cover-Platzhalter, abgeleitet aus dem Slug (deterministisch).
+// Cover-Platzhalter: ausschließlich App-Tokens (night/mint), dezent variiert.
 function coverGradient(seed: string): string {
   const palettes = [
-    "from-mint/25 via-night-surface to-night-inset",
-    "from-indigo-500/25 via-night-surface to-night-inset",
-    "from-mint/20 via-emerald-500/10 to-night-inset",
-    "from-sky-500/20 via-night-surface to-night-inset",
+    "from-mint/20 via-night-surface to-night-inset",
+    "from-mint/10 via-night-surface to-night-inset",
+    "from-night-surface via-night-inset to-night",
+    "from-mint/15 via-night-inset to-night",
   ];
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
@@ -20,7 +20,7 @@ export function ArticleCard({ post }: { post: PostMeta }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="reveal is-visible group flex flex-col overflow-hidden rounded-4xl border border-white/10 bg-night-surface/70 bezel-soft transition-transform duration-500 hover:-translate-y-1"
+      className="group flex flex-col overflow-hidden rounded-4xl border border-white/10 bg-night-surface/70 bezel-soft outline-none transition-transform duration-300 hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:ring-2 focus-visible:ring-mint/60 focus-visible:ring-offset-2 focus-visible:ring-offset-night"
     >
       {/* Cover / Bild-Platzhalter */}
       <div className={`relative aspect-[16/10] overflow-hidden bg-gradient-to-br ${coverGradient(post.slug)}`}>
@@ -47,9 +47,9 @@ export function ArticleCard({ post }: { post: PostMeta }) {
 
       {/* Text */}
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="text-lg font-extrabold leading-snug tracking-tight text-white transition-colors group-hover:text-mint-light">
+        <h2 className="text-lg font-extrabold leading-snug tracking-tight text-white transition-colors group-hover:text-mint-light">
           {post.title}
-        </h3>
+        </h2>
         <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-400">{post.lead}</p>
         <div className="mt-5 flex items-center gap-2 text-xs text-slate-500">
           <time dateTime={post.date}>{formatDate(post.date)}</time>

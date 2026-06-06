@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllSlugs, getPost, formatDate } from "@/lib/blog";
+import { SITE_URL } from "@/lib/blog-shared";
 import { SiteHeader } from "@/components/blog/SiteHeader";
 import { CtaBlock } from "@/components/blog/CtaBlock";
 import { mdxComponents } from "@/components/blog/mdx";
@@ -20,7 +21,24 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Artikel nicht gefunden" };
-  return { title: post.title, description: post.lead };
+
+  const url = `/blog/${post.slug}`;
+  return {
+    title: post.title,
+    description: post.lead,
+    keywords: post.keywords,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.lead,
+      url,
+      publishedTime: post.date,
+      section: post.category,
+      tags: post.keywords,
+    },
+    twitter: { card: "summary_large_image", title: post.title, description: post.lead },
+  };
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -28,8 +46,28 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const post = getPost(slug);
   if (!post) notFound();
 
+  // Structured Data (JSON-LD) für Rich Results.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.lead,
+    datePublished: post.date,
+    articleSection: post.category,
+    keywords: post.keywords?.join(", "),
+    inLanguage: "de-DE",
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+    author: { "@type": "Organization", name: "Inkasso·Defense" },
+    publisher: { "@type": "Organization", name: "Inkasso·Defense" },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader />
 
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-14 sm:pt-20">
@@ -55,10 +93,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </span>
           </div>
 
-          <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tightest text-white sm:text-5xl">
+          <h1 className="font-display mt-5 text-4xl font-semibold leading-[1.1] tracking-tightest text-white sm:text-5xl">
             {post.title}
           </h1>
-          <p className="mt-5 text-xl leading-relaxed text-slate-400">{post.lead}</p>
+          <p className="mt-5 max-w-[60ch] text-xl leading-relaxed text-slate-400">{post.lead}</p>
         </header>
 
         {/* Titelbild-Platzhalter */}

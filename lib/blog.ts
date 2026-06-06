@@ -31,6 +31,12 @@ function estimateReadingMinutes(content: string): number {
   return Math.max(1, Math.round(words / 200));
 }
 
+function parseKeywords(raw: unknown): string[] | undefined {
+  if (Array.isArray(raw)) return raw.map((k) => String(k).trim()).filter(Boolean);
+  if (typeof raw === "string") return raw.split(",").map((k) => k.trim()).filter(Boolean);
+  return undefined;
+}
+
 function toMeta(slug: string, data: Record<string, unknown>, content: string): PostMeta {
   return {
     slug,
@@ -40,6 +46,7 @@ function toMeta(slug: string, data: Record<string, unknown>, content: string): P
     date: String(data.date ?? "1970-01-01"),
     cover: data.cover ? String(data.cover) : undefined,
     readingMinutes: data.readingMinutes ? Number(data.readingMinutes) : estimateReadingMinutes(content),
+    keywords: parseKeywords(data.keywords),
   };
 }
 
