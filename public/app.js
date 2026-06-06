@@ -51,6 +51,15 @@
   })();
 
   /* ============================================================
+   * 1c) Service Worker registrieren (PWA / Offline-Shell)
+   * ============================================================ */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+
+  /* ============================================================
    * 2) Canvas-Konstellation
    * ============================================================ */
   (function initParticles() {
@@ -171,6 +180,29 @@
     const loader = createLoader();
     let file = null;
 
+    // Handy-Fotos vor dem Upload verkleinern: hält die Anfrage unter Vercels
+    // 4,5-MB-Body-Limit und spart Vision-Tokens. PDFs bleiben unverändert.
+    async function maybeDownscale(f) {
+      if (!f.type || !f.type.startsWith('image/')) return f;
+      if (f.size < 1.4 * 1024 * 1024) return f;
+      try {
+        const bmp = await createImageBitmap(f);
+        const maxEdge = 2000;
+        const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
+        const w = Math.round(bmp.width * scale);
+        const h = Math.round(bmp.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+        if (bmp.close) bmp.close();
+        const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.85));
+        if (!blob) return f;
+        return new File([blob], f.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+      } catch (_) {
+        return f;
+      }
+    }
+
     function setFile(f) {
       if (!f) return;
       if (f.size > MAX) { alert('Die Datei ist zu groß (max. 10 MB).'); return; }
@@ -193,7 +225,8 @@
       label.textContent = 'Analysiere Forderung …';
       if (loader) loader.start();
       try {
-        const fd = new FormData(); fd.append('file', file);
+        const toSend = await maybeDownscale(file);
+        const fd = new FormData(); fd.append('file', toSend);
         const res = await fetch('/api/analyze', { method: 'POST', body: fd });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Die Analyse ist fehlgeschlagen.');

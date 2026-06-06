@@ -14,7 +14,7 @@
     "dev": "node --watch server.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": "22.x"
   },
   "keywords": [
     "inkasso",
@@ -27,6 +27,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.101.0",
+    "busboy": "^1.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "multer": "^2.0.1"
