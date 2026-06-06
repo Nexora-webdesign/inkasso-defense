@@ -226,10 +226,27 @@
       if (loader) loader.start();
       try {
         const toSend = await maybeDownscale(file);
+        if (toSend.size > 4.4 * 1024 * 1024) {
+          throw new Error('Die Datei ist nach der Komprimierung noch zu groß (max. ~4 MB). Bitte ein kleineres Foto oder ein komprimiertes PDF hochladen.');
+        }
         const fd = new FormData(); fd.append('file', toSend);
         const res = await fetch('/api/analyze', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Die Analyse ist fehlgeschlagen.');
+
+        // Robust: Body als Text lesen und tolerant parsen. Verhindert den kryptischen
+        // "The string did not match the expected pattern"-Fehler (iOS/WebKit), falls
+        // die Plattform bei Timeout/Fehler HTML/Text statt JSON zurückgibt.
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
+
+        if (!res.ok || !data || typeof data !== 'object') {
+          const msg = (data && data.error)
+            || (res.status === 413 ? 'Die Datei ist zu groß. Bitte kleiner hochladen.'
+              : res.status === 504 ? 'Die Analyse hat zu lange gedauert. Bitte mit einem kleineren, scharfen Bild erneut versuchen.'
+              : `Die Analyse ist fehlgeschlagen (Status ${res.status || '–'}). Bitte erneut versuchen.`);
+          throw new Error(msg);
+        }
+
         sessionStorage.setItem('inkassoResult', JSON.stringify(data));
         const go = () => { window.location.href = 'dashboard.html'; };
         if (loader) loader.finish(go); else go();
