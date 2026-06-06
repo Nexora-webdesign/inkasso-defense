@@ -99,10 +99,18 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <p className="mt-5 max-w-[60ch] text-xl leading-relaxed text-slate-400">{post.lead}</p>
         </header>
 
-        {/* Titelbild-Platzhalter */}
+        {/* Titelbild (Hero) – Aspect-Container verhindert Layout-Shift (CLS) */}
         {post.cover ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.cover} alt="" className="mt-10 w-full rounded-3xl border border-white/10 bezel-soft" />
+          <div className="mt-10 aspect-[16/9] overflow-hidden rounded-3xl border border-white/10 bezel-soft">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.cover}
+              alt={post.title}
+              width={1600}
+              height={900}
+              className="h-full w-full object-cover"
+            />
+          </div>
         ) : (
           <div className="mt-10 flex aspect-[16/9] items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br from-mint/15 via-night-surface to-night-inset bezel-soft">
             <svg className="h-12 w-12 text-white/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
