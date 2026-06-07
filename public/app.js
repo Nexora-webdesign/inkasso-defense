@@ -620,6 +620,19 @@
       });
     })();
 
+    // Fall im Konto speichern: Ergebnis tab-übergreifend (localStorage) ablegen
+    // und in den geschützten Bereich wechseln. Nicht eingeloggt → Login mit next.
+    (function initSaveCase() {
+      const btn = document.getElementById('save-case-btn');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        try {
+          localStorage.setItem('inkassoPendingCase', JSON.stringify({ v: 1, ts: Date.now(), result: d }));
+        } catch (_) { /* ignore */ }
+        window.location.href = '/fall/import';
+      });
+    })();
+
     // Raten-Slider (mit KI-Vorschlag vorbelegt)
     const slider = $('rate-slider');
     if (slider) {

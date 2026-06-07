@@ -28,7 +28,7 @@ function extractKey(data: unknown): string {
   }
 }
 
-export function BuyAndActivate({ checkoutUrl }: { checkoutUrl: string }) {
+export function BuyAndActivate({ checkoutUrl, priceLabel }: { checkoutUrl: string; priceLabel?: string }) {
   const [state, setState] = useState<State>("idle");
   const [msg, setMsg] = useState("");
   const [code, setCode] = useState("");
@@ -109,6 +109,7 @@ export function BuyAndActivate({ checkoutUrl }: { checkoutUrl: string }) {
         Fall-Begleitung freischalten
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
       </button>
+      {priceLabel ? <p className="mt-2 text-sm font-semibold text-slate-300">{priceLabel}</p> : null}
 
       {msg ? (
         <p className={`mt-3 text-sm ${state === "ok" ? "text-mint-light" : state === "err" ? "text-red-400" : "text-slate-400"}`}>{msg}</p>
