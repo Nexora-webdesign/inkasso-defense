@@ -15,6 +15,7 @@ export function SiteFooter() {
           <Link href="/blog" className={linkCls}>Blog</Link>
           <a href="/" className={linkCls}>Analyse-Tool</a>
           <Link href="/datenschutz" className={linkCls}>Datenschutz</Link>
+          <Link href="/agb" className={linkCls}>AGB</Link>
           <Link href="/impressum" className={linkCls}>Impressum</Link>
         </nav>
       </div>
