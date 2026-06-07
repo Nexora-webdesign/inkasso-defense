@@ -545,8 +545,8 @@
       const licMsg = $('license-msg');
 
       const LKEY = 'inkassoLicense';
-      // ⚠️ Nach Lemon-Squeezy-Produktanlage hier die Checkout-URL eintragen (öffentlich, kein Secret).
-      const CHECKOUT_URL = 'https://inkasso-defense.lemonsqueezy.com/buy/REPLACE_WITH_VARIANT';
+      // Lemon-Squeezy Checkout-URL (öffentlich, kein Secret).
+      const CHECKOUT_URL = 'https://nexora-services.lemonsqueezy.com/checkout/buy/3199fec3-f4da-40c1-b5e0-82aa071e7038';
 
       const getLic = () => { try { return sessionStorage.getItem(LKEY) || ''; } catch (_) { return ''; } };
       const setLic = (k) => { try { k ? sessionStorage.setItem(LKEY, k) : sessionStorage.removeItem(LKEY); } catch (_) {} };

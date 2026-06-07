@@ -25,6 +25,14 @@ export async function verifyLicense(rawKey: string): Promise<boolean> {
   const license_key = (rawKey || "").trim();
   if (!license_key) return false;
 
+  // Produkt-Härtung (fail-closed): ohne konfigurierte Produkt-ID akzeptieren wir
+  // KEINE Lizenz – auch keine fremden LS-Keys. Verhindert Bypass über Drittshops.
+  const expectedProductId = process.env.LEMONSQUEEZY_PRODUCT_ID;
+  if (!expectedProductId) {
+    console.error("[lemonsqueezy] LEMONSQUEEZY_PRODUCT_ID nicht gesetzt – Lizenzprüfung verweigert.");
+    throw new LicenseCheckError("missing-product-id");
+  }
+
   let res: Response;
   try {
     res = await fetch(LS_VALIDATE_URL, {
@@ -51,9 +59,8 @@ export async function verifyLicense(rawKey: string): Promise<boolean> {
   if (json?.valid !== true) return false;
   if (json?.license_key?.status !== "active") return false;
 
-  // Produkt-Härtung: nur eigene Keys akzeptieren (sofern Produkt-ID gesetzt).
-  const expected = process.env.LEMONSQUEEZY_PRODUCT_ID;
-  if (expected && String(json?.meta?.product_id ?? "") !== String(expected)) return false;
+  // Nur Lizenzen unseres Produkts akzeptieren.
+  if (String(json?.meta?.product_id ?? "") !== String(expectedProductId)) return false;
 
   return true;
 }
