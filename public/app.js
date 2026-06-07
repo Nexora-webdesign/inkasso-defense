@@ -577,92 +577,11 @@
       if (typeof reveal === 'function') reveal(box);
     })();
 
-    // ── Freemium-Paywall: Widerspruch-PDF freischalten & herunterladen ───────
-    (function initPaywall() {
+    // ── PDF-Download (kostenlos, serverseitig via /api/widerspruch-pdf) ──────
+    (function initPdfDownload() {
       const dlBtn = $('download-pdf');
       if (!dlBtn) return;
       const dlSpan = dlBtn.querySelector('span');
-      const unlockBtn = $('unlock-pdf');
-      const widerruf = $('widerruf-check');
-      const licInput = $('license-input');
-      const licApply = $('license-apply');
-      const licMsg = $('license-msg');
-
-      const LKEY = 'inkassoLicense';
-      // Lemon-Squeezy Checkout-URL (öffentlich, kein Secret).
-      const CHECKOUT_URL = 'https://nexora-services.lemonsqueezy.com/checkout/buy/3199fec3-f4da-40c1-b5e0-82aa071e7038';
-
-      const getLic = () => { try { return sessionStorage.getItem(LKEY) || ''; } catch (_) { return ''; } };
-      const setLic = (k) => { try { k ? sessionStorage.setItem(LKEY, k) : sessionStorage.removeItem(LKEY); } catch (_) {} };
-
-      function msg(text, ok) {
-        if (!licMsg) return;
-        licMsg.textContent = text;
-        licMsg.classList.remove('hidden');
-        licMsg.classList.toggle('text-mint-dark', !!ok);
-        licMsg.classList.toggle('dark:text-mint-light', !!ok);
-        licMsg.classList.toggle('text-red-500', !ok);
-      }
-
-      function renderState() {
-        const unlocked = !!getLic();
-        if (unlockBtn) { unlockBtn.classList.toggle('hidden', unlocked); unlockBtn.classList.toggle('flex', !unlocked); }
-        dlBtn.classList.toggle('hidden', !unlocked);
-        dlBtn.classList.toggle('flex', unlocked);
-      }
-
-      // Freischalt-Button erst aktiv, wenn der Widerrufs-Hinweis bestätigt ist.
-      const syncUnlock = () => { if (unlockBtn) unlockBtn.disabled = !(widerruf && widerruf.checked); };
-      if (widerruf) widerruf.addEventListener('change', syncUnlock);
-      syncUnlock();
-
-      function openCheckout() {
-        if (widerruf && !widerruf.checked) { alert('Bitte bestätige zuerst den Hinweis zum Widerrufsrecht.'); return; }
-        try {
-          if (window.LemonSqueezy && window.LemonSqueezy.Url) window.LemonSqueezy.Url.Open(CHECKOUT_URL);
-          else window.open(CHECKOUT_URL, '_blank', 'noopener');
-        } catch (_) { window.open(CHECKOUT_URL, '_blank', 'noopener'); }
-      }
-      if (unlockBtn) unlockBtn.addEventListener('click', openCheckout);
-
-      // Lemon.js Overlay – License Key aus dem Success-Event übernehmen.
-      function extractKey(data) {
-        try {
-          const o = (data && (data.order || data)) || {};
-          const attr = (o.data && o.data.attributes) || o.attributes || {};
-          const item = attr.first_order_item || attr.order_item || {};
-          return item.license_key || attr.license_key || data.license_key || '';
-        } catch (_) { return ''; }
-      }
-      function onLemon(e) {
-        if (!e || e.event !== 'Checkout.Success') return;
-        const key = extractKey(e.data);
-        if (key) { setLic(key); renderState(); msg('Freigeschaltet – du kannst das PDF jetzt herunterladen.', true); }
-        else { msg('Kauf erkannt. Bitte gib den Freischaltcode aus der Bestätigungs-E-Mail unten ein.', true); }
-      }
-      try {
-        if (typeof window.createLemonSqueezy === 'function') window.createLemonSqueezy();
-        if (window.LemonSqueezy && window.LemonSqueezy.Setup) window.LemonSqueezy.Setup({ eventHandler: onLemon });
-      } catch (_) {}
-
-      // Manuelles Freischalten per Code (Fallback) – serverseitig geprüft.
-      async function applyCode() {
-        const code = ((licInput && licInput.value) || '').trim();
-        if (!code) { msg('Bitte Freischaltcode eingeben.', false); return; }
-        if (licApply) licApply.disabled = true;
-        try {
-          const r = await fetch('/api/license/validate', {
-            method: 'POST', headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ licenseKey: code }),
-          });
-          if (r.ok) { setLic(code); renderState(); msg('Freigeschaltet – du kannst das PDF jetzt herunterladen.', true); }
-          else { let m = 'Freischaltcode ungültig.'; try { const j = await r.json(); if (j && j.error) m = j.error; } catch (_) {} msg(m, false); }
-        } catch (_) { msg('Prüfung fehlgeschlagen. Bitte erneut versuchen.', false); }
-        finally { if (licApply) licApply.disabled = false; }
-      }
-      if (licApply) licApply.addEventListener('click', applyCode);
-
-      // PDF-Download (serverseitig via /api/widerspruch-pdf, mit Lizenz).
       dlBtn.addEventListener('click', async () => {
         let absender = {};
         try { absender = JSON.parse(sessionStorage.getItem('inkassoAbsender') || '{}') || {}; } catch (_) {}
@@ -678,14 +597,8 @@
               betreff: subject,
               body: body,
               absender: absender,
-              licenseKey: getLic(),
             }),
           });
-          if (res.status === 402) {
-            setLic(''); renderState();
-            msg('Freischaltung nötig oder abgelaufen. Bitte erneut freischalten.', false);
-            throw new Error('Bitte schalte den Widerspruch zuerst frei.');
-          }
           const ct = res.headers.get('content-type') || '';
           if (!res.ok || !ct.includes('application/pdf')) {
             let m = 'Das PDF konnte nicht erstellt werden.';
@@ -705,8 +618,6 @@
           dlBtn.disabled = false; if (dlSpan) dlSpan.textContent = prev;
         }
       });
-
-      renderState();
     })();
 
     // Raten-Slider (mit KI-Vorschlag vorbelegt)
