@@ -7,9 +7,22 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getPremiumUntil } from "@/lib/premium";
 import { getEscalation, isCaseStatus, type CaseStatus } from "@/lib/escalation";
+import { getLetterGuide, LETTER_TYPE_LABEL } from "@/lib/letter-guide";
+import type { LetterType } from "@/lib/followup";
 import { SiteHeader } from "@/components/blog/SiteHeader";
 import { CaseStatusControl } from "@/components/account/CaseStatusControl";
 import { CopyEmail } from "@/components/account/CopyEmail";
+import { LetterUpload } from "@/components/account/LetterUpload";
+
+const dfmt = (d: string | Date) =>
+  new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" });
+
+type CaseLetter = {
+  id: string;
+  letter_type: LetterType;
+  summary: string | null;
+  created_at: string;
+};
 
 export const metadata: Metadata = { title: "Fall", robots: { index: false } };
 
@@ -49,6 +62,14 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
 
   const premiumUntil = await getPremiumUntil(supabase, user.id);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
+
+  // Folgeschreiben (Verlauf) – RLS liefert nur eigene.
+  const { data: lettersData } = await supabase
+    .from("case_letters")
+    .select("id,letter_type,summary,created_at")
+    .eq("case_id", id)
+    .order("created_at", { ascending: true });
+  const letters = (lettersData ?? []) as CaseLetter[];
 
   const status: CaseStatus = isCaseStatus(fall.status) ? fall.status : "offen";
   const guide = getEscalation(status);
@@ -142,6 +163,86 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             Hinweis: Dies ist eine technische Orientierungshilfe und keine Rechtsberatung. Bei
             gerichtlichen Schritten oder Unsicherheit wende dich an eine Verbraucherzentrale oder einen Rechtsanwalt.
           </p>
+        </section>
+
+        {/* ── Schreiben im Fall (Verlauf) ─────────────────────────────── */}
+        <section className="mt-8">
+          <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">Schreiben im Fall</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Jedes neue Schreiben gehört zu diesem Fall. Lade es hoch – wir ordnen es ein und zeigen, wie es weitergeht.
+          </p>
+
+          <ol className="mt-4 space-y-3">
+            {/* Erstschreiben */}
+            <li className="rounded-3xl border border-white/10 bg-night-surface/60 p-5 bezel-soft">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="rounded-full bg-mint/15 px-2.5 py-1 text-[11px] font-bold text-mint-light">Erstes Inkasso-Schreiben</span>
+                <span className="text-xs text-slate-500">{dfmt(fall.created_at as string)}</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-300">
+                Geforderte Summe {eur(orig)} · fairer Kern <span className="font-semibold text-mint-light">{eur(fair)}</span>
+                {pct > 0 ? <> · Ersparnis {eur(saving)}</> : null}. Details &amp; fertige Antwort findest du unten.
+              </p>
+            </li>
+
+            {/* Folgeschreiben */}
+            {letters.map((l) => {
+              const g = getLetterGuide(l.letter_type);
+              return (
+                <li
+                  key={l.id}
+                  className={"rounded-3xl border p-5 bezel-soft " + (g.urgent ? "border-rose-400/30 bg-rose-400/5" : "border-white/10 bg-night-surface/60")}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className={"rounded-full px-2.5 py-1 text-[11px] font-bold " + (g.urgent ? "bg-rose-400/15 text-rose-300" : "bg-mint/15 text-mint-light")}>
+                      {LETTER_TYPE_LABEL[l.letter_type]}
+                    </span>
+                    <span className="text-xs text-slate-500">{dfmt(l.created_at)}</span>
+                  </div>
+                  {l.summary ? <p className="mt-2 text-sm text-slate-300">{l.summary}</p> : null}
+                  <p className="mt-3 font-bold text-white">{g.headline}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-400">{g.intro}</p>
+                  <ol className="mt-3 space-y-2">
+                    {g.steps.map((s, i) => (
+                      <li key={s.title} className="flex gap-2.5 text-sm">
+                        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-mint/15 text-xs font-bold text-mint-light">{i + 1}</span>
+                        <span><span className="font-semibold text-white">{s.title}</span> <span className="text-slate-400">– {s.detail}</span></span>
+                      </li>
+                    ))}
+                  </ol>
+                </li>
+              );
+            })}
+          </ol>
+
+          {/* Upload (Premium) */}
+          <div className="mt-4 rounded-4xl border border-white/10 bg-night-surface/60 p-6 bezel-soft">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-mint-light">Neues Schreiben hochladen</p>
+            {isPremium ? (
+              <>
+                <p className="mt-2 text-sm text-slate-400">Foto oder PDF des neuen Briefs – die KI ordnet ihn ein und sagt, wie du vorgehst.</p>
+                <div className="mt-4">
+                  <LetterUpload caseId={fall.id as string} />
+                </div>
+              </>
+            ) : (
+              <div className="mt-3 rounded-3xl border border-white/10 bg-night/60 p-5">
+                <p className="text-sm text-slate-300">
+                  🔒 Das Hochladen &amp; Analysieren weiterer Schreiben ist Teil der <strong className="font-semibold text-white">Fall-Begleitung</strong> – so wirst du durch den ganzen Inkasso-Prozess begleitet.
+                </p>
+                <Link
+                  href="/konto"
+                  className="btn-press mt-4 inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3 text-sm font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60"
+                >
+                  Fall-Begleitung freischalten
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </Link>
+              </div>
+            )}
+            <p className="mt-4 text-xs leading-relaxed text-slate-500">
+              Technische Orientierungshilfe, keine Rechtsberatung. Bei gerichtlichen Schritten oder Unsicherheit: Verbraucherzentrale oder Rechtsanwalt.
+            </p>
+          </div>
         </section>
 
         {/* ── Gespeicherte Analyse ────────────────────────────────────── */}

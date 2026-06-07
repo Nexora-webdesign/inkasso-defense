@@ -68,8 +68,10 @@ export default function DatenschutzPage() {
           einwilligst</strong>, wird das <strong className="font-semibold text-white">berechnete
           Analyse-Ergebnis</strong> (nicht das hochgeladene Dokument) in einer Datenbank deinem Konto
           zugeordnet abgelegt – damit du deinen Fall wiederfindest und die optionale Fall-Begleitung
-          nutzen kannst. Du kannst gespeicherte Fälle jederzeit selbst löschen. Technischer Dienstleister
-          hierfür ist Supabase (siehe Ziffer 6).
+          nutzen kannst. Lädst du im Rahmen der Fall-Begleitung <strong className="font-semibold text-white">weitere
+          Schreiben</strong> zu einem Fall hoch, wird ebenfalls nur die <strong className="font-semibold text-white">berechnete
+          Einordnung/Zusammenfassung</strong> gespeichert – nicht das hochgeladene Dokument. Du kannst gespeicherte
+          Fälle jederzeit selbst löschen. Technischer Dienstleister hierfür ist Supabase (siehe Ziffer 6).
         </P>
 
         <H2>3. Welche Daten verarbeitet werden</H2>
