@@ -4,8 +4,6 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { SiteHeader } from "@/components/blog/SiteHeader";
 
-type Mode = "login" | "register";
-
 const BENEFITS = [
   { t: "Fristen-Erinnerungen", d: "Wir erinnern dich rechtzeitig – z. B. an die 14-Tage-Widerspruchsfrist." },
   { t: "Eskalations-Assistent", d: "Schritt-für-Schritt, was als Nächstes zu tun ist (z. B. bei Mahnbescheid)." },
@@ -13,12 +11,10 @@ const BENEFITS = [
 ];
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<Mode>("register");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
-  const [confirmSent, setConfirmSent] = useState(false);
+  const [sent, setSent] = useState(false);
 
   function nextUrl() {
     return new URLSearchParams(window.location.search).get("next") || "/konto";
@@ -26,32 +22,22 @@ export default function LoginPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim() || password.length < 6) {
-      setMsg("Bitte E-Mail und ein Passwort (mind. 6 Zeichen) eingeben.");
+    if (!email.trim()) {
+      setMsg("Bitte gib deine E-Mail-Adresse ein.");
       return;
     }
     setBusy(true);
     setMsg("");
     const supabase = createClient();
     try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) setMsg("Anmeldung fehlgeschlagen. Stimmen E-Mail und Passwort?");
-        else return window.location.assign(nextUrl());
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl())}` },
-        });
-        if (error) {
-          setMsg(error.message.includes("registered") ? "Diese E-Mail ist bereits registriert – bitte anmelden." : "Registrierung fehlgeschlagen.");
-        } else if (data.session) {
-          return window.location.assign(nextUrl());
-        } else {
-          setConfirmSent(true);
-        }
-      }
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl())}`,
+        },
+      });
+      if (error) setMsg("Der Link konnte nicht gesendet werden. Bitte erneut versuchen.");
+      else setSent(true);
     } catch {
       setMsg("Etwas ist schiefgelaufen. Bitte erneut versuchen.");
     } finally {
@@ -87,36 +73,30 @@ export default function LoginPage() {
           ))}
         </ul>
 
-        {/* Anmelden / Konto erstellen */}
+        {/* Magic-Link: nur E-Mail, kein Passwort */}
         <div className="mt-8 rounded-4xl border border-white/10 bg-night-surface/60 p-6 bezel-soft">
-          {confirmSent ? (
+          {sent ? (
             <div className="text-slate-200">
-              <p className="font-semibold text-white">Fast geschafft 📬</p>
+              <p className="font-semibold text-white">Link unterwegs 📬</p>
               <p className="mt-2 text-sm text-slate-300">
-                Wir haben dir eine Bestätigungs-E-Mail an <strong>{email}</strong> geschickt. Bestätige
-                sie, danach kannst du dich anmelden.
+                Wir haben dir einen Anmelde-Link an <strong>{email}</strong> geschickt.
+                Öffne ihn auf diesem Gerät – du bist dann sofort eingeloggt. Kein Passwort nötig.
               </p>
+              <button
+                type="button"
+                onClick={() => { setSent(false); setMsg(""); }}
+                className="mt-4 text-sm text-mint-light underline underline-offset-2"
+              >
+                Andere E-Mail verwenden
+              </button>
             </div>
           ) : (
             <>
-              <div className="inline-flex rounded-full bg-night p-1">
-                {(["register", "login"] as Mode[]).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => { setMode(m); setMsg(""); }}
-                    aria-pressed={mode === m}
-                    className={
-                      "rounded-full px-4 py-2 text-sm font-bold transition " +
-                      (mode === m ? "bg-mint text-night" : "text-slate-300 hover:text-white")
-                    }
-                  >
-                    {m === "register" ? "Konto erstellen" : "Anmelden"}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={submit} className="mt-5 space-y-4">
+              <p className="text-sm text-slate-400">
+                Gib deine E-Mail ein – wir senden dir einen Anmelde-Link.
+                <strong className="font-semibold text-white"> Ohne Passwort, ohne Wartezeit.</strong>
+              </p>
+              <form onSubmit={submit} className="mt-4 space-y-4">
                 <input
                   type="email"
                   required
@@ -126,22 +106,12 @@ export default function LoginPage() {
                   placeholder="deine@email.de"
                   className="w-full rounded-2xl border border-white/10 bg-night px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 outline-none focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40"
                 />
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Passwort (mind. 6 Zeichen)"
-                  className="w-full rounded-2xl border border-white/10 bg-night px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 outline-none focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40"
-                />
                 <button
                   type="submit"
                   disabled={busy}
                   className="btn-press w-full rounded-2xl bg-mint py-3.5 text-base font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60 disabled:opacity-60"
                 >
-                  {busy ? "Bitte warten …" : mode === "register" ? "Konto erstellen" : "Anmelden"}
+                  {busy ? "Link wird gesendet …" : "Anmelden / Konto erstellen"}
                 </button>
                 {msg ? <p className="text-sm text-red-400">{msg}</p> : null}
               </form>
