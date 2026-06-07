@@ -60,7 +60,13 @@ export async function verifyLicense(
   }
 
   if (json?.valid !== true) return false;
-  if (json?.license_key?.status !== "active") return false;
+
+  // Status: Frisch gekaufte Keys sind „inactive", bis sie erstmals aktiviert
+  // (eine Instanz registriert) wurden – das ist ein GÜLTIGER, einlösbarer Key.
+  // Wir verfolgen die Einlösung selbst (consumed_licenses), brauchen also LS-
+  // Aktivierung nicht. Nur dauerhaft ungültige Zustände ablehnen.
+  const status = json?.license_key?.status;
+  if (status === "expired" || status === "disabled") return false;
 
   // Nur Lizenzen unseres Produkts akzeptieren.
   if (String(json?.meta?.product_id ?? "") !== String(expectedProductId)) return false;
