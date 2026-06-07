@@ -1,5 +1,6 @@
 // app/api/widerspruch-pdf/route.ts
 import { renderWiderspruchPdf } from "@/lib/widerspruch-pdf";
+import { verifyLicense, LicenseCheckError } from "@/lib/lemonsqueezy";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -14,19 +15,32 @@ function bad(error: string, status = 400) {
 }
 
 export async function POST(req: Request) {
-  // hier Premium-/Bezahl-Prüfung vor dem Rendern
   let payload: {
     empfaenger?: string;
     aktenzeichen?: string;
     betreff?: string;
     body?: string;
     absender?: { name?: string; strasse?: string; plzOrt?: string };
+    licenseKey?: string;
   };
   try {
     payload = await req.json();
   } catch {
     return bad("Ungültiger Request-Body.");
   }
+
+  // Premium-/Bezahl-Prüfung vor dem Rendern (Freemium: nur das PDF kostet).
+  // Gültiger Lemon-Squeezy-Lizenzschlüssel erforderlich.
+  let lizenzOk = false;
+  try {
+    lizenzOk = await verifyLicense(String(payload.licenseKey || ""));
+  } catch (err) {
+    if (err instanceof LicenseCheckError) {
+      return bad("Freischaltung konnte gerade nicht geprüft werden. Bitte erneut versuchen.", 503);
+    }
+    throw err;
+  }
+  if (!lizenzOk) return bad("Bitte schalte den Widerspruch zuerst frei.", 402);
 
   const body = String(payload.body || "");
   if (!body.trim()) return bad("Kein Brieftext übermittelt.");

@@ -105,13 +105,30 @@ Mit **beiden** Dienstleistern ist ein **AVV/DPA** abzuschließen; der USA-Transf
 - ☐ **DSFA / DPIA** (Art. 35) prüfen – sensible Finanzdaten + automatisierte Bewertung
 - ☐ **Cookie-/Consent-Banner** – nur falls Analytics/Tracking aktiviert wird (aktuell keins)
 - ✅ **RDG-Disclaimer** in App + jedem Blogartikel („keine Rechtsberatung")
+- ✅ **AGB** (`/agb`) inkl. Widerrufsbelehrung digitale Inhalte – umgesetzt
+- ✅ **Widerrufsverzicht digital** (§ 356 V BGB) als Pflicht-Checkbox vor Kauf – umgesetzt
+
+---
+
+## 7a. Monetarisierung / Zahlungen (Lemon Squeezy, Merchant of Record)
+
+Freemium: Analyse + Vorschau gratis; nur das **Widerspruchs-PDF** kostet (Einmalkauf, 4,90 €).
+- **Lemon Squeezy** wickelt Zahlung & Rechnung als **Merchant of Record** ab (führt EU-USt selbst ab)
+  und ist insoweit **eigener Verantwortlicher** für Zahlungsdaten. Wir verarbeiten **keine Kartendaten**.
+- Gating **ohne DB**: Lizenzschlüssel-Prüfung per `validate` (öffentliche LS-API, kein API-Key/Webhook).
+- Rechtsgrundlage für den Bezahl-Teil: **Art. 6 Abs. 1 lit. b** (Vertrag). Gratis-Analyse bleibt lit. a.
+- Datenempfänger ergänzen (siehe §1/§4): **Lemon Squeezy** (Zahlung, USA, eigener Verantwortlicher).
+- Env: `LEMONSQUEEZY_PRODUCT_ID` (Server). Checkout-URL im Frontend (öffentlich). KEIN `LEMONSQUEEZY_API_KEY` nötig.
 
 ---
 
 ## 8. Offene Aufgaben des Betreibers (nicht im Code lösbar)
 
 1. AVV/DPA mit Anthropic und Vercel abschließen (Links in §4).
-2. Datenschutzerklärung & Impressum mit echten Firmendaten füllen (Platzhalter ersetzen).
-3. Vercel-Region auf `fra1` stellen und im Dashboard verifizieren.
+2. Datenschutzerklärung & Impressum mit echten Firmendaten füllen (Platzhalter ersetzen). ✅ erledigt
+3. Vercel-Region auf `fra1` stellen und im Dashboard verifizieren (vercel.json gesetzt).
+4. **Lemon Squeezy**: Store + Produkt (4,90 € inkl. USt) anlegen, **License Keys aktivieren**,
+   Checkout-URL in `public/app.js` (Platzhalter `REPLACE_WITH_VARIANT`) eintragen,
+   `LEMONSQUEEZY_PRODUCT_ID` in Vercel setzen, LS-DPA/Terms ablegen.
 4. Datenschutz-/RDG-Erstprüfung durch fachkundige Stelle.
 5. Entscheiden: Einwilligung vs. Vertrag als Rechtsgrundlage (Geschäftsmodell).

@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "npm run build:css && next build"
+  "buildCommand": "npm run build:css && next build",
+  "regions": ["fra1"]
 }

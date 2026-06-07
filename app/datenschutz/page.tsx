@@ -98,7 +98,9 @@ export default function DatenschutzPage() {
           <strong className="font-semibold text-white">Einwilligung</strong> (Art. 6 Abs. 1 lit. a
           DSGVO), die du vor dem Upload aktiv erteilst und jederzeit mit Wirkung für die Zukunft
           widerrufen kannst. Der technische Betrieb stützt sich auf unser berechtigtes Interesse an
-          einer sicheren, funktionsfähigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO).
+          einer sicheren, funktionsfähigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Der{" "}
+          <strong className="font-semibold text-white">kostenpflichtige Erwerb des Widerspruchs-PDF</strong>{" "}
+          wird zur Vertragserfüllung verarbeitet (Art. 6 Abs. 1 lit. b DSGVO).
         </P>
 
         <H2>6. Empfänger / Auftragsverarbeiter</H2>
@@ -128,6 +130,19 @@ export default function DatenschutzPage() {
           ; weitere Informationen unter{" "}
           <a href="https://vercel.com/legal/privacy-policy" className={linkCls} target="_blank" rel="noopener">
             vercel.com/legal/privacy-policy
+          </a>
+          .
+        </P>
+        <H3>c) Lemon Squeezy (Zahlungsabwicklung, Merchant of Record)</H3>
+        <P>
+          Kaufst du das kostenpflichtige Widerspruchs-PDF, wird die Zahlung über Lemon Squeezy
+          (Lemon Squeezy, LLC, USA) als „Merchant of Record" abgewickelt. Lemon Squeezy ist insoweit{" "}
+          <strong className="font-semibold text-white">eigenverantwortlich</strong> für die
+          Zahlungsdaten (z. B. Zahlungsmittel, Rechnungsangaben); <strong className="font-semibold text-white">
+          Kartendaten verarbeiten wir nicht</strong>. Wir erhalten lediglich die Information, dass eine
+          gültige Lizenz vorliegt. Details:{" "}
+          <a href="https://www.lemonsqueezy.com/privacy" className={linkCls} target="_blank" rel="noopener">
+            lemonsqueezy.com/privacy
           </a>
           .
         </P>
