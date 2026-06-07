@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Ablauf des Widerrufs: Ware erhalten, 14 Tage widerrufen, Geld zurück</title>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <text x="120" y="140" fill="#6ee7c4" font-size="30" font-weight="700" letter-spacing="3">SO LÄUFT DER WIDERRUF</text>
+
+  <line x1="200" y1="380" x2="1400" y2="380" stroke="#243047" stroke-width="6"/>
+
+  <!-- Schritt 1 -->
+  <circle cx="280" cy="380" r="18" fill="#6ee7c4"/>
+  <text x="280" y="330" fill="#e2e8f0" font-size="28" font-weight="700" text-anchor="middle">Ware erhalten</text>
+
+  <!-- 14 Tage -->
+  <rect x="320" y="365" width="640" height="30" rx="15" fill="#12b886"/>
+  <text x="640" y="450" fill="#6ee7c4" font-size="30" font-weight="700" text-anchor="middle">14 Tage Widerrufsfrist</text>
+
+  <!-- Schritt 2 -->
+  <circle cx="1000" cy="380" r="18" fill="#12b886"/>
+  <text x="1000" y="330" fill="#e2e8f0" font-size="28" font-weight="700" text-anchor="middle">Widerruf erklären</text>
+
+  <!-- Schritt 3 -->
+  <circle cx="1340" cy="380" r="18" fill="#12b886"/>
+  <text x="1340" y="330" fill="#e2e8f0" font-size="28" font-weight="700" text-anchor="middle">Geld zurück</text>
+  <text x="1340" y="440" fill="#94a3b8" font-size="24" text-anchor="middle">i. d. R. 14 Tage</text>
+
+  <g transform="translate(200,560)"><rect width="1200" height="170" rx="16" fill="#131c2e" stroke="#243047" stroke-width="2"/>
+    <text x="40" y="60" fill="#cbd5e1" font-size="30">Formlos möglich (Brief/E-Mail/Formular). Keine Begründung nötig.</text>
+    <text x="40" y="110" fill="#94a3b8" font-size="27">Ausnahmen: z. B. schnell verderbliche Ware, entsiegelte Hygieneartikel,</text>
+    <text x="40" y="148" fill="#94a3b8" font-size="27">individuell angefertigte Produkte, Downloads nach Zustimmung.</text>
+  </g>
+</svg>

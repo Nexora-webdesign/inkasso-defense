@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Zeitstrahl der Verjährung: Start zum Jahresende, drei volle Jahre, dann verjährt</title>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <text x="120" y="140" fill="#6ee7c4" font-size="30" font-weight="700" letter-spacing="3">SO LÄUFT DIE FRIST</text>
+
+  <line x1="160" y1="420" x2="1440" y2="420" stroke="#243047" stroke-width="6"/>
+
+  <!-- Start -->
+  <circle cx="260" cy="420" r="16" fill="#fbbf24"/>
+  <text x="260" y="370" fill="#fde68a" font-size="28" font-weight="700" text-anchor="middle">Forderung 2025</text>
+  <text x="260" y="480" fill="#94a3b8" font-size="24" text-anchor="middle">Start: 31.12.2025</text>
+
+  <!-- 3 Jahre Balken -->
+  <rect x="300" y="405" width="900" height="30" rx="15" fill="#12b886"/>
+  <g fill="#06231b" font-size="26" font-weight="800" text-anchor="middle">
+    <text x="450" y="427">Jahr 1</text><text x="750" y="427">Jahr 2</text><text x="1050" y="427">Jahr 3</text>
+  </g>
+  <g stroke="#0b0f19" stroke-width="3"><line x1="600" y1="405" x2="600" y2="435"/><line x1="900" y1="405" x2="900" y2="435"/></g>
+
+  <!-- Ende -->
+  <circle cx="1240" cy="420" r="18" fill="#f87171"/>
+  <text x="1240" y="370" fill="#fca5a5" font-size="28" font-weight="800" text-anchor="middle">verjährt</text>
+  <text x="1240" y="480" fill="#94a3b8" font-size="24" text-anchor="middle">31.12.2028</text>
+
+  <g transform="translate(160,600)"><rect width="1280" height="120" rx="16" fill="#131c2e" stroke="#243047" stroke-width="2"/>
+    <text x="40" y="58" fill="#cbd5e1" font-size="30">Die Frist startet am <tspan fill="#6ee7c4" font-weight="700">Ende des Jahres</tspan>, in dem die Forderung entstand –</text>
+    <text x="40" y="98" fill="#cbd5e1" font-size="30">und läuft <tspan fill="#6ee7c4" font-weight="700">3 volle Kalenderjahre</tspan>. Danach kannst du die Einrede der Verjährung erheben.</text>
+  </g>
+</svg>

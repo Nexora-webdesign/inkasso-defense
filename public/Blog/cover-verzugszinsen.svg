@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Verzugszins Verbraucher fünf Prozentpunkte gegenüber neun Prozentpunkten</title>
+  <defs>
+    <radialGradient id="gv" cx="22%" cy="20%" r="85%">
+      <stop offset="0%" stop-color="#12b886" stop-opacity="0.2"/>
+      <stop offset="60%" stop-color="#0b0f19" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <rect width="1600" height="900" fill="url(#gv)"/>
+
+  <text x="800" y="160" fill="#94a3b8" font-size="30" letter-spacing="4" text-anchor="middle">VERZUGSZINS · § 288 BGB</text>
+
+  <!-- Großes Prozentzeichen -->
+  <text x="250" y="560" fill="#12b886" font-size="320" font-weight="800" opacity="0.16">%</text>
+
+  <!-- Zwei Säulen -->
+  <g>
+    <!-- Verbraucher 5 PP -->
+    <rect x="620" y="470" width="240" height="240" rx="22" fill="#12b886"/>
+    <text x="740" y="610" fill="#06231b" font-size="92" font-weight="800" text-anchor="middle">5</text>
+    <text x="740" y="675" fill="#06231b" font-size="34" font-weight="700" text-anchor="middle">PP</text>
+    <text x="740" y="770" fill="#6ee7c4" font-size="32" font-weight="600" text-anchor="middle">Verbraucher</text>
+    <text x="740" y="430" fill="#94a3b8" font-size="26" text-anchor="middle">über Basiszins</text>
+
+    <!-- Unternehmen 9 PP -->
+    <rect x="960" y="350" width="240" height="360" rx="22" fill="#1b2740" stroke="#334"  stroke-width="2"/>
+    <text x="1080" y="540" fill="#e2e8f0" font-size="92" font-weight="800" text-anchor="middle">9</text>
+    <text x="1080" y="605" fill="#94a3b8" font-size="34" font-weight="700" text-anchor="middle">PP</text>
+    <text x="1080" y="770" fill="#94a3b8" font-size="32" font-weight="600" text-anchor="middle">nur Unternehmen</text>
+  </g>
+
+  <!-- Hinweis -->
+  <g transform="translate(620,250)">
+    <rect x="0" y="0" width="580" height="56" rx="28" fill="#f87171" fill-opacity="0.12"/>
+    <text x="30" y="37" fill="#f87171" font-size="26" font-weight="700">9 % beim Verbraucher? Oft zu hoch.</text>
+  </g>
+</svg>

@@ -30,44 +30,6 @@ export function Figure({ src, alt, caption }: { src?: string; alt?: string; capt
   );
 }
 
-/** Schlichter Balken-Chart-Platzhalter (reines SVG, keine Lib) für Daten-Fokus. */
-export function Chart({
-  title,
-  caption,
-  values = [48, 72, 35, 90, 61, 78],
-}: {
-  title?: string;
-  caption?: string;
-  values?: number[];
-}) {
-  const max = Math.max(1, ...values);
-  // Screen-Reader-Zusammenfassung statt rein visueller Balken (WCAG).
-  const summary = [title, caption, `Werte: ${values.join(", ")}.`].filter(Boolean).join(" ");
-  return (
-    <figure
-      role="img"
-      aria-label={summary || "Balkendiagramm"}
-      className="not-prose my-9 overflow-hidden rounded-3xl border border-white/10 bg-night-surface p-6 bezel-soft"
-    >
-      {title ? (
-        <p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-mint-light">{title}</p>
-      ) : null}
-      <div className="flex h-44 items-end gap-3" aria-hidden="true">
-        {values.map((v, i) => (
-          <div key={i} className="flex flex-1 flex-col items-center justify-end gap-2">
-            <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-mint/40 to-mint"
-              style={{ height: `${Math.max(6, (v / max) * 100)}%` }}
-            />
-            <span className="text-[10px] text-slate-500">{i + 1}</span>
-          </div>
-        ))}
-      </div>
-      {caption ? <figcaption className="mt-4 text-sm text-slate-500">{caption}</figcaption> : null}
-    </figure>
-  );
-}
-
 /** Rechtlicher Hinweis (RDG) – wiederverwendbar in jedem Artikel. */
 export function Disclaimer() {
   return (
@@ -124,6 +86,5 @@ export const mdxComponents = {
   hr: () => <hr className="my-10 border-white/10" />,
   // In MDX direkt verfügbar:
   Figure,
-  Chart,
   Disclaimer,
 };

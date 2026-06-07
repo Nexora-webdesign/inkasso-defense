@@ -4,6 +4,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { SITE_URL } from "@/lib/blog-shared";
+import { SiteFooter } from "@/components/blog/SiteFooter";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -30,9 +31,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <style
           dangerouslySetInnerHTML={{
             __html:
-              ":root{font-size:106.25%}" +
-              "@media (min-width:640px){:root{font-size:118.75%}}" +
-              "@media (min-width:1024px){:root{font-size:131.25%}}",
+              ":root{font-size:100%}" +
+              "@media (min-width:640px){:root{font-size:106.25%}}" +
+              "@media (min-width:1024px){:root{font-size:112.5%}}",
           }}
         />
       </head>
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="grain" />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

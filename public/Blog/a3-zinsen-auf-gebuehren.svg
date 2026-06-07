@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Verzugszinsen sind auf die Hauptforderung zulässig, auf Gebühren in der Regel nicht</title>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <text x="800" y="150" fill="#94a3b8" font-size="32" letter-spacing="3" text-anchor="middle">WORAUF DÜRFEN VERZUGSZINSEN BERECHNET WERDEN?</text>
+
+  <line x1="200" y1="700" x2="1400" y2="700" stroke="#243047" stroke-width="3"/>
+
+  <!-- Links: Hauptforderung + Zinsen (zulässig) -->
+  <g>
+    <rect x="430" y="470" width="320" height="230" rx="14" fill="#26334d"/>
+    <text x="590" y="600" fill="#cbd5e1" font-size="34" text-anchor="middle">Haupt-</text>
+    <text x="590" y="640" fill="#cbd5e1" font-size="34" text-anchor="middle">forderung</text>
+    <rect x="430" y="380" width="320" height="80" rx="14" fill="#12b886"/>
+    <text x="590" y="432" fill="#06231b" font-size="32" font-weight="700" text-anchor="middle">+ Zinsen</text>
+    <!-- check -->
+    <circle cx="590" cy="300" r="40" fill="#12b886"/>
+    <path d="M570 300 l14 16 l26 -32" fill="none" stroke="#06231b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="590" y="770" fill="#6ee7c4" font-size="30" font-weight="700" text-anchor="middle">zulässig</text>
+  </g>
+
+  <!-- Rechts: Gebühren + Zinsen (nicht zulässig) -->
+  <g>
+    <rect x="850" y="500" width="320" height="200" rx="14" fill="#26334d"/>
+    <text x="1010" y="590" fill="#cbd5e1" font-size="34" text-anchor="middle">Gebühren &amp;</text>
+    <text x="1010" y="632" fill="#cbd5e1" font-size="34" text-anchor="middle">Pauschalen</text>
+    <rect x="850" y="410" width="320" height="80" rx="14" fill="#f87171" fill-opacity="0.9"/>
+    <text x="1010" y="462" fill="#3a1414" font-size="32" font-weight="700" text-anchor="middle">+ Zinsen</text>
+    <!-- X über dem Zins-Band -->
+    <line x1="868" y1="420" x2="1152" y2="480" stroke="#7f1d1d" stroke-width="8" stroke-linecap="round"/>
+    <line x1="1152" y1="420" x2="868" y2="480" stroke="#7f1d1d" stroke-width="8" stroke-linecap="round"/>
+    <!-- x badge -->
+    <circle cx="1010" cy="330" r="40" fill="#f87171"/>
+    <path d="M994 314 l32 32 M1026 314 l-32 32" stroke="#3a1414" stroke-width="9" stroke-linecap="round"/>
+    <text x="1010" y="770" fill="#f87171" font-size="30" font-weight="700" text-anchor="middle">meist unzulässig</text>
+  </g>
+
+  <text x="800" y="850" fill="#64748b" font-size="27" text-anchor="middle">Zinsen gehören auf die Hauptforderung – nicht zusätzlich auf jeden Gebührenposten.</text>
+</svg>

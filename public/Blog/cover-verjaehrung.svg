@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Verjährung von Forderungen nach drei Jahren</title>
+  <defs><radialGradient id="cv" cx="50%" cy="14%" r="85%"><stop offset="0%" stop-color="#12b886" stop-opacity="0.2"/><stop offset="60%" stop-color="#0b0f19" stop-opacity="0"/></radialGradient></defs>
+  <rect width="1600" height="900" fill="#0b0f19"/><rect width="1600" height="900" fill="url(#cv)"/>
+  <text x="800" y="170" fill="#94a3b8" font-size="30" letter-spacing="4" text-anchor="middle">REGELMÄSSIGE VERJÄHRUNG · § 195 BGB</text>
+
+  <!-- Sanduhr -->
+  <g transform="translate(420,470)" stroke="#12b886" stroke-width="8" fill="none" stroke-linejoin="round">
+    <path d="M-120 -160 H120 L20 0 L120 160 H-120 L-20 0 Z"/>
+  </g>
+  <path d="M380 320 H460 L420 460 Z" fill="#12b886"/>
+  <path d="M340 620 H500 L420 500 Z" fill="#12b886" opacity="0.5"/>
+
+  <!-- 3 Jahre -->
+  <text x="1050" y="500" fill="#6ee7c4" font-size="240" font-weight="800" text-anchor="middle">3</text>
+  <text x="1050" y="600" fill="#e2e8f0" font-size="60" font-weight="700" text-anchor="middle">Jahre</text>
+  <g transform="translate(870,650)"><rect width="360" height="56" rx="28" fill="#12b886" fill-opacity="0.14"/><text x="180" y="37" fill="#6ee7c4" font-size="26" font-weight="700" text-anchor="middle">dann oft nicht mehr durchsetzbar</text></g>
+</svg>

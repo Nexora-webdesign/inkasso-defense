@@ -267,7 +267,11 @@
     const pill = document.getElementById('file-pill');
     const nameEl = document.getElementById('file-name');
     const btn = document.getElementById('analyze-btn');
+    const consent = document.getElementById('consent-check');
     if (!form || !dropzone || !input) return;
+
+    // Button nur aktiv, wenn Datei vorhanden UND Datenschutz-Einwilligung gesetzt.
+    function updateBtn() { btn.disabled = !(file && (!consent || consent.checked)); }
 
     const MAX = 10 * 1024 * 1024;
     const OK = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
@@ -305,10 +309,11 @@
       file = f;
       nameEl.textContent = f.name;
       pill.classList.remove('hidden'); pill.classList.add('inline-flex');
-      btn.disabled = false;
+      updateBtn();
     }
 
     input.addEventListener('change', (e) => setFile(e.target.files[0]));
+    if (consent) consent.addEventListener('change', updateBtn);
     ['dragenter', 'dragover'].forEach((ev) => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add('is-dragover'); }));
     ['dragleave', 'drop'].forEach((ev) => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove('is-dragover'); }));
     dropzone.addEventListener('drop', (e) => setFile(e.dataTransfer && e.dataTransfer.files[0]));
@@ -316,6 +321,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!file) return;
+      if (consent && !consent.checked) { alert('Bitte bestätige zuerst die Datenschutz-Einwilligung.'); return; }
       btn.disabled = true;
       label.textContent = 'Analysiere Forderung …';
       if (loader) loader.start();
