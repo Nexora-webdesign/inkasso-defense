@@ -52,16 +52,24 @@ export default function DatenschutzPage() {
           </a>
         </P>
 
-        <H2>2. Privacy by Design: keine dauerhafte Speicherung</H2>
+        <H2>2. Privacy by Design: Datensparsamkeit</H2>
         <P>
-          Diese Anwendung ist auf Datensparsamkeit ausgelegt. Hochgeladene Dokumente und
-          Analyseergebnisse werden{" "}
-          <strong className="font-semibold text-white">nicht dauerhaft auf einem Server gespeichert</strong>;
-          es wird <strong className="font-semibold text-white">keine Datenbank</strong> betrieben. Dein
-          Dokument wird nur <strong className="font-semibold text-white">flüchtig im Arbeitsspeicher</strong>{" "}
-          verarbeitet (für die Dauer der Analyse) und danach verworfen. Das Ergebnis verbleibt
-          ausschließlich lokal in deinem Browser (Session-Speicher) und verschwindet, sobald du den
-          Tab schließt.
+          Diese Anwendung ist auf Datensparsamkeit ausgelegt. Dein{" "}
+          <strong className="font-semibold text-white">hochgeladenes Dokument</strong> wird zu keinem
+          Zeitpunkt dauerhaft gespeichert: Es wird nur{" "}
+          <strong className="font-semibold text-white">flüchtig im Arbeitsspeicher</strong> verarbeitet
+          (für die Dauer der Analyse) und danach verworfen. Die kostenlose Analyse läuft ohne Konto;
+          ihr Ergebnis verbleibt zunächst ausschließlich lokal in deinem Browser und verschwindet,
+          sobald du den Tab schließt.
+        </P>
+        <P>
+          <strong className="font-semibold text-white">Optionale Speicherung im Konto:</strong> Nur wenn
+          du ein Konto anlegst und beim Speichern <strong className="font-semibold text-white">ausdrücklich
+          einwilligst</strong>, wird das <strong className="font-semibold text-white">berechnete
+          Analyse-Ergebnis</strong> (nicht das hochgeladene Dokument) in einer Datenbank deinem Konto
+          zugeordnet abgelegt – damit du deinen Fall wiederfindest und die optionale Fall-Begleitung
+          nutzen kannst. Du kannst gespeicherte Fälle jederzeit selbst löschen. Technischer Dienstleister
+          hierfür ist Supabase (siehe Ziffer 6).
         </P>
 
         <H2>3. Welche Daten verarbeitet werden</H2>
@@ -98,9 +106,13 @@ export default function DatenschutzPage() {
           <strong className="font-semibold text-white">Einwilligung</strong> (Art. 6 Abs. 1 lit. a
           DSGVO), die du vor dem Upload aktiv erteilst und jederzeit mit Wirkung für die Zukunft
           widerrufen kannst. Der technische Betrieb stützt sich auf unser berechtigtes Interesse an
-          einer sicheren, funktionsfähigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Für etwaige{" "}
-          <strong className="font-semibold text-white">kostenpflichtige Zusatzangebote</strong>{" "}
-          (z. B. eine künftige „Fall-Begleitung") gilt Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO).
+          einer sicheren, funktionsfähigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Die{" "}
+          <strong className="font-semibold text-white">optionale Speicherung des Analyse-Ergebnisses in
+          deinem Konto</strong> erfolgt auf Grundlage deiner gesonderten Einwilligung (Art. 6 Abs. 1
+          lit. a DSGVO), die du beim Speichern erteilst und jederzeit widerrufen kannst (Löschen des
+          Falls). Für die{" "}
+          <strong className="font-semibold text-white">kostenpflichtige Fall-Begleitung</strong>{" "}
+          gilt Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO).
         </P>
 
         <H2>6. Empfänger / Auftragsverarbeiter</H2>
@@ -146,6 +158,17 @@ export default function DatenschutzPage() {
           </a>
           .
         </P>
+        <H3>d) Supabase (Konten &amp; Fallspeicherung, EU)</H3>
+        <P>
+          Für Anmeldung/Konto (passwortloser Login per E-Mail-Link) und – nur bei deiner Einwilligung –
+          die Speicherung deiner Fälle nutzen wir Supabase. Die Daten werden in einem{" "}
+          <strong className="font-semibold text-white">Rechenzentrum in der EU</strong> verarbeitet.
+          Grundlage ist ein Auftragsverarbeitungsvertrag (DPA). Details:{" "}
+          <a href="https://supabase.com/privacy" className={linkCls} target="_blank" rel="noopener">
+            supabase.com/privacy
+          </a>
+          .
+        </P>
         <H3>Drittlandübermittlung</H3>
         <P>
           Soweit Daten in die USA übermittelt werden, erfolgt dies auf Grundlage der
@@ -155,9 +178,12 @@ export default function DatenschutzPage() {
 
         <H2>7. Speicherdauer</H2>
         <P>
-          Hochgeladene Dokumente werden nicht dauerhaft gespeichert (siehe Ziffer 2). Ergebnisse
-          verbleiben nur in deinem Browser. Bei den Auftragsverarbeitern gelten deren jeweilige
-          Aufbewahrungsfristen.
+          Hochgeladene Dokumente werden zu keinem Zeitpunkt dauerhaft gespeichert (siehe Ziffer 2).
+          Ergebnisse der kostenlosen Analyse verbleiben nur in deinem Browser. Speicherst du einen Fall
+          in deinem Konto, wird das berechnete Ergebnis bis zu deiner Löschung bzw. längstens{" "}
+          <strong className="font-semibold text-white">90 Tage</strong> aufbewahrt und danach automatisch
+          gelöscht. Konto-Stammdaten bleiben bis zur Löschung deines Kontos bestehen. Bei den
+          Auftragsverarbeitern gelten zusätzlich deren jeweilige Aufbewahrungsfristen.
         </P>
 
         <H2>8. Keine belastende automatisierte Entscheidung</H2>
