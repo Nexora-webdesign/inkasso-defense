@@ -146,13 +146,21 @@ export default async function KontoPage() {
 
       <BuyAndActivate checkoutUrl={checkoutUrl} priceLabel={CASE_PRICE_LABEL} />
 
-      <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-        <span>Sichere Zahlung über Lemon Squeezy</span>
-        <span aria-hidden="true">·</span>
-        <span>Einmalkauf, kein Abo</span>
-        <span aria-hidden="true">·</span>
-        <span>90 Tage Begleitung</span>
-      </p>
+      {/* Trust-Badges (ruhiges Blau) – Vertrauen statt Druck, transparente Gebühr */}
+      <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-400">
+        <li className="flex items-center gap-1.5">
+          <svg className="h-4 w-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z" /><path d="M9 12l2 2 4-4" /></svg>
+          Sichere Zahlung
+        </li>
+        <li className="flex items-center gap-1.5">
+          <svg className="h-4 w-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z" /><path d="M5 5l14 14" /></svg>
+          Einmalkauf, kein Abo
+        </li>
+        <li className="flex items-center gap-1.5">
+          <svg className="h-4 w-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+          Daten in der EU
+        </li>
+      </ul>
     </section>
   );
 
