@@ -24,6 +24,11 @@ export default async function KontoPage() {
   const premiumUntil = await getPremiumUntil(supabase, user.id);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
 
+  // Lemon-Squeezy Checkout der „Fall-Begleitung" (öffentlich, per Env überschreibbar).
+  const checkoutUrl =
+    process.env.NEXT_PUBLIC_LS_CASE_CHECKOUT_URL ||
+    "https://nexora-services.lemonsqueezy.com/checkout/buy/3199fec3-f4da-40c1-b5e0-82aa071e7038";
+
   return (
     <>
       <SiteHeader />
@@ -46,9 +51,19 @@ export default async function KontoPage() {
           ) : (
             <>
               <p className="mt-2 text-slate-300">
-                Noch nicht aktiv. Mit einem Freischaltcode (90 Tage Begleitung) erhältst du
-                Fristen-Erinnerungen und den Eskalations-Assistenten für deinen Fall.
+                Noch nicht aktiv. Die Fall-Begleitung (90 Tage) schaltet Fristen-Erinnerungen und
+                den Eskalations-Assistenten für deinen Fall frei.
               </p>
+              <a
+                href={checkoutUrl}
+                target="_blank"
+                rel="noopener"
+                className="btn-press mt-4 inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3 text-sm font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60"
+              >
+                Fall-Begleitung freischalten
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </a>
+              <p className="mt-5 text-sm text-slate-400">Schon gekauft? Freischaltcode eingeben:</p>
               <ActivateForm />
             </>
           )}
