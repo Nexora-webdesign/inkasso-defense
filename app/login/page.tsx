@@ -70,9 +70,16 @@ export default function LoginPage() {
         });
         if (error) {
           const m = error.message.toLowerCase();
+          const status = (error as { status?: number }).status;
           if (m.includes("registered") || m.includes("already")) {
             setMsg("Diese E-Mail ist bereits registriert – bitte melde dich an.");
             setMode("login");
+          } else if (status === 429 || m.includes("rate limit")) {
+            setMsg("Der E-Mail-Versand ist aktuell limitiert (zu viele Anfragen). Bitte in etwa einer Stunde erneut versuchen.");
+          } else if (m.includes("sending") && m.includes("email")) {
+            setMsg("Die Bestätigungs-E-Mail konnte gerade nicht gesendet werden. Bitte später erneut versuchen.");
+          } else if (m.includes("password")) {
+            setMsg("Das Passwort erfüllt nicht die Anforderungen (mind. 8 Zeichen).");
           } else {
             setMsg("Registrierung fehlgeschlagen. Bitte erneut versuchen.");
           }
