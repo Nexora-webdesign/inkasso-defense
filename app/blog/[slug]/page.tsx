@@ -7,7 +7,7 @@ import { getAllSlugs, getPost, formatDate } from "@/lib/blog";
 import { SITE_URL } from "@/lib/blog-shared";
 import { SiteHeader } from "@/components/blog/SiteHeader";
 import { CtaBlock } from "@/components/blog/CtaBlock";
-import { mdxComponents } from "@/components/blog/mdx";
+import { mdxComponents, Disclaimer } from "@/components/blog/mdx";
 
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
@@ -128,6 +128,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <article className="mt-10">
           <MDXRemote source={post.content} components={mdxComponents} />
         </article>
+
+        {/* Rechtlicher Hinweis – in JEDEM Artikel an gleicher Stelle (Ende -> Hinweis -> CTA) */}
+        <Disclaimer />
 
         {/* Call-to-Action zum Analyse-Tool */}
         <CtaBlock />

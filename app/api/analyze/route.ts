@@ -126,7 +126,19 @@ export async function POST(req: Request) {
   // Deterministische Bewertung – die KI hat NICHT gewertet. Informations-Modus:
   // alle Regeln rechnen, ungeprüfte Kürzungen werden im Audit markiert.
   const data = evaluate(fakten, onboarding);
-  console.info("[/api/analyze] audit:", JSON.stringify(data.audit));
+  // Log-Hygiene (DSGVO): nur Kennzahlen/Regel-IDs loggen – KEINE Dokument-Freitexte,
+  // Namen, Adressen o. Ä. Damit bleiben Vercel-Logs ohne Personenbezug.
+  console.info(
+    "[/api/analyze] audit:",
+    JSON.stringify({
+      rulesVersion: data.audit.rulesVersion,
+      regelnGesamt: data.audit.regelnGesamt,
+      treffer: data.audit.eintraege.length,
+      regelIds: data.audit.eintraege.map((e) => e.regelId),
+      ungepruefteErsparnis: data.audit.ungepruefteErsparnis,
+      alleAngewendetenGeprueft: data.audit.alleAngewendetenGeprueft,
+    }),
+  );
 
   return json({ ok: true, data });
 }

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Zwei Wege: vorschnell unterschreiben gegenüber erst prüfen und widersprechen</title>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <text x="800" y="130" fill="#6ee7c4" font-size="30" font-weight="700" letter-spacing="3" text-anchor="middle">ZWEI WEGE – EINE ENTSCHEIDUNG</text>
+
+  <circle cx="800" cy="250" r="22" fill="#94a3b8"/>
+  <text x="800" y="320" fill="#cbd5e1" font-size="30" text-anchor="middle">Forderungsschreiben mit Anerkenntnis</text>
+  <path d="M800 340 V400 M800 400 H420 V470 M800 400 H1180 V470" fill="none" stroke="#243047" stroke-width="4"/>
+
+  <!-- Schlecht -->
+  <g transform="translate(180,470)">
+    <rect width="480" height="320" rx="20" fill="#2a1416" stroke="#f87171" stroke-width="2"/>
+    <text x="40" y="70" fill="#fca5a5" font-size="30" font-weight="800">✗ Vorschnell unterschreiben</text>
+    <g fill="#fecaca" font-size="28">
+      <text x="40" y="140">• Forderung gilt als anerkannt</text>
+      <text x="40" y="190">• Verjährung startet neu</text>
+      <text x="40" y="240">• später kaum noch angreifbar</text>
+      <text x="40" y="290">• auch überhöhte Posten „fix"</text>
+    </g>
+  </g>
+  <!-- Gut -->
+  <g transform="translate(940,470)">
+    <rect width="480" height="320" rx="20" fill="#0e2a22" stroke="#12b886" stroke-width="2"/>
+    <text x="40" y="70" fill="#6ee7c4" font-size="30" font-weight="800">✓ Erst prüfen / widersprechen</text>
+    <g fill="#bdf0dd" font-size="28">
+      <text x="40" y="140">• deine Rechte bleiben erhalten</text>
+      <text x="40" y="190">• überhöhte Posten kürzbar</text>
+      <text x="40" y="240">• nur fairen Kern anerkennen</text>
+      <text x="40" y="290">• Ratenzahlung weiter möglich</text>
+    </g>
+  </g>
+</svg>

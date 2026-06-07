@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Inkassoschreiben wird auf drei Anzeichen geprüft</title>
+  <defs>
+    <radialGradient id="hg" cx="70%" cy="20%" r="85%">
+      <stop offset="0%" stop-color="#12b886" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#0b0f19" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#12b886" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#6ee7c4" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <rect width="1600" height="900" fill="url(#hg)"/>
+
+  <!-- Schreiben (Papier, leicht gedreht) -->
+  <g transform="rotate(-5 430 470)">
+    <rect x="210" y="200" width="440" height="540" rx="10" fill="#ece8e0"/>
+    <text x="250" y="270" fill="#b91c1c" font-size="30" font-weight="800">ZAHLUNGSAUFFORDERUNG</text>
+    <rect x="540" y="300" width="100" height="44" rx="6" fill="#dc2626"/>
+    <text x="590" y="330" fill="#fff" font-size="22" font-weight="700" text-anchor="middle">DRINGEND</text>
+    <rect x="250" y="300" width="220" height="12" rx="6" fill="#cbd5e1"/>
+    <rect x="250" y="330" width="180" height="12" rx="6" fill="#cbd5e1"/>
+    <rect x="250" y="400" width="360" height="12" rx="6" fill="#dbe2ea"/>
+    <rect x="250" y="430" width="320" height="12" rx="6" fill="#dbe2ea"/>
+    <rect x="250" y="460" width="340" height="12" rx="6" fill="#dbe2ea"/>
+    <text x="250" y="560" fill="#1c2347" font-size="30" font-weight="800">Offene Forderung</text>
+    <text x="250" y="600" fill="#0c8f6a" font-size="38" font-weight="800">1.247,35 €</text>
+    <rect x="250" y="650" width="300" height="12" rx="6" fill="#e2e8f0"/>
+    <rect x="250" y="680" width="240" height="12" rx="6" fill="#e2e8f0"/>
+  </g>
+
+  <!-- Scan-Beam -->
+  <rect x="640" y="465" width="300" height="6" fill="url(#beam)"/>
+  <circle cx="940" cy="468" r="10" fill="#6ee7c4"/>
+
+  <!-- Analyse-Panel -->
+  <g>
+    <rect x="940" y="210" width="520" height="500" rx="26" fill="#0e1a2a" stroke="#12b886" stroke-width="2"/>
+    <text x="980" y="285" fill="#ffffff" font-size="36" font-weight="800">INKASSO-ANALYSE</text>
+    <path d="M1400 250 l8 3v8c0 6-4 10-8 11-4-1-8-5-8-11v-8z" fill="none" stroke="#6ee7c4" stroke-width="2.5"/>
+    <line x1="980" y1="312" x2="1300" y2="312" stroke="#243047" stroke-width="2"/>
+
+    <!-- 3 Anzeichen -->
+    <g font-size="28">
+      <g transform="translate(980,360)">
+        <circle cx="22" cy="0" r="22" fill="#12b886" fill-opacity="0.15"/>
+        <text x="22" y="10" fill="#6ee7c4" font-size="26" font-weight="800" text-anchor="middle">1</text>
+        <text x="70" y="9" fill="#e2e8f0">Doppelte Gebühr</text>
+        <circle cx="440" cy="0" r="20" fill="#12b886"/>
+        <path d="M431 0 l7 8 l13 -16" fill="none" stroke="#06231b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(980,440)">
+        <circle cx="22" cy="0" r="22" fill="#12b886" fill-opacity="0.15"/>
+        <text x="22" y="10" fill="#6ee7c4" font-size="26" font-weight="800" text-anchor="middle">2</text>
+        <text x="70" y="9" fill="#e2e8f0">Unklare Posten</text>
+        <circle cx="440" cy="0" r="20" fill="#12b886"/>
+        <path d="M431 0 l7 8 l13 -16" fill="none" stroke="#06231b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(980,520)">
+        <circle cx="22" cy="0" r="22" fill="#12b886" fill-opacity="0.15"/>
+        <text x="22" y="10" fill="#6ee7c4" font-size="26" font-weight="800" text-anchor="middle">3</text>
+        <text x="70" y="9" fill="#e2e8f0">Zinsen auf Gebühren</text>
+        <circle cx="440" cy="0" r="20" fill="#12b886"/>
+        <path d="M431 0 l7 8 l13 -16" fill="none" stroke="#06231b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+
+    <rect x="980" y="600" width="470" height="74" rx="14" fill="#12b886" fill-opacity="0.12"/>
+    <text x="1215" y="645" fill="#6ee7c4" font-size="21" font-weight="700" text-anchor="middle">Dein fairer Kern – transparent berechnet</text>
+  </g>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Doppelt berechnete Gebühr gegenüber einmal geschuldeter Gebühr</title>
+  <defs>
+    <radialGradient id="dg" cx="50%" cy="12%" r="85%">
+      <stop offset="0%" stop-color="#12b886" stop-opacity="0.16"/>
+      <stop offset="60%" stop-color="#0b0f19" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <rect width="1600" height="900" fill="url(#dg)"/>
+  <text x="800" y="150" fill="#e2e8f0" font-size="40" font-weight="800" text-anchor="middle">GESCHÄFTSGEBÜHR: DOPPELT VS. GESCHULDET</text>
+
+  <!-- Links: doppelt (rot) -->
+  <g>
+    <rect x="300" y="280" width="430" height="150" rx="16" fill="#2a1416" stroke="#f87171" stroke-width="3"/>
+    <rect x="300" y="470" width="430" height="150" rx="16" fill="#2a1416" stroke="#f87171" stroke-width="3"/>
+    <g stroke="#f87171" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M360 380 l24 -42 l24 42 z"/><path d="M360 570 l24 -42 l24 42 z"/>
+    </g>
+    <text x="384" y="372" fill="#f87171" font-size="30" font-weight="800" text-anchor="middle">!</text>
+    <text x="384" y="562" fill="#f87171" font-size="30" font-weight="800" text-anchor="middle">!</text>
+    <text x="440" y="368" fill="#fca5a5" font-size="34" font-weight="700">Gebühr</text>
+    <text x="440" y="558" fill="#fca5a5" font-size="34" font-weight="700">Gebühr</text>
+    <!-- Klammer 2x -->
+    <path d="M250 280 h-26 v340 h26" fill="none" stroke="#f87171" stroke-width="4"/>
+    <text x="180" y="462" fill="#f87171" font-size="48" font-weight="800" text-anchor="middle">2×</text>
+    <text x="515" y="690" fill="#f87171" font-size="30" font-weight="700" text-anchor="middle">doppelt berechnet</text>
+  </g>
+
+  <!-- vs -->
+  <text x="800" y="465" fill="#64748b" font-size="44" font-weight="800" text-anchor="middle">vs</text>
+
+  <!-- Rechts: einmal (grün) -->
+  <g>
+    <rect x="900" y="375" width="430" height="150" rx="16" fill="#0e2a22" stroke="#12b886" stroke-width="3"/>
+    <circle cx="984" cy="450" r="30" fill="none" stroke="#12b886" stroke-width="4"/>
+    <path d="M970 450 l10 11 l19 -23" fill="none" stroke="#12b886" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1040" y="463" fill="#6ee7c4" font-size="34" font-weight="700">Gebühr</text>
+    <!-- Klammer 1x -->
+    <path d="M1380 375 h26 v150 h-26" fill="none" stroke="#12b886" stroke-width="4"/>
+    <text x="1450" y="465" fill="#6ee7c4" font-size="48" font-weight="800" text-anchor="middle">1×</text>
+    <text x="1115" y="595" fill="#6ee7c4" font-size="30" font-weight="700" text-anchor="middle">nur einmal geschuldet</text>
+  </g>
+
+  <!-- Hinweis -->
+  <g transform="translate(400,720)">
+    <rect x="0" y="0" width="800" height="80" rx="16" fill="#131c2e" stroke="#243047" stroke-width="2"/>
+    <text x="400" y="50" fill="#cbd5e1" font-size="28" text-anchor="middle">Die zweite Gebühr wird angerechnet (§ 13e RDG).</text>
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="'Segoe UI',Roboto,system-ui,-apple-system,sans-serif">
+  <title>Gebührenskala mit Schwellengebühr 1,3 und überhöhtem Bereich</title>
+  <defs>
+    <radialGradient id="gg" cx="50%" cy="12%" r="85%">
+      <stop offset="0%" stop-color="#12b886" stop-opacity="0.2"/>
+      <stop offset="60%" stop-color="#0b0f19" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#0b0f19"/>
+  <rect width="1600" height="900" fill="url(#gg)"/>
+
+  <text x="800" y="180" fill="#94a3b8" font-size="30" letter-spacing="4" text-anchor="middle">GESCHÄFTSGEBÜHR · NR. 2300 VV RVG</text>
+
+  <!-- Skala -->
+  <g>
+    <rect x="200" y="430" width="800" height="40" rx="20" fill="#12b886"/>
+    <rect x="1000" y="430" width="400" height="40" rx="20" fill="#f87171" fill-opacity="0.85"/>
+    <!-- Ticks -->
+    <g fill="#e2e8f0" font-size="30" text-anchor="middle">
+      <line x1="200" y1="420" x2="200" y2="480" stroke="#243047" stroke-width="3"/>
+      <text x="200" y="540">0,5</text>
+      <line x1="440" y1="420" x2="440" y2="480" stroke="#2a3650" stroke-width="3"/>
+      <text x="440" y="540" fill="#94a3b8">0,9</text>
+      <line x1="1000" y1="410" x2="1000" y2="490" stroke="#6ee7c4" stroke-width="5"/>
+      <text x="1400" y="540">2,5</text>
+    </g>
+  </g>
+
+  <!-- Schwellen-Marker 1,3 -->
+  <g transform="translate(1000,300)">
+    <rect x="-110" y="0" width="220" height="78" rx="16" fill="#0e1424" stroke="#12b886" stroke-width="3"/>
+    <text x="0" y="52" fill="#6ee7c4" font-size="46" font-weight="700" text-anchor="middle">1,3</text>
+    <path d="M0 78 L0 128" stroke="#12b886" stroke-width="5"/>
+    <circle cx="0" cy="150" r="14" fill="#12b886"/>
+  </g>
+  <text x="600" y="650" fill="#12b886" font-size="30" font-weight="600" text-anchor="middle">Schwelle (Regelfall)</text>
+  <text x="1200" y="650" fill="#f87171" font-size="30" font-weight="600" text-anchor="middle">überhöht</text>
+</svg>

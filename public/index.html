@@ -170,6 +170,12 @@
             </span>
           </label>
 
+          <!-- Datenschutz-Einwilligung – muss vor der Analyse aktiv bestätigt werden -->
+          <label for="consent-check" class="mt-3 flex cursor-pointer items-start gap-3 px-3 text-left text-sm leading-relaxed text-ink-700/80 dark:text-slate-400">
+            <input id="consent-check" type="checkbox" class="mt-0.5 h-5 w-5 flex-shrink-0 cursor-pointer accent-mint outline-none focus-visible:ring-2 focus-visible:ring-mint/50" />
+            <span>Ich willige ein, dass mein hochgeladenes Dokument zur Analyse verarbeitet und dafür an einen Dienstleister (Anthropic, USA) übermittelt wird. Es wird nicht dauerhaft gespeichert. Mehr in der <a href="/datenschutz" target="_blank" rel="noopener" class="font-semibold text-mint-dark underline underline-offset-2 dark:text-mint-light">Datenschutzerklärung</a>.</span>
+          </label>
+
           <button id="analyze-btn" type="submit" disabled
             class="group btn-press mt-2 flex w-full items-center justify-center gap-2.5 rounded-[1.85rem] bg-mint py-4 pl-6 pr-4 text-base font-bold text-ink-950 shadow-[0_12px_30px_-10px_rgba(18,184,134,0.7)] disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-ink-700/40 disabled:shadow-none dark:disabled:bg-white/10 dark:disabled:text-slate-500">
             <span>Forderung jetzt analysieren</span>
@@ -240,6 +246,11 @@
     <div class="mx-auto max-w-6xl px-5 py-10 text-center text-xs text-ink-700/60 dark:text-slate-400">
       <p class="font-display text-base font-semibold text-ink-950 dark:text-white">Inkasso·Defense</p>
       <p class="mx-auto mt-2 max-w-lg leading-relaxed">Inkasso-Defense ist ein automatisiertes Informations-Tool und ersetzt keine Rechtsberatung im Einzelfall.</p>
+      <nav class="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium" aria-label="Rechtliches">
+        <a href="/blog" class="hover:text-mint-dark dark:hover:text-mint-light">Blog</a>
+        <a href="/datenschutz" class="hover:text-mint-dark dark:hover:text-mint-light">Datenschutz</a>
+        <a href="/impressum" class="hover:text-mint-dark dark:hover:text-mint-light">Impressum</a>
+      </nav>
       <p class="mt-4">&copy; 2026 Inkasso-Defense</p>
     </div>
   </footer>
