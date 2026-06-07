@@ -3,7 +3,7 @@
 // Komponenten importiert werden. Die fs-gestützten Loader liegen in lib/blog.ts.
 
 /** Basis-URL für Canonical-/OG-Links (per Env überschreibbar). */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inkasso-defense.vercel.app";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.inkasso-defense.de";
 
 export interface PostMeta {
   slug: string;
