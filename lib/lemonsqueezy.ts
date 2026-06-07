@@ -18,18 +18,21 @@ export class LicenseCheckError extends Error {
 }
 
 /**
- * Prüft, ob ein Lizenzschlüssel gültig, aktiv und unserem Produkt zugeordnet ist.
+ * Prüft, ob ein Lizenzschlüssel gültig, aktiv und dem ERWARTETEN Produkt zugeordnet ist.
+ * @param expectedProductId numerische LS-Produkt-ID (Pflicht, fail-closed bei fehlend).
  * @returns true (gültig) / false (ungültig). Wirft LicenseCheckError bei Netz-/Parsefehlern.
  */
-export async function verifyLicense(rawKey: string): Promise<boolean> {
+export async function verifyLicense(
+  rawKey: string,
+  expectedProductId: string | undefined,
+): Promise<boolean> {
   const license_key = (rawKey || "").trim();
   if (!license_key) return false;
 
-  // Produkt-Härtung: nur Lizenzen UNSERES LS-Produkts akzeptieren (verhindert
-  // Bypass über fremde LS-Keys). Produkt-ID ist öffentlich; per Env überschreibbar.
-  const expectedProductId = process.env.LEMONSQUEEZY_PRODUCT_ID || "1123668";
+  // Produkt-Härtung (fail-closed): ohne erwartete Produkt-ID akzeptieren wir KEINE
+  // Lizenz – verhindert Bypass über fremde LS-Keys eines anderen Produkts/Shops.
   if (!expectedProductId) {
-    console.error("[lemonsqueezy] Keine Produkt-ID konfiguriert – Lizenzprüfung verweigert.");
+    console.error("[lemonsqueezy] Keine erwartete Produkt-ID übergeben – Lizenzprüfung verweigert.");
     throw new LicenseCheckError("missing-product-id");
   }
 

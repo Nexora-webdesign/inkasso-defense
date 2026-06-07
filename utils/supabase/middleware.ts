@@ -24,7 +24,20 @@ export async function updateSession(request: NextRequest) {
   });
 
   // WICHTIG: getUser() löst die Token-Erneuerung aus.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Zugriffsschutz: geschützte Bereiche nur für angemeldete Nutzer.
+  const path = request.nextUrl.pathname;
+  const isProtected =
+    path.startsWith("/konto") || path.startsWith("/faelle") || path.startsWith("/fall");
+  if (!user && isProtected) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", path);
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }
