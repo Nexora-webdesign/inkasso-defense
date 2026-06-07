@@ -1,4 +1,7 @@
-// app/auth/callback/route.ts – Magic-Link-Rückkehr: Code/Token -> Session.
+// app/auth/callback/route.ts – Rückkehr vom E-Mail-Bestätigungslink.
+// Bestätigt die E-Mail (Code/Token -> Session), beendet die Session dann wieder
+// und schickt den Nutzer auf die Login-Seite: Er meldet sich anschließend
+// regulär mit E-Mail + Passwort an. So ist der Flow eindeutig.
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
@@ -26,6 +29,13 @@ export async function GET(request: Request) {
     ok = !error;
   }
 
-  const dest = ok ? next : "/login?error=link";
+  if (!ok) {
+    return NextResponse.redirect(new URL("/login?error=link", url.origin));
+  }
+
+  // E-Mail ist jetzt bestätigt. Session wieder beenden → bewusst manuelle Anmeldung.
+  await supabase.auth.signOut();
+
+  const dest = `/login?confirmed=1&next=${encodeURIComponent(next)}`;
   return NextResponse.redirect(new URL(dest, url.origin));
 }
