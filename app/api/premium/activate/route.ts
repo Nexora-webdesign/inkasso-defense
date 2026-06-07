@@ -30,10 +30,14 @@ export async function POST(req: Request) {
   }
   if (!key.trim()) return json({ ok: false, error: "Bitte Freischaltcode eingeben." }, 400);
 
-  // Echtheits-/Produktprüfung (fail-closed, falls Produkt-ID nicht konfiguriert).
+  // Produkt-ID der "Fall-Begleitung" (= weiterverwendetes LS-Produkt). Öffentlich,
+  // per Env überschreibbar.
+  const caseProductId = process.env.LEMONSQUEEZY_CASE_PRODUCT_ID || "1123668";
+
+  // Echtheits-/Produktprüfung.
   let valid = false;
   try {
-    valid = await verifyLicense(key, process.env.LEMONSQUEEZY_CASE_PRODUCT_ID);
+    valid = await verifyLicense(key, caseProductId);
   } catch (err) {
     if (err instanceof LicenseCheckError) {
       return json({ ok: false, error: "Freischaltung konnte gerade nicht geprüft werden. Bitte erneut versuchen." }, 503);
@@ -46,7 +50,7 @@ export async function POST(req: Request) {
   const { error } = await supabase.from("consumed_licenses").insert({
     license_hash: hashLicense(key),
     user_id: user.id,
-    product_id: process.env.LEMONSQUEEZY_CASE_PRODUCT_ID ?? null,
+    product_id: caseProductId,
   });
   if (error) {
     if ((error as { code?: string }).code === "23505") {
