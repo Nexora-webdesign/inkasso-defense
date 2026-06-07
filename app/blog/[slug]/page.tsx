@@ -7,6 +7,7 @@ import { getAllSlugs, getPost, formatDate } from "@/lib/blog";
 import { SITE_URL } from "@/lib/blog-shared";
 import { SiteHeader } from "@/components/blog/SiteHeader";
 import { CtaBlock } from "@/components/blog/CtaBlock";
+import { AffiliateBlock } from "@/components/blog/AffiliateBlock";
 import { mdxComponents, Disclaimer } from "@/components/blog/mdx";
 
 export function generateStaticParams() {
@@ -131,6 +132,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
         {/* Rechtlicher Hinweis – in JEDEM Artikel an gleicher Stelle (Ende -> Hinweis -> CTA) */}
         <Disclaimer />
+
+        {/* Kontextbezogene Empfehlungen (zulässige Partner, gekennzeichnet) */}
+        <AffiliateBlock />
 
         {/* Call-to-Action zum Analyse-Tool */}
         <CtaBlock />

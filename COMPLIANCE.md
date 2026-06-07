@@ -122,6 +122,17 @@ Freemium: Analyse + Vorschau gratis; nur das **Widerspruchs-PDF** kostet (Einmal
 
 ---
 
+## 7b. Affiliate / Empfehlungen
+
+- Kontextbezogene Empfehlungen im Tool-Ergebnis (`#affiliate-block`) und im Blog (nach Disclaimer).
+- **Nur zulässige Partner** (Rechtsschutzversicherung, Bonitäts-/SCHUFA-Dienste, Schuldnerberatung) –
+  **KEINE** bezahlten Anwalts-Empfehlungen (§ 49b BRAO).
+- **Werbekennzeichnung**: Provisions-Partner mit „Anzeige" + Provisionshinweis; Links `rel="sponsored nofollow"`.
+- **Kein Tracking/keine Cookies** – nur statische Links. Datenschutz §8a + diese Datei.
+- Betreiber-To-do: echte Affiliate-Links in `lib/affiliates.ts` UND in der JS-Spiegelung in `public/app.js` eintragen.
+
+---
+
 ## 8. Offene Aufgaben des Betreibers (nicht im Code lösbar)
 
 1. AVV/DPA mit Anthropic und Vercel abschließen (Links in §4).
