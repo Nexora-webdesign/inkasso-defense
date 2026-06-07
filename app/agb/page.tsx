@@ -28,8 +28,11 @@ export default function AgbPage() {
           Allgemeine Geschäftsbedingungen
         </h1>
         <P>
-          Diese Bedingungen gelten für den kostenpflichtigen Erwerb des Widerspruchs-PDF. Die Analyse,
-          die Posten-Übersicht und das Kopieren der Antwort-E-Mail sind und bleiben kostenlos.
+          Die Nutzung von Inkasso·Defense – einschließlich Analyse, Posten-Übersicht, Antwort-E-Mail
+          und Widerspruchs-PDF – ist <strong className="font-semibold text-white">kostenlos</strong>.
+          Diese Bedingungen gelten für etwaige künftige <strong className="font-semibold text-white">
+          kostenpflichtige Zusatzangebote</strong> (z. B. eine „Fall-Begleitung"). Sobald ein solches
+          Angebot verfügbar ist, gelten die nachstehenden Regelungen.
         </P>
 
         <H2>1. Anbieter</H2>
@@ -47,42 +50,35 @@ export default function AgbPage() {
 
         <H2>2. Leistung</H2>
         <P>
-          Gegenstand des kostenpflichtigen Angebots ist die einmalige Erstellung und Bereitstellung
-          eines individuellen Widerspruchs-Schreibens als PDF-Datei auf Grundlage der von dir
-          erfassten Angaben. Es handelt sich um eine{" "}
-          <strong className="font-semibold text-white">technische Analyse- und Dokumenterstellung,
-          nicht um Rechtsberatung</strong>.
+          Der kostenlose Kern (Analyse, Posten-Übersicht, Antwort-E-Mail, Widerspruchs-PDF) ist eine{" "}
+          <strong className="font-semibold text-white">technische, regelbasierte Orientierungshilfe –
+          keine Rechtsberatung</strong>. Gegenstand künftiger kostenpflichtiger Zusatzangebote ist eine
+          erweiterte digitale Leistung (z. B. zeitlich begrenzte „Fall-Begleitung").
         </P>
 
         <H2>3. Preis und Zahlungsabwicklung</H2>
         <P>
-          Der Preis für das Widerspruchs-PDF beträgt <strong className="font-semibold text-white">4,90 €
-          inkl. gesetzlicher Umsatzsteuer</strong>. Die Zahlungs- und Rechnungsabwicklung erfolgt über
-          unseren Reseller{" "}
+          Der Preis eines kostenpflichtigen Zusatzangebots wird vor dem Kauf klar inkl. gesetzlicher
+          Umsatzsteuer ausgewiesen. Die Zahlungs- und Rechnungsabwicklung erfolgt über unseren Reseller{" "}
           <strong className="font-semibold text-white">Lemon Squeezy (Lemon Squeezy, LLC)</strong> als
-          „Merchant of Record". Lemon Squeezy stellt die Rechnung, wickelt die Zahlung ab und führt die
-          jeweils anfallende Umsatzsteuer ab. Es gelten ergänzend deren Bedingungen.
+          „Merchant of Record": Lemon Squeezy stellt die Rechnung, wickelt die Zahlung ab und führt die
+          anfallende Umsatzsteuer ab. Es gelten ergänzend deren Bedingungen.
         </P>
 
         <H2>4. Vertragsschluss</H2>
         <P>
-          Der Vertrag kommt mit Abschluss des Bezahlvorgangs über Lemon Squeezy zustande. Nach
-          erfolgreicher Zahlung erhältst du einen Freischaltcode (Lizenzschlüssel), mit dem das PDF
-          erzeugt und heruntergeladen werden kann.
+          Ein kostenpflichtiger Vertrag kommt erst mit Abschluss des Bezahlvorgangs über Lemon Squeezy
+          zustande. Für den kostenlosen Kern entsteht keine Zahlungspflicht.
         </P>
 
         <H2>5. Widerrufsrecht bei digitalen Inhalten</H2>
         <P>
-          Verbraucher haben grundsätzlich ein 14-tägiges Widerrufsrecht. Bei digitalen Inhalten, die
-          nicht auf einem körperlichen Datenträger geliefert werden, <strong className="font-semibold text-white">
-          erlischt das Widerrufsrecht</strong>, wenn die Ausführung begonnen hat, nachdem du
-          ausdrücklich zugestimmt hast, dass mit der Ausführung vor Ablauf der Widerrufsfrist begonnen
-          wird, und du deine Kenntnis vom Verlust des Widerrufsrechts bestätigt hast (§ 356 Abs. 5 BGB).
-        </P>
-        <P>
-          Diese ausdrückliche Zustimmung und Bestätigung holen wir vor dem Kauf über eine Pflicht-
-          Checkbox ein. Da das PDF unmittelbar nach Zahlung bereitgestellt wird, erlischt dein
-          Widerrufsrecht mit Beginn der Bereitstellung.
+          Bei kostenpflichtigen digitalen Inhalten haben Verbraucher grundsätzlich ein 14-tägiges
+          Widerrufsrecht. Es <strong className="font-semibold text-white">erlischt</strong>, wenn die
+          Ausführung begonnen hat, nachdem du ausdrücklich zugestimmt hast, dass mit der Ausführung vor
+          Ablauf der Widerrufsfrist begonnen wird, und du deine Kenntnis vom Verlust des Widerrufsrechts
+          bestätigt hast (§ 356 Abs. 5 BGB). Diese Zustimmung holen wir vor einem Kauf über eine
+          Pflicht-Checkbox ein.
         </P>
 
         <H2>6. Keine Rechtsberatung (RDG)</H2>
