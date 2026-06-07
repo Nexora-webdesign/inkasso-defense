@@ -108,6 +108,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               alt={post.title}
               width={1600}
               height={900}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           </div>

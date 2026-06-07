@@ -11,7 +11,7 @@ export function Figure({ src, alt, caption }: { src?: string; alt?: string; capt
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-night-surface bezel-soft">
         {src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={alt ?? ""} className="w-full" />
+          <img src={src} alt={alt ?? ""} loading="lazy" decoding="async" className="w-full" />
         ) : (
           <div className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-night-inset via-night-surface to-night-inset">
             <div className="flex flex-col items-center gap-3 text-slate-500">

@@ -25,6 +25,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
         <link rel="stylesheet" href="/styles.css" />
+        {/* Blog bewusst größer skaliert ("ran gezoomt") – skaliert alle rem-Werte
+            gleichmäßig. Nur dieses (Next-)Dokument, nicht die statische App. */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              ":root{font-size:106.25%}" +
+              "@media (min-width:640px){:root{font-size:118.75%}}" +
+              "@media (min-width:1024px){:root{font-size:131.25%}}",
+          }}
+        />
       </head>
       <body className="relative min-h-[100dvh] overflow-x-hidden bg-night font-sans text-slate-100 antialiased selection:bg-mint/25">
         {/* Atmosphäre: weiche Mint-/Indigo-Auren + Film-Grain (wie die App) */}
