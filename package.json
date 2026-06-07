@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "npm run build:css && next build",
     "start": "next start",
+    "optimize:images": "node scripts/optimize-blog-images.cjs --delete",
     "test": "vitest run"
   },
   "engines": {
@@ -38,6 +39,7 @@
     "typescript": "^5.4.5"
   },
   "devDependencies": {
+    "sharp": "^0.34.5",
     "vitest": "^4.1.8"
   }
 }
