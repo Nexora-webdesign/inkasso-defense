@@ -75,11 +75,13 @@ export default async function KontoPage() {
     process.env.NEXT_PUBLIC_LS_CASE_CHECKOUT_URL ||
     "https://nexora-services.lemonsqueezy.com/checkout/buy/3199fec3-f4da-40c1-b5e0-82aa071e7038";
 
+  const premiumLabel = premiumUntil ? fmt(premiumUntil) : "";
+
   const PremiumCard = (
     <section className="mt-8 rounded-4xl border border-mint/25 bg-night-surface/60 p-6 bezel-soft">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-mint-light">Fall-Begleitung</p>
       <p className="mt-2 text-slate-200">
-        ✅ Aktiv bis <strong className="font-semibold text-white">{fmt(premiumUntil!)}</strong> –
+        ✅ Aktiv bis <strong className="font-semibold text-white">{premiumLabel}</strong> –
         Fristen-Erinnerungen und Eskalations-Assistent sind freigeschaltet.
       </p>
     </section>
