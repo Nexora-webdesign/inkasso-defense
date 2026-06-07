@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getPremiumUntil } from "@/lib/premium";
 import { SiteHeader } from "@/components/blog/SiteHeader";
-import { ActivateForm } from "@/components/account/ActivateForm";
+import { BuyAndActivate } from "@/components/account/BuyAndActivate";
 
 export const metadata: Metadata = { title: "Mein Konto", robots: { index: false } };
 
@@ -52,19 +52,10 @@ export default async function KontoPage() {
             <>
               <p className="mt-2 text-slate-300">
                 Noch nicht aktiv. Die Fall-Begleitung (90 Tage) schaltet Fristen-Erinnerungen und
-                den Eskalations-Assistenten für deinen Fall frei.
+                den Eskalations-Assistenten für deinen Fall frei. Kauf direkt hier im Fenster –
+                die Freischaltung passiert <strong className="font-semibold text-white">automatisch</strong>.
               </p>
-              <a
-                href={checkoutUrl}
-                target="_blank"
-                rel="noopener"
-                className="btn-press mt-4 inline-flex items-center gap-2 rounded-full bg-mint px-6 py-3 text-sm font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60"
-              >
-                Fall-Begleitung freischalten
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </a>
-              <p className="mt-5 text-sm text-slate-400">Schon gekauft? Freischaltcode eingeben:</p>
-              <ActivateForm />
+              <BuyAndActivate checkoutUrl={checkoutUrl} />
             </>
           )}
         </section>
