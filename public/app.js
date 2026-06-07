@@ -533,6 +533,50 @@
       Object.keys(fields).forEach((k) => { if (fields[k]) fields[k].addEventListener('input', persist); });
     })();
 
+    // ── Kontextbezogene Empfehlungen (Affiliate, zulässige Partner) ──────────
+    (function initAffiliate() {
+      const box = $('affiliate-block');
+      if (!box) return;
+      // Mini-Konfig (gespiegelt aus lib/affiliates.ts). Einträge ohne url werden
+      // nicht angezeigt -> Betreiber trägt echte Affiliate-Links ein.
+      const PARTNERS = [
+        { id: 'rechtsschutz', name: 'Rechtsschutzversicherung', url: '', claim: 'Für künftige Streitfälle abgesichert – Beratung & Kostenübernahme.', kommission: true, signals: ['hohe_ersparnis', 'nicht_rechtens'] },
+        { id: 'bonitaet', name: 'Bonitäts- & SCHUFA-Check', url: '', claim: 'Prüfe kostenlos, ob ein Eintrag deine Bonität beeinflusst.', kommission: true, signals: ['schufa'] },
+        { id: 'schuldnerberatung', name: 'Schuldnerberatung finden', url: 'https://www.bag-sb.de/ratsuchende/wie-finde-ich-eine-schuldnerberatung/', claim: 'Kostenlose, anerkannte Schuldnerberatungsstellen in deiner Nähe.', kommission: false, signals: ['ratenzahlung', 'hohe_ersparnis'] },
+      ];
+      // Signale aus dem Ergebnis ableiten
+      const signals = new Set();
+      if ((Number(ber.ersparnis) || 0) >= 100) signals.add('hohe_ersparnis');
+      if (posten.some((p) => p && p.status === 'NICHT_RECHTENS')) signals.add('nicht_rechtens');
+      const hay = (JSON.stringify(hinweise || []) + ' ' + String(d.emailTemplate || '')).toLowerCase();
+      if (hay.includes('schufa') || hay.includes('auskunftei')) signals.add('schufa');
+      if ((Number(ber.fairerKern) || 0) > 0) signals.add('ratenzahlung');
+
+      const items = PARTNERS.filter((p) => p.url && p.signals.some((s) => signals.has(s))).slice(0, 3);
+      if (!items.length) return;
+
+      const rows = items.map((a) => `
+        <li class="rounded-2xl border border-ink-100 bg-white p-4 dark:border-white/10 dark:bg-night">
+          <a href="${a.url}" target="_blank" rel="sponsored nofollow noopener" class="group flex items-center justify-between gap-4">
+            <span>
+              <span class="flex items-center gap-2">
+                <span class="font-bold text-ink-950 dark:text-white">${esc(a.name)}</span>
+                ${a.kommission ? '<span class="rounded bg-black/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-700/60 dark:bg-white/10 dark:text-slate-400">Anzeige</span>' : ''}
+              </span>
+              <span class="mt-0.5 block text-sm text-ink-700/70 dark:text-slate-400">${esc(a.claim)}</span>
+            </span>
+            <svg class="btn-icon h-5 w-5 flex-shrink-0 text-mint-dark dark:text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          ${a.kommission ? '<p class="mt-2 text-[11px] text-ink-700/55 dark:text-slate-500">Partner-Empfehlung – bei Abschluss erhalten wir ggf. eine Provision. Für dich ohne Mehrkosten.</p>' : ''}
+        </li>`).join('');
+
+      box.innerHTML = `
+        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-700/50 dark:text-slate-500">Hilfreiche Empfehlungen</p>
+        <ul class="mt-4 space-y-3">${rows}</ul>`;
+      box.classList.remove('hidden');
+      if (typeof reveal === 'function') reveal(box);
+    })();
+
     // ── Freemium-Paywall: Widerspruch-PDF freischalten & herunterladen ───────
     (function initPaywall() {
       const dlBtn = $('download-pdf');

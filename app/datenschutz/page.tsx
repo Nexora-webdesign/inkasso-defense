@@ -167,6 +167,17 @@ export default function DatenschutzPage() {
           keine rechtliche Wirkung im Sinne von Art. 22 DSGVO; Entscheidungen triffst du selbst.
         </P>
 
+        <H2>8a. Empfehlungen &amp; Partner-Links (Affiliate)</H2>
+        <P>
+          Im Analyse-Ergebnis und in Blog-Artikeln zeigen wir gelegentlich Empfehlungen zu Angeboten
+          Dritter (z. B. Rechtsschutzversicherung, Bonitäts-/SCHUFA-Dienste, Schuldnerberatung).
+          Provisions-/Werbepartner sind mit „Anzeige" gekennzeichnet; bei einem Abschluss erhalten wir
+          ggf. eine Provision – für dich ohne Mehrkosten. Wir setzen dafür{" "}
+          <strong className="font-semibold text-white">kein Tracking und keine Cookies</strong> ein;
+          ein Klick öffnet lediglich die Seite des Partners. Für die dortige Datenverarbeitung sind
+          die jeweiligen Anbieter selbst verantwortlich.
+        </P>
+
         <H2>9. Deine Rechte</H2>
         <P>
           Du hast das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17),
