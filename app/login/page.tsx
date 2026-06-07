@@ -6,8 +6,14 @@ import { SiteHeader } from "@/components/blog/SiteHeader";
 
 type Mode = "login" | "register";
 
+const BENEFITS = [
+  { t: "Fristen-Erinnerungen", d: "Wir erinnern dich rechtzeitig – z. B. an die 14-Tage-Widerspruchsfrist." },
+  { t: "Eskalations-Assistent", d: "Schritt-für-Schritt, was als Nächstes zu tun ist (z. B. bei Mahnbescheid)." },
+  { t: "Alle Fälle an einem Ort", d: "Speichere deine Analyse und behalte den Überblick." },
+];
+
 export default function LoginPage() {
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -30,12 +36,8 @@ export default function LoginPage() {
     try {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) {
-          setMsg("Anmeldung fehlgeschlagen. Stimmen E-Mail und Passwort?");
-        } else {
-          window.location.assign(nextUrl());
-          return;
-        }
+        if (error) setMsg("Anmeldung fehlgeschlagen. Stimmen E-Mail und Passwort?");
+        else return window.location.assign(nextUrl());
       } else {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
@@ -45,10 +47,9 @@ export default function LoginPage() {
         if (error) {
           setMsg(error.message.includes("registered") ? "Diese E-Mail ist bereits registriert – bitte anmelden." : "Registrierung fehlgeschlagen.");
         } else if (data.session) {
-          window.location.assign(nextUrl()); // E-Mail-Bestätigung ist deaktiviert -> direkt eingeloggt
-          return;
+          return window.location.assign(nextUrl());
         } else {
-          setConfirmSent(true); // E-Mail-Bestätigung aktiv -> Hinweis zeigen
+          setConfirmSent(true);
         }
       }
     } catch {
@@ -61,68 +62,98 @@ export default function LoginPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto flex max-w-md flex-col px-4 pb-24 pt-16 sm:pt-24">
-        <h1 className="font-display text-3xl font-semibold tracking-tightest text-white sm:text-4xl">
-          {mode === "login" ? "Anmelden" : "Konto erstellen"}
+      <main className="mx-auto max-w-xl px-4 pb-24 pt-14 sm:pt-20">
+        <span className="text-xs font-bold uppercase tracking-[0.22em] text-mint-light">Fall-Begleitung</span>
+        <h1 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tightest text-white sm:text-4xl">
+          Konto für deine Fall-Begleitung
         </h1>
-        <p className="mt-3 text-slate-400">
-          Für die <strong className="font-semibold text-white">Fall-Begleitung</strong> – mit E-Mail
-          und Passwort, ohne Wartezeit.
+        <p className="mt-3 leading-relaxed text-slate-400">
+          Die Inkasso-Analyse ist <strong className="font-semibold text-white">kostenlos und ohne Konto</strong>.
+          Ein Konto brauchst du nur für die optionale Begleitung deines Falls:
         </p>
 
-        {confirmSent ? (
-          <div className="mt-8 rounded-3xl border border-mint/30 bg-mint/10 p-6 text-slate-200">
-            <p className="font-semibold text-white">Fast geschafft 📬</p>
-            <p className="mt-2 text-sm text-slate-300">
-              Wir haben dir eine Bestätigungs-E-Mail an <strong>{email}</strong> geschickt. Bestätige
-              sie, danach kannst du dich anmelden.
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="mt-8 space-y-4">
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="deine@email.de"
-              className="w-full rounded-2xl border border-white/10 bg-night-surface px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 outline-none focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40"
-            />
-            <input
-              type="password"
-              required
-              minLength={6}
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Passwort (mind. 6 Zeichen)"
-              className="w-full rounded-2xl border border-white/10 bg-night-surface px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 outline-none focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40"
-            />
-            <button
-              type="submit"
-              disabled={busy}
-              className="btn-press w-full rounded-2xl bg-mint py-3.5 text-base font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60 disabled:opacity-60"
-            >
-              {busy ? "Bitte warten …" : mode === "login" ? "Anmelden" : "Konto erstellen"}
-            </button>
-            {msg ? <p className="text-sm text-red-400">{msg}</p> : null}
-          </form>
-        )}
+        {/* Nutzen */}
+        <ul className="mt-5 space-y-3">
+          {BENEFITS.map((b) => (
+            <li key={b.t} className="flex gap-3">
+              <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-mint/15">
+                <svg className="h-3 w-3 text-mint-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+              </span>
+              <span>
+                <span className="font-semibold text-white">{b.t}</span>
+                <span className="block text-sm text-slate-400">{b.d}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
 
-        {!confirmSent ? (
-          <button
-            type="button"
-            onClick={() => { setMode(mode === "login" ? "register" : "login"); setMsg(""); }}
-            className="mt-6 text-left text-sm text-slate-400 underline underline-offset-2 hover:text-mint-light"
-          >
-            {mode === "login" ? "Noch kein Konto? Jetzt registrieren" : "Schon ein Konto? Zur Anmeldung"}
-          </button>
-        ) : null}
+        {/* Anmelden / Konto erstellen */}
+        <div className="mt-8 rounded-4xl border border-white/10 bg-night-surface/60 p-6 bezel-soft">
+          {confirmSent ? (
+            <div className="text-slate-200">
+              <p className="font-semibold text-white">Fast geschafft 📬</p>
+              <p className="mt-2 text-sm text-slate-300">
+                Wir haben dir eine Bestätigungs-E-Mail an <strong>{email}</strong> geschickt. Bestätige
+                sie, danach kannst du dich anmelden.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="inline-flex rounded-full bg-night p-1">
+                {(["register", "login"] as Mode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => { setMode(m); setMsg(""); }}
+                    aria-pressed={mode === m}
+                    className={
+                      "rounded-full px-4 py-2 text-sm font-bold transition " +
+                      (mode === m ? "bg-mint text-night" : "text-slate-300 hover:text-white")
+                    }
+                  >
+                    {m === "register" ? "Konto erstellen" : "Anmelden"}
+                  </button>
+                ))}
+              </div>
 
-        <p className="mt-6 text-xs text-slate-500">
-          Mit der Nutzung stimmst du der{" "}
-          <a href="/datenschutz" className="text-mint-light underline underline-offset-2">Datenschutzerklärung</a> zu.
+              <form onSubmit={submit} className="mt-5 space-y-4">
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="deine@email.de"
+                  className="w-full rounded-2xl border border-white/10 bg-night px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 outline-none focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40"
+                />
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Passwort (mind. 6 Zeichen)"
+                  className="w-full rounded-2xl border border-white/10 bg-night px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 outline-none focus-visible:border-mint/50 focus-visible:ring-2 focus-visible:ring-mint/40"
+                />
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="btn-press w-full rounded-2xl bg-mint py-3.5 text-base font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60 disabled:opacity-60"
+                >
+                  {busy ? "Bitte warten …" : mode === "register" ? "Konto erstellen" : "Anmelden"}
+                </button>
+                {msg ? <p className="text-sm text-red-400">{msg}</p> : null}
+              </form>
+            </>
+          )}
+        </div>
+
+        <p className="mt-6 text-sm text-slate-500">
+          Nur prüfen, ohne Konto?{" "}
+          <a href="/" className="text-mint-light underline underline-offset-2">Zur kostenlosen Analyse</a>
+          {" · "}
+          <a href="/datenschutz" className="text-mint-light underline underline-offset-2">Datenschutz</a>
         </p>
       </main>
     </>
