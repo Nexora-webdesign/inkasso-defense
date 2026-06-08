@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta id="meta-theme-color" name="theme-color" content="#0b0f19" />
-  <title>Inkasso-Defense – Inkasso-Forderung kostenlos prüfen</title>
-  <meta name="description" content="Inkasso-Brief erhalten? Lade ihn hoch und prüfe in Sekunden nach BGH-Rechtsprechung und BGB, wie viel du wirklich zahlen musst." />
+  <title>Inkasso-Defense – Legal Intelligence Layer für Kanzleien</title>
+  <meta name="description" content="Legal-Tech für Kanzleien: automatisierte Extraktion und deterministische rechtliche Ersteinschätzung von Forderungsschreiben – nach geltendem Verbraucherrecht, als Single Source of Truth." />
 
   <!-- PWA / Homescreen -->
   <link rel="manifest" href="/manifest.webmanifest" />
@@ -88,7 +88,7 @@
       <div class="reveal">
         <span class="inline-flex items-center gap-2 rounded-full border border-mint/30 bg-mint/10 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-mint-dark dark:text-mint-light">
           <span class="h-1.5 w-1.5 rounded-full bg-mint"></span>
-          Kostenlose Erstprüfung · unter 60 Sekunden
+          Legal Intelligence Layer · für Kanzleien
         </span>
       </div>
 
@@ -107,12 +107,12 @@
       <!-- Kontext-Onboarding: OPTIONAL (kein Upload-Gate mehr) -->
       <section id="onboarding-section" class="reveal mx-auto max-w-xl">
         <div class="rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface sm:p-8">
-          <h2 class="text-lg font-bold text-ink-950 dark:text-white">Optional: 3 kurze Fragen</h2>
-          <p class="mt-1 text-sm text-ink-700/70 dark:text-slate-400">Für eine genauere Einschätzung. Du kannst sie überspringen und direkt hochladen.</p>
+          <h2 class="text-lg font-bold text-ink-950 dark:text-white">Optional: 3 kurze Angaben zum Fall</h2>
+          <p class="mt-1 text-sm text-ink-700/70 dark:text-slate-400">Für eine präzisere Einschätzung – oder überspringen und direkt hochladen.</p>
 
           <div class="mt-6 space-y-5">
             <div class="onb-q" data-key="ersterBrief">
-              <p class="text-sm font-semibold text-ink-950 dark:text-white">Ist das der erste Brief, den du in dieser Sache erhältst?</p>
+              <p class="text-sm font-semibold text-ink-950 dark:text-white">Ist dies das erste Schreiben in dieser Sache?</p>
               <div class="mt-2 inline-flex rounded-full bg-black/5 p-1 dark:bg-white/5" role="group" aria-label="Erstes Schreiben?">
                 <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="true">Ja</button>
                 <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="false">Nein</button>
@@ -120,7 +120,7 @@
             </div>
 
             <div class="onb-q" data-key="bereitsWidersprochen">
-              <p class="text-sm font-semibold text-ink-950 dark:text-white">Hast du dem Gläubiger/Inkassobüro bereits widersprochen?</p>
+              <p class="text-sm font-semibold text-ink-950 dark:text-white">Wurde der Forderung bereits widersprochen?</p>
               <div class="mt-2 inline-flex rounded-full bg-black/5 p-1 dark:bg-white/5" role="group" aria-label="Bereits widersprochen?">
                 <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="true">Ja</button>
                 <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="false">Nein</button>
@@ -128,7 +128,7 @@
             </div>
 
             <div class="onb-q" data-key="bereitsGezahlt">
-              <p class="text-sm font-semibold text-ink-950 dark:text-white">Hast du bereits eine (Teil-)Zahlung geleistet?</p>
+              <p class="text-sm font-semibold text-ink-950 dark:text-white">Wurde bereits eine (Teil-)Zahlung geleistet?</p>
               <div class="mt-2 inline-flex rounded-full bg-black/5 p-1 dark:bg-white/5" role="group" aria-label="Bereits gezahlt?">
                 <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="true">Ja</button>
                 <button type="button" class="onb-opt rounded-full px-5 py-2 text-sm font-semibold text-ink-700/70 transition dark:text-slate-300" data-val="false">Nein</button>
@@ -166,7 +166,7 @@
             </span>
 
             <span class="mt-5 block text-lg font-bold text-ink-950 dark:text-white">
-              Brief hierher ziehen oder <span class="text-mint-dark underline decoration-mint/40 underline-offset-4 dark:text-mint-light">auswählen</span>
+              Forderungsschreiben hierher ziehen oder <span class="text-mint-dark underline decoration-mint/40 underline-offset-4 dark:text-mint-light">auswählen</span>
             </span>
             <span class="mt-1.5 block text-sm text-ink-700/70 dark:text-slate-400">Foto (JPG/PNG) oder PDF · max. 10 MB</span>
 
@@ -179,7 +179,7 @@
           <!-- Datenschutz-Einwilligung – muss vor der Analyse aktiv bestätigt werden -->
           <label for="consent-check" class="mt-3 flex cursor-pointer items-start gap-3 px-3 text-left text-sm leading-relaxed text-ink-700/80 dark:text-slate-400">
             <input id="consent-check" type="checkbox" class="mt-0.5 h-5 w-5 flex-shrink-0 cursor-pointer accent-mint outline-none focus-visible:ring-2 focus-visible:ring-mint/50" />
-            <span>Ich willige ein, dass mein hochgeladenes Dokument zur Analyse verarbeitet und dafür an einen Dienstleister (Anthropic, USA) übermittelt wird. Es wird nicht dauerhaft gespeichert. Mehr in der <a href="/datenschutz" target="_blank" rel="noopener" class="font-semibold text-mint-dark underline underline-offset-2 dark:text-mint-light">Datenschutzerklärung</a>.</span>
+            <span>Ich willige ein, dass das hochgeladene Dokument zur Analyse verarbeitet und dabei an einen Dienstleister (Anthropic, USA) übermittelt wird. Es wird nicht dauerhaft gespeichert. Mehr in der <a href="/datenschutz" target="_blank" rel="noopener" class="font-semibold text-mint-dark underline underline-offset-2 dark:text-mint-light">Datenschutzerklärung</a>.</span>
           </label>
 
           <button id="analyze-btn" type="submit" disabled
@@ -214,14 +214,14 @@
     <section class="py-24 sm:py-32">
       <div class="reveal mx-auto max-w-2xl text-center">
         <span class="text-[10px] font-semibold uppercase tracking-[0.25em] text-mint-dark dark:text-mint-light">So funktioniert's</span>
-        <h2 class="font-display mt-3 text-3xl font-semibold tracking-tightest text-ink-950 sm:text-4xl dark:text-white">In drei Schritten zur fairen Forderung</h2>
+        <h2 class="font-display mt-3 text-3xl font-semibold tracking-tightest text-ink-950 sm:text-4xl dark:text-white">In drei Schritten zur belastbaren Ersteinschätzung</h2>
       </div>
 
       <div class="mt-14 grid gap-4 md:grid-cols-6">
         <article class="reveal group rounded-4xl border border-white/70 bg-white/85 p-7 bezel-soft md:col-span-3 lg:col-span-2 dark:border-white/10 dark:bg-night-surface">
           <span class="font-display block text-4xl font-semibold text-mint-dark dark:text-mint-light">01</span>
           <h3 class="mt-4 text-lg font-bold text-ink-950 dark:text-white">Hochladen</h3>
-          <p class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300">Foto oder PDF deiner Forderung hochladen. Der Text wird automatisch per KI-Vision erkannt.</p>
+          <p class="mt-2 text-sm leading-relaxed text-ink-700/80 dark:text-slate-300">Forderungsschreiben als Foto oder PDF hochladen – der Text wird automatisch per KI-Vision extrahiert.</p>
         </article>
         <article class="reveal group rounded-4xl border border-white/70 bg-white/85 p-7 bezel-soft md:col-span-3 lg:col-span-2 dark:border-white/10 dark:bg-night-surface" style="--reveal-delay:90ms">
           <span class="font-display block text-4xl font-semibold text-mint-dark dark:text-mint-light">02</span>
@@ -231,7 +231,7 @@
         <article class="reveal group rounded-4xl border border-mint/30 bg-ink-950 p-7 text-white md:col-span-6 lg:col-span-2 dark:bg-mint/10" style="--reveal-delay:180ms">
           <span class="font-display block text-4xl font-semibold text-mint-light">03</span>
           <h3 class="mt-4 text-lg font-bold">Reagieren</h3>
-          <p class="mt-2 text-sm leading-relaxed text-white/70 dark:text-slate-300">Du erhältst den fairen Kern, eine verständliche Erklärung und eine fertige E-Mail zum Kopieren.</p>
+          <p class="mt-2 text-sm leading-relaxed text-white/70 dark:text-slate-300">Sie erhalten den fairen Kern, eine nachvollziehbare Begründung und einen fertigen Schriftsatz zum Übernehmen.</p>
         </article>
       </div>
 
@@ -251,14 +251,14 @@
   <footer class="relative z-10 border-t border-ink-100/70 dark:border-white/10">
     <div class="mx-auto max-w-6xl px-5 py-10 text-center text-xs text-ink-700/60 dark:text-slate-400">
       <p class="font-display text-base font-semibold text-ink-950 dark:text-white">Inkasso·Defense</p>
-      <p class="mx-auto mt-2 max-w-lg leading-relaxed">Inkasso-Defense ist ein automatisiertes Informations-Tool und ersetzt keine Rechtsberatung im Einzelfall.</p>
+      <p class="mx-auto mt-2 max-w-lg leading-relaxed">Inkasso-Defense ist ein automatisiertes Analyse-Tool und ersetzt keine anwaltliche Einzelfallprüfung.</p>
       <nav class="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium" aria-label="Rechtliches">
         <a href="/blog" class="hover:text-mint-dark dark:hover:text-mint-light">Blog</a>
         <a href="/datenschutz" class="hover:text-mint-dark dark:hover:text-mint-light">Datenschutz</a>
         <a href="/agb" class="hover:text-mint-dark dark:hover:text-mint-light">AGB</a>
         <a href="/impressum" class="hover:text-mint-dark dark:hover:text-mint-light">Impressum</a>
       </nav>
-      <p class="mt-3">Analyse, Widerspruch und PDF – komplett kostenlos.</p>
+      <p class="mt-3">Deterministische Logik &amp; geltendes Verbraucherrecht – als Legal Intelligence Layer.</p>
       <p class="mt-2">&copy; 2026 Inkasso-Defense</p>
     </div>
   </footer>
@@ -275,7 +275,7 @@
           </span>
           <div>
             <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-mint-dark dark:text-mint-light">Inkasso·Defense</p>
-            <p class="font-display text-xl font-semibold tracking-tightest text-ink-950 dark:text-white">Wir prüfen deine Forderung</p>
+            <p class="font-display text-xl font-semibold tracking-tightest text-ink-950 dark:text-white">Die Forderung wird geprüft</p>
           </div>
         </div>
 
