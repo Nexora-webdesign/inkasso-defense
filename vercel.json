@@ -4,6 +4,7 @@
   "buildCommand": "npm run build:css && next build",
   "regions": ["fra1"],
   "crons": [
-    { "path": "/api/cron/reminders", "schedule": "0 9 * * *" }
+    { "path": "/api/cron/reminders", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/health-alert", "schedule": "30 9 * * *" }
   ]
 }
