@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f19" />
+  <title>Inkasso-Defense · Gegenwehr-Cockpit</title>
+  <meta name="robots" content="noindex" />
+
+  <!--
+    Inkasso-Defense · Main-UI-Hülle (Gegenwehr-Flow)
+    ------------------------------------------------------------------
+    Eigenständig (HTML/CSS/JS, keine Build-Abhängigkeit) → low-code- &
+    integrationsfreundlich. Backend-agnostisch via Api-Schicht (siehe <script>).
+
+    Backend-Vorbereitung (FreeBSD / srv1 / MySQL|MariaDB):
+      Empfohlene Tabelle (MariaDB):
+        CREATE TABLE faelle (
+          id            CHAR(36) PRIMARY KEY,
+          inkassobuero  VARCHAR(255),
+          aktenzeichen  VARCHAR(120),
+          hauptforderung DECIMAL(10,2),
+          gebuehren_json JSON,
+          status        ENUM('scan','fakten','analyse','ergebnis','gegenwehr') DEFAULT 'scan',
+          result_json   JSON,
+          created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      REST-Endpunkte (relativ, unter Api.base konfigurierbar):
+        POST {base}/scan      (multipart: file)      -> Basisdaten extrahieren
+        POST {base}/analyze   (json: AppState)       -> deterministische Logik + LLM
+        PUT  {base}/akte/:id  (json: akte)           -> in MySQL/MariaDB speichern
+    ------------------------------------------------------------------
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================ Design-Tokens ============================ */
+    :root {
+      --night:        #0b0f19;   /* Seiten-Hintergrund */
+      --surface:      #161f30;   /* Karten / Sidebar */
+      --inset:        #0e1424;   /* eingelassene Flächen */
+      --hair:         rgba(255,255,255,.10);
+      --hair-strong:  rgba(255,255,255,.16);
+
+      --mint:         #12b886;   /* primäre Aktion */
+      --mint-light:   #6ee7c4;   /* Akzent-Text/Icon */
+      --cyber:        #38bdf8;   /* Cyber-Akzent (Vertrauen) */
+      --amber:        #fbbf24;   /* Warnung / Frist */
+      --rose:         #fb7185;   /* Fehler / dringend */
+
+      --txt:          #e7ecf5;
+      --txt-soft:     #9aa6bd;
+      --txt-faint:    #64748b;
+
+      --r-lg: 22px; --r-md: 16px; --r-sm: 11px;
+      --shadow: 0 24px 60px -24px rgba(0,0,0,.7);
+      --ease: cubic-bezier(.16,1,.3,1);
+      --header-h: 64px;
+      --maxw: 1200px;
+    }
+
+    /* ============================ Reset / Base ============================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      /* STRIKT: niemals horizontaler Scroll */
+      overflow-x: hidden;
+      background: var(--night);
+      color: var(--txt);
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size: 16px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100dvh;
+    }
+    h1,h2,h3 { font-family: "Fraunces", Georgia, serif; letter-spacing: -.02em; margin: 0; }
+    a { color: var(--mint-light); }
+    img, svg, video { max-width: 100%; display: block; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; border-radius: 6px; }
+
+    /* dezente Hintergrund-Auren */
+    .aura { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .aura::before, .aura::after { content:""; position:absolute; border-radius:50%; filter: blur(120px); }
+    .aura::before { top:-12rem; right:-8rem; width:32rem; height:32rem; background: rgba(18,184,134,.10); }
+    .aura::after  { top:35%; left:-10rem; width:28rem; height:28rem; background: rgba(56,189,248,.08); }
+
+    /* ============================ 1) Sticky Header / Progress ============================ */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(11,15,25,.82); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--hair);
+      padding-top: env(safe-area-inset-top);
+    }
+    .topbar__row {
+      max-width: var(--maxw); margin: 0 auto; min-height: var(--header-h);
+      display: flex; align-items: center; gap: 12px; padding: 8px 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; text-decoration: none; color: var(--txt); }
+    .brand__mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: rgba(18,184,134,.15); color: var(--mint-light); }
+    .brand__name { font-weight: 800; letter-spacing: -.02em; font-size: 15px; white-space: nowrap; }
+    .brand__name b { color: var(--mint-light); font-weight: 800; }
+
+    /* Desktop-Stepper: passt OHNE Scroll in die Breite (flex, schrumpfbar) */
+    .stepper { display: none; flex: 1 1 auto; min-width: 0; align-items: center; gap: 6px; }
+    .step { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .step__dot {
+      flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
+      display: grid; place-items: center; font-weight: 700; font-size: 13px;
+      background: var(--inset); color: var(--txt-faint); border: 1px solid var(--hair);
+      transition: all .25s var(--ease);
+    }
+    .step__label { font-size: 13px; font-weight: 600; color: var(--txt-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .step__line { flex: 1 1 auto; height: 2px; min-width: 10px; background: var(--hair); border-radius: 2px; }
+    .step.is-done   .step__dot { background: rgba(18,184,134,.15); color: var(--mint-light); border-color: rgba(18,184,134,.45); }
+    .step.is-active .step__dot { background: var(--mint); color: var(--night); border-color: var(--mint); box-shadow: 0 0 0 4px rgba(18,184,134,.18); }
+    .step.is-active .step__label { color: var(--txt); }
+    .step.is-done .step__line { background: rgba(18,184,134,.5); }
+
+    /* Mobile-Progress: kompakt – aktueller Text + kleine Punkte (kein Scroll!) */
+    .mprogress { display: flex; flex: 1 1 auto; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+    .mprogress__txt { min-width: 0; }
+    .mprogress__eyebrow { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--mint-light); font-weight: 700; }
+    .mprogress__now { font-size: 14px; font-weight: 700; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dots { display: flex; gap: 6px; flex: 0 0 auto; }
+    .dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--hair-strong); transition: all .25s var(--ease); }
+    .dots span.is-done { background: rgba(18,184,134,.6); }
+    .dots span.is-active { background: var(--mint); width: 18px; border-radius: 4px; }
+
+    /* ============================ Layout: Akte + Main ============================ */
+    .layout { max-width: var(--maxw); margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* 2) Intelligente Akte – Mobile: Accordion (<details>) */
+    .akte { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r-lg); box-shadow: var(--shadow); overflow: hidden; }
+    .akte > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; }
+    .akte > summary::-webkit-details-marker { display: none; }
+    .akte__title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--mint-light); font-weight: 700; flex: 1 1 auto; }
+    .akte__chev { color: var(--txt-faint); transition: transform .25s var(--ease); }
+    .akte[open] .akte__chev { transform: rotate(180deg); }
+    .akte__body { padding: 0 16px 16px; display: grid; gap: 10px; }
+    .field { background: var(--inset); border: 1px solid var(--hair); border-radius: var(--r-md); padding: 11px 13px; }
+    .field__k { font-size: 11px; color: var(--txt-faint); }
+    .field__v { margin-top: 2px; font-weight: 700; color: var(--txt); font-variant-numeric: tabular-nums; word-break: break-word; }
+    .field__v.is-empty { color: var(--txt-faint); font-weight: 500; }
+    .field--accent .field__v { color: var(--mint-light); }
+
+    /* 3) Main Content – rein vertikal */
+    .main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow); }
+    .card h2 { font-size: 22px; }
+    .lead { color: var(--txt-soft); margin: 8px 0 0; }
+    .eyebrow { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--mint-light); font-weight: 700; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; font-weight: 700; transition: transform .12s var(--ease), filter .2s; }
+    .btn:active { transform: scale(.97); }
+    .btn--primary { background: var(--mint); color: var(--night); box-shadow: 0 14px 30px -12px rgba(18,184,134,.7); }
+    .btn--ghost { background: var(--inset); color: var(--txt); border: 1px solid var(--hair); }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .nav-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    .nav-row .btn { flex: 1 1 auto; }
+
+    .dropzone { border: 2px dashed rgba(18,184,134,.5); border-radius: var(--r-md); background: var(--inset); padding: 36px 16px; text-align: center; display: grid; gap: 8px; place-items: center; transition: border-color .2s, background .2s; }
+    .dropzone.is-over { border-color: var(--mint); background: rgba(18,184,134,.07); }
+    .dropzone__icon { width: 56px; height: 56px; border-radius: 16px; background: rgba(18,184,134,.15); color: var(--mint-light); display: grid; place-items: center; }
+
+    .q { border: 1px solid var(--hair); border-radius: var(--r-md); padding: 14px; background: var(--inset); }
+    .q__label { font-weight: 600; font-size: 14px; }
+    .seg { display: inline-flex; margin-top: 10px; background: rgba(255,255,255,.05); border-radius: 999px; padding: 4px; }
+    .seg button { background: transparent; border: 0; color: var(--txt-soft); font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 999px; min-height: 40px; }
+    .seg button[aria-pressed="true"] { background: var(--mint); color: var(--night); }
+
+    .kpis { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    .kpi { background: var(--inset); border: 1px solid var(--hair); border-radius: var(--r-md); padding: 16px; }
+    .kpi__k { font-size: 12px; color: var(--txt-faint); }
+    .kpi__v { font-family: "Fraunces", serif; font-size: 30px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .kpi--save .kpi__v { color: var(--mint-light); }
+
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 999px; background: rgba(56,189,248,.14); color: var(--cyber); }
+
+    .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--hair); border-top-color: var(--mint); animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .disclaimer { color: var(--txt-faint); font-size: 12px; line-height: 1.6; }
+
+    /* ============================ Desktop ============================ */
+    @media (min-width: 768px) {
+      .kpis { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .stepper { display: flex; }
+      .mprogress { display: none; }
+
+      /* Akte wird zur dezenten, klebrigen Sidebar – Inhalt immer sichtbar */
+      .layout { display: grid; grid-template-columns: minmax(0,1fr) 320px; align-items: start; gap: 24px; padding: 24px 16px; }
+      .main { order: 1; }
+      .akte { order: 2; position: sticky; top: calc(var(--header-h) + 24px); }
+      .akte > summary { cursor: default; }
+      .akte > summary .akte__chev { display: none; }
+      .akte__body { display: grid !important; } /* override native <details>-collapse auf Desktop */
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="aura" aria-hidden="true"></div>
+
+  <!-- ============================ 1) Sticky Header / Progress ============================ -->
+  <header class="topbar">
+    <div class="topbar__row">
+      <a class="brand" href="/">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <span class="brand__name">Inkasso<b>·Defense</b></span>
+      </a>
+
+      <!-- Desktop-Stepper -->
+      <nav class="stepper" id="stepper" aria-label="Fortschritt"></nav>
+
+      <!-- Mobile-Progress -->
+      <div class="mprogress" id="mprogress" aria-hidden="false">
+        <span class="mprogress__txt">
+          <span class="mprogress__eyebrow" id="m-eyebrow">Schritt 1/5</span>
+          <span class="mprogress__now" id="m-now">Dokumenten-Scan</span>
+        </span>
+        <span class="dots" id="m-dots" aria-hidden="true"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================ Layout ============================ -->
+  <div class="layout">
+    <!-- 2) Intelligente Akte (Mobile: Accordion / Desktop: Sidebar) -->
+    <details class="akte" id="akte" open>
+      <summary>
+        <span class="brand__mark" aria-hidden="true" style="background:rgba(56,189,248,.14);color:var(--cyber)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        </span>
+        <span class="akte__title">Intelligente Akte</span>
+        <svg class="akte__chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="akte__body">
+        <div class="field"><div class="field__k">Inkassobüro</div><div class="field__v is-empty" data-akte="inkassobuero">—</div></div>
+        <div class="field"><div class="field__k">Aktenzeichen</div><div class="field__v is-empty" data-akte="aktenzeichen">—</div></div>
+        <div class="field"><div class="field__k">Hauptforderung</div><div class="field__v is-empty" data-akte="hauptforderung">—</div></div>
+        <div class="field field--accent"><div class="field__k">Gebühren (gesamt)</div><div class="field__v is-empty" data-akte="gebuehren">—</div></div>
+      </div>
+    </details>
+
+    <!-- 3) Main Content – dynamisch, rein vertikal -->
+    <main class="main" id="main" aria-live="polite"></main>
+  </div>
+
+  <script>
+  (function () {
+    "use strict";
+
+    /* ============================ State-Management ============================
+       Zentrale, serialisierbare Quelle der Wahrheit. Vorbereitet für die
+       deterministische Logik + LLM (siehe Api.analyze / buildPromptPayload). */
+    const AppState = {
+      step: 0,                                   // 0..4
+      akte: { inkassobuero: "", aktenzeichen: "", hauptforderung: null, gebuehren: [], waehrung: "EUR" },
+      fakten: { ersterBrief: null, bereitsWidersprochen: null, bereitsGezahltEur: 0 },
+      analyse: null,                             // { fairerKern, ersparnis, posten[] }
+    };
+
+    const STEPS = [
+      { key: "scan",      label: "Dokumenten-Scan" },
+      { key: "fakten",    label: "Fakten-Check" },
+      { key: "analyse",   label: "KI-Analyse" },
+      { key: "ergebnis",  label: "Ergebnis" },
+      { key: "gegenwehr", label: "Gegenwehr" },
+    ];
+
+    const eur = (n) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
+    const $ = (s, r) => (r || document).querySelector(s);
+
+    /* ============================ Backend-Schicht (austauschbar) ============================
+       base zeigt auf eure FreeBSD/srv1-API (MySQL/MariaDB) ODER die bestehende Next-API.
+       Alle Methoden geben Promises zurück; UI bleibt davon entkoppelt. */
+    const Api = {
+      base: "/api",
+      async scan(file) {
+        const fd = new FormData(); fd.append("file", file);
+        return fetch(this.base + "/scan", { method: "POST", body: fd }).then((r) => r.json());
+      },
+      async analyze(payload) {
+        return fetch(this.base + "/analyze", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
+        }).then((r) => r.json());
+      },
+      async persistAkte(akte) {
+        return fetch(this.base + "/akte", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(akte),
+        }).then((r) => r.json());
+      },
+    };
+
+    /** Payload für deterministische Logik + LLM (Prompt-Engineering). */
+    function buildPromptPayload() {
+      return { akte: AppState.akte, fakten: AppState.fakten, schritt: STEPS[AppState.step].key };
+    }
+
+    /* ============================ Render: Progress ============================ */
+    function renderProgress() {
+      // Desktop-Stepper
+      const stepper = $("#stepper");
+      stepper.innerHTML = STEPS.map((s, i) => {
+        const cls = i < AppState.step ? "is-done" : i === AppState.step ? "is-active" : "";
+        const inner = i < AppState.step
+          ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+          : String(i + 1);
+        const line = i < STEPS.length - 1 ? '<span class="step__line"></span>' : "";
+        return '<div class="step ' + cls + '" aria-current="' + (i === AppState.step ? "step" : "false") + '">' +
+                 '<span class="step__dot">' + inner + '</span>' +
+                 '<span class="step__label">' + s.label + '</span>' +
+               '</div>' + line;
+      }).join("");
+
+      // Mobile-Progress
+      $("#m-eyebrow").textContent = "Schritt " + (AppState.step + 1) + "/" + STEPS.length;
+      $("#m-now").textContent = STEPS[AppState.step].label;
+      $("#m-dots").innerHTML = STEPS.map((_, i) =>
+        '<span class="' + (i < AppState.step ? "is-done" : i === AppState.step ? "is-active" : "") + '"></span>'
+      ).join("");
+    }
+
+    /* ============================ Render: Akte ============================ */
+    function renderAkte() {
+      const a = AppState.akte;
+      const set = (key, val, accent) => {
+        const el = document.querySelector('[data-akte="' + key + '"]');
+        if (!el) return;
+        const empty = val == null || val === "";
+        el.textContent = empty ? "—" : val;
+        el.classList.toggle("is-empty", empty);
+      };
+      set("inkassobuero", a.inkassobuero);
+      set("aktenzeichen", a.aktenzeichen);
+      set("hauptforderung", a.hauptforderung == null ? "" : eur(a.hauptforderung));
+      const geb = (a.gebuehren || []).reduce((s, g) => s + (Number(g.betrag) || 0), 0);
+      set("gebuehren", a.gebuehren && a.gebuehren.length ? eur(geb) : "");
+    }
+
+    /* ============================ Navigation ============================ */
+    function goTo(step) {
+      AppState.step = Math.max(0, Math.min(STEPS.length - 1, step));
+      renderProgress();
+      renderStep();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function navRow(backLabel, nextLabel, nextEnabled, onNext) {
+      const row = document.createElement("div");
+      row.className = "nav-row";
+      if (AppState.step > 0) {
+        const back = document.createElement("button");
+        back.className = "btn btn--ghost"; back.textContent = backLabel || "Zurück";
+        back.onclick = () => goTo(AppState.step - 1);
+        row.appendChild(back);
+      }
+      if (nextLabel) {
+        const next = document.createElement("button");
+        next.className = "btn btn--primary"; next.textContent = nextLabel;
+        next.disabled = !nextEnabled;
+        next.onclick = onNext || (() => goTo(AppState.step + 1));
+        row.appendChild(next);
+      }
+      return row;
+    }
+
+    /* ============================ Render: Schritt-Inhalte (injiziert) ============================ */
+    function renderStep() {
+      const main = $("#main");
+      main.innerHTML = "";
+      const key = STEPS[AppState.step].key;
+      ({ scan: stepScan, fakten: stepFakten, analyse: stepAnalyse, ergebnis: stepErgebnis, gegenwehr: stepGegenwehr }[key])(main);
+    }
+
+    function card(html) { const c = document.createElement("section"); c.className = "card"; c.innerHTML = html; return c; }
+
+    function stepScan(main) {
+      const c = card(
+        '<p class="eyebrow">Schritt 1</p><h2>Dokument scannen</h2>' +
+        '<p class="lead">Lade ein Foto oder PDF deiner Inkasso-Forderung hoch. Wir lesen die Basisdaten aus.</p>' +
+        '<label class="dropzone" id="dz" style="margin-top:16px">' +
+          '<input id="file" type="file" accept="image/*,application/pdf" hidden />' +
+          '<span class="dropzone__icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>' +
+          '<span style="font-weight:700">Brief hierher ziehen oder auswählen</span>' +
+          '<span style="color:var(--txt-faint);font-size:13px">JPG, PNG oder PDF · max. 10 MB</span>' +
+        '</label>' +
+        '<p id="scanmsg" class="disclaimer" style="margin-top:12px"></p>'
+      );
+      main.appendChild(c);
+      main.appendChild(navRow("Zurück", "Weiter zum Fakten-Check", hasAkte(), () => goTo(1)));
+      const next = main.querySelector(".btn--primary");
+
+      const dz = $("#dz", c), input = $("#file", c), msg = $("#scanmsg", c);
+      const onFile = (f) => {
+        if (!f) return;
+        if (f.size > 10 * 1024 * 1024) { msg.textContent = "Datei zu groß (max. 10 MB)."; return; }
+        msg.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle"></span> Lese Dokument …';
+        // Backend-Aufruf (FreeBSD/MySQL ODER Next-API). Demo-Fallback unten.
+        Api.scan(f).then((res) => {
+          const d = (res && res.data) || res || {};
+          AppState.akte.inkassobuero = d.inkassobuero || d.inkassoName || "Beispiel Inkasso GmbH";
+          AppState.akte.aktenzeichen = d.aktenzeichen || "AZ-DEMO-001";
+          AppState.akte.hauptforderung = d.hauptforderung != null ? d.hauptforderung : 189.0;
+          AppState.akte.gebuehren = d.gebuehren || [{ name: "Inkassogebühr", betrag: 58.5 }, { name: "Auslagenpauschale", betrag: 20 }];
+          afterScan(msg, next);
+        }).catch(() => {
+          // Demo-Fallback, falls noch kein Backend angebunden ist
+          AppState.akte.inkassobuero = "Beispiel Inkasso GmbH";
+          AppState.akte.aktenzeichen = "AZ-DEMO-001";
+          AppState.akte.hauptforderung = 189.0;
+          AppState.akte.gebuehren = [{ name: "Inkassogebühr", betrag: 58.5 }, { name: "Auslagenpauschale", betrag: 20 }];
+          afterScan(msg, next, true);
+        });
+      };
+      input.addEventListener("change", (e) => onFile(e.target.files[0]));
+      ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("is-over"); }));
+      ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("is-over"); }));
+      dz.addEventListener("drop", (e) => onFile(e.dataTransfer && e.dataTransfer.files[0]));
+    }
+    function afterScan(msg, next, demo) {
+      renderAkte();
+      msg.innerHTML = (demo ? "Demo-Daten geladen (kein Backend verbunden). " : "Basisdaten erkannt. ") + "Du kannst sie in der Akte prüfen.";
+      if (next) next.disabled = false;
+    }
+    function hasAkte() { return !!AppState.akte.inkassobuero; }
+
+    function stepFakten(main) {
+      const f = AppState.fakten;
+      const c = card(
+        '<p class="eyebrow">Schritt 2</p><h2>Fakten-Check</h2>' +
+        '<p class="lead">Drei kurze Angaben für eine genauere Bewertung.</p>' +
+        '<div style="display:grid;gap:12px;margin-top:16px">' +
+          qBlock("ersterBrief", "Ist das der erste Brief in dieser Sache?") +
+          qBlock("bereitsWidersprochen", "Hast du bereits widersprochen?") +
+          qBlock("bereitsGezahlt", "Hast du bereits (teilweise) gezahlt?") +
+        '</div>'
+      );
+      main.appendChild(c);
+      main.appendChild(navRow("Zurück", "KI-Analyse starten", true, () => goTo(2)));
+
+      c.querySelectorAll(".seg button").forEach((b) => {
+        b.addEventListener("click", () => {
+          const q = b.closest("[data-q]").dataset.q, val = b.dataset.v === "true";
+          b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+          if (q === "bereitsGezahlt") f.bereitsGezahltEur = val ? (f.bereitsGezahltEur || 0.01) : 0;
+          else f[q] = val;
+        });
+      });
+      function qBlock(key, label) {
+        return '<div class="q" data-q="' + key + '"><div class="q__label">' + label + '</div>' +
+          '<div class="seg" role="group"><button data-v="true" aria-pressed="false">Ja</button><button data-v="false" aria-pressed="false">Nein</button></div></div>';
+      }
+    }
+
+    function stepAnalyse(main) {
+      const c = card(
+        '<p class="eyebrow">Schritt 3</p><h2>KI-Analyse läuft</h2>' +
+        '<div style="display:flex;align-items:center;gap:14px;margin-top:18px">' +
+          '<span class="spinner"></span>' +
+          '<span class="lead" style="margin:0">Die Fakten werden nach Verbraucherrecht geprüft …</span>' +
+        '</div>'
+      );
+      main.appendChild(c);
+      // Deterministische Logik + LLM (Backend). Demo-Fallback nach kurzer Zeit.
+      Api.analyze(buildPromptPayload()).then((res) => finishAnalyse((res && res.data) || res)).catch(() => finishAnalyse(null));
+    }
+    function finishAnalyse(data) {
+      const geb = (AppState.akte.gebuehren || []).reduce((s, g) => s + (Number(g.betrag) || 0), 0);
+      AppState.analyse = data || {
+        fairerKern: Number(AppState.akte.hauptforderung) || 0,
+        ersparnis: Math.round(geb * 100) / 100,
+        posten: (AppState.akte.gebuehren || []).map((g) => ({ name: g.name, betrag: g.betrag, status: "GEKUERZT" })),
+      };
+      goTo(3);
+    }
+
+    function stepErgebnis(main) {
+      const a = AppState.analyse || {};
+      const orig = (Number(AppState.akte.hauptforderung) || 0) + (AppState.akte.gebuehren || []).reduce((s, g) => s + (Number(g.betrag) || 0), 0);
+      const fair = Number(a.fairerKern) || 0, save = Number(a.ersparnis) || 0;
+      const c = card(
+        '<span class="badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3z"/></svg>Basiert auf geltendem Verbraucherrecht</span>' +
+        '<h2 style="margin-top:12px">Das musst du wirklich zahlen.</h2>' +
+        '<div class="kpis">' +
+          '<div class="kpi"><div class="kpi__k">Geforderte Summe</div><div class="kpi__v">' + eur(orig) + '</div></div>' +
+          '<div class="kpi kpi--save"><div class="kpi__k">Fairer Kern</div><div class="kpi__v">' + eur(fair) + '</div></div>' +
+          '<div class="kpi"><div class="kpi__k">Ersparnis</div><div class="kpi__v">' + eur(save) + '</div></div>' +
+        '</div>'
+      );
+      main.appendChild(c);
+      main.appendChild(navRow("Zurück", "Zur Gegenwehr", true, () => goTo(4)));
+    }
+
+    function stepGegenwehr(main) {
+      const c = card(
+        '<p class="eyebrow">Schritt 5</p><h2>Gegenwehr</h2>' +
+        '<p class="lead">Deine fertige Antwort – kopieren oder als PDF herunterladen und an das Inkassobüro senden.</p>' +
+        '<div class="nav-row" style="margin-top:18px">' +
+          '<button class="btn btn--primary" id="copy">Antwort-E-Mail kopieren</button>' +
+          '<button class="btn btn--ghost" id="pdf">Als PDF</button>' +
+        '</div>' +
+        '<p class="disclaimer" style="margin-top:16px">Automatisierte Ersteinschätzung basierend auf geltenden Gesetzen – ersetzt keine anwaltliche Rechtsberatung.</p>'
+      );
+      main.appendChild(c);
+      main.appendChild(navRow("Zurück", null));
+      $("#copy", c).addEventListener("click", function () {
+        const txt = "Teilwiderspruch – Az. " + (AppState.akte.aktenzeichen || "") + "\n\n[Hier steht später die generierte Antwort.]";
+        (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => { this.textContent = "Kopiert ✓"; }).catch(() => {});
+      });
+    }
+
+    /* ============================ Init ============================ */
+    // Akte-Accordion auf Desktop immer offen halten
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const syncAkte = () => { if (mq.matches) $("#akte").setAttribute("open", ""); };
+    mq.addEventListener ? mq.addEventListener("change", syncAkte) : mq.addListener(syncAkte);
+    syncAkte();
+
+    renderProgress();
+    renderAkte();
+    renderStep();
+
+    // Optional für Debugging/Integration: window.InkassoDefense = { AppState, goTo, Api };
+    window.InkassoDefense = { AppState, goTo, Api, buildPromptPayload };
+  })();
+  </script>
+</body>
+</html>
