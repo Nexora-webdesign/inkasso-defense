@@ -55,6 +55,10 @@ export default function ImportCasePage() {
         try { localStorage.removeItem(KEY); } catch { /* ignore */ }
         // Direkt ins Schutz-Dashboard, wo die Fall-Begleitung aktiviert wird.
         window.location.assign("/konto");
+      } else if (res.status === 409 && j?.code === "case_exists") {
+        // Pro Konto nur ein Fall: zum bestehenden Fall führen, statt zu duplizieren.
+        try { localStorage.removeItem(KEY); } catch { /* ignore */ }
+        window.location.assign(j?.id ? `/fall/${j.id}` : "/konto");
       } else {
         setError(j?.error || "Speichern fehlgeschlagen. Bitte erneut versuchen.");
       }

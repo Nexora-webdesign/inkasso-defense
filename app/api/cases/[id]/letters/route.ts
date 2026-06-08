@@ -12,6 +12,7 @@ import {
   type FollowupFacts,
 } from "@/lib/followup";
 import { getLetterGuide, isStatusAdvance } from "@/lib/letter-guide";
+import { letterMatchesCase, type CaseStamm } from "@/lib/casematch";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -35,7 +36,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // Fall laden (RLS: nur eigener Fall sichtbar).
   const { data: fall } = await supabase
     .from("cases")
-    .select("id,status")
+    .select("id,status,result_json")
     .eq("id", id)
     .maybeSingle();
   if (!fall) return json({ ok: false, error: "Fall nicht gefunden." }, 404);
@@ -114,6 +115,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const f = facts as FollowupFacts;
   if (!f.dokument_erkannt) {
     return json({ ok: false, error: "Auf dem Dokument war kein Schreiben in dieser Sache erkennbar." }, 422);
+  }
+
+  // Zugehörigkeit prüfen: Folgebrief muss vom selben Inkasso/Gläubiger ODER
+  // mit dem gleichen Aktenzeichen stammen wie der Fall – sonst ablehnen.
+  const stamm = ((fall.result_json ?? {}) as { stammdaten?: CaseStamm }).stammdaten ?? {};
+  const match = letterMatchesCase(stamm, { absender_name: f.absender_name, aktenzeichen: f.aktenzeichen });
+  if (!match.ok) {
+    return json(
+      {
+        ok: false,
+        code: "case_mismatch",
+        error:
+          "Diese PDF gehört nicht zu diesem Fall – sie stammt von einem anderen Inkasso oder hat ein anderes Aktenzeichen. Bitte lade nur Schreiben zu genau diesem Fall hoch.",
+      },
+      422,
+    );
   }
 
   const analysis = {

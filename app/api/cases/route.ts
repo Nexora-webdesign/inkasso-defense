@@ -57,6 +57,26 @@ export async function POST(req: Request) {
     return json({ ok: false, error: "Kein gültiges Analyse-Ergebnis." }, 400);
   }
 
+  // Regel: nur EIN Fall pro Konto. Folgeschreiben werden zum bestehenden Fall
+  // hochgeladen (statt einen zweiten Fall anzulegen).
+  const { data: existing } = await supabase
+    .from("cases")
+    .select("id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  if (existing?.id) {
+    return json(
+      {
+        ok: false,
+        code: "case_exists",
+        id: existing.id,
+        error: "Pro Konto ist nur ein Fall möglich. Lade weitere Schreiben direkt zu deinem bestehenden Fall hoch.",
+      },
+      409,
+    );
+  }
+
   const autoDeleteAt = new Date(Date.now() + RETENTION_DAYS * 86_400_000).toISOString();
 
   const { data, error } = await supabase
