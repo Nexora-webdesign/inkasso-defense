@@ -3,6 +3,14 @@
 // gleiches Aktenzeichen ODER (falls kein Az) gleicher Gläubiger/Inkasso-Name.
 // Robust gegen OCR-/Formatierungs-Abweichungen (Normalisierung + Kern-Vergleich).
 
+// ── Regel 1: max. 1 Fall pro Konto ───────────────────────────────────────────
+export const MAX_CASES_PER_ACCOUNT = 1;
+
+/** Darf der Nutzer (mit bereits existingCaseCount Fällen) noch einen Fall anlegen? */
+export function canOpenNewCase(existingCaseCount: number): boolean {
+  return (Number(existingCaseCount) || 0) < MAX_CASES_PER_ACCOUNT;
+}
+
 export function norm(s: unknown): string {
   return String(s ?? "")
     .toLowerCase()

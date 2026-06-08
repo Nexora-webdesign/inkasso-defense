@@ -3,6 +3,7 @@
 // nur mit ausdrücklicher Einwilligung. Log-Hygiene: keine PII/Inhalte loggen.
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { canOpenNewCase } from "@/lib/casematch";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
@@ -57,15 +58,15 @@ export async function POST(req: Request) {
     return json({ ok: false, error: "Kein gültiges Analyse-Ergebnis." }, 400);
   }
 
-  // Regel: nur EIN Fall pro Konto. Folgeschreiben werden zum bestehenden Fall
-  // hochgeladen (statt einen zweiten Fall anzulegen).
+  // Regel 1: nur EIN Fall pro Konto (canOpenNewCase). Folgeschreiben werden zum
+  // bestehenden Fall hochgeladen (statt einen zweiten Fall anzulegen).
   const { data: existing } = await supabase
     .from("cases")
     .select("id")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
-  if (existing?.id) {
+  if (!canOpenNewCase(existing ? 1 : 0)) {
     return json(
       {
         ok: false,
