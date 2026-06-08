@@ -4,10 +4,10 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { getPremiumUntil } from "@/lib/premium";
+import { getPremiumUntilByKanzlei } from "@/lib/premium";
+import { resolveKanzleiId } from "@/lib/kanzlei";
 import { CASE_PRICE_LABEL } from "@/lib/pricing";
 import { eur, fmtDate, STATUS_LABEL, STATUS_CLS } from "@/lib/format";
-import { DashboardShell } from "@/components/account/DashboardShell";
 import { BuyAndActivate } from "@/components/account/BuyAndActivate";
 
 export const metadata: Metadata = { title: "Mein Dashboard", robots: { index: false } };
@@ -40,14 +40,16 @@ export default async function KontoPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/konto");
 
-  const premiumUntil = await getPremiumUntil(supabase, user.id);
+  // Premium gilt auf Kanzlei-Ebene -> Kanzlei serverseitig auflösen; bei nicht
+  // auflösbarer Kanzlei (kein/mehrdeutiges Mitglied bzw. DB-Fehler) "nicht Premium".
+  const kres = await resolveKanzleiId(supabase, user.id);
+  const premiumUntil = kres.ok ? await getPremiumUntilByKanzlei(supabase, kres.kanzleiId) : null;
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
   const premiumLabel = premiumUntil ? fmtDate(premiumUntil) : "";
 
   const { data: casesData, count } = await supabase
     .from("cases")
     .select("id,title,status,created_at,result_json", { count: "exact" })
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(50);
   const cases = (casesData ?? []) as CaseRow[];
@@ -60,7 +62,6 @@ export default async function KontoPage() {
   const { data: nextRem } = await supabase
     .from("reminders")
     .select("due_at")
-    .eq("user_id", user.id)
     .is("sent_at", null)
     .order("due_at", { ascending: true })
     .limit(1)
@@ -139,7 +140,7 @@ export default async function KontoPage() {
   );
 
   return (
-    <DashboardShell email={user.email} premiumActive={isPremium} premiumLabel={premiumLabel}>
+    <>
       {/* Begrüßung */}
       <p className="text-xs font-bold uppercase tracking-[0.22em] text-mint-light">Schutz-Dashboard</p>
       <h1 className="mt-2 font-display text-3xl font-semibold tracking-tightest text-white sm:text-4xl">
@@ -250,6 +251,6 @@ export default async function KontoPage() {
           ) : null}
         </>
       )}
-    </DashboardShell>
+    </>
   );
 }

@@ -4,7 +4,6 @@
 // liest das in localStorage zwischengespeicherte Analyse-Ergebnis,
 // holt die DSGVO-Einwilligung ein und speichert es als Fall.
 import { useEffect, useState } from "react";
-import { DashboardShell } from "@/components/account/DashboardShell";
 import { eur } from "@/lib/format";
 
 const KEY = "inkassoPendingCase";
@@ -77,7 +76,7 @@ export default function ImportCasePage() {
   const b = result?.berechnung ?? {};
 
   return (
-    <DashboardShell>
+    <>
         <h1 className="font-display text-3xl font-semibold leading-tight tracking-tightest text-white sm:text-4xl">
           Deinen Fall absichern
         </h1>
@@ -163,6 +162,6 @@ export default function ImportCasePage() {
             </p>
           </>
         )}
-    </DashboardShell>
+    </>
   );
 }
