@@ -103,11 +103,11 @@
         und berechnen, wie viel du <span class="font-semibold text-ink-900 dark:text-white">wirklich</span> zahlen musst.
       </p>
 
-      <!-- Kontext-Onboarding: gatet den Upload -->
+      <!-- Kontext-Onboarding: OPTIONAL (kein Upload-Gate mehr) -->
       <section id="onboarding-section" class="reveal mx-auto max-w-xl">
         <div class="rounded-4xl border border-white/70 bg-white/85 p-6 bezel-soft dark:border-white/10 dark:bg-night-surface sm:p-8">
-          <h2 class="text-lg font-bold text-ink-950 dark:text-white">Kurz vorab: 3 Fragen</h2>
-          <p class="mt-1 text-sm text-ink-700/70 dark:text-slate-400">Damit ordnen wir deinen Fall korrekt ein. Dauert 10 Sekunden.</p>
+          <h2 class="text-lg font-bold text-ink-950 dark:text-white">Optional: 3 kurze Fragen</h2>
+          <p class="mt-1 text-sm text-ink-700/70 dark:text-slate-400">Für eine genauere Einschätzung. Du kannst sie überspringen und direkt hochladen.</p>
 
           <div class="mt-6 space-y-5">
             <div class="onb-q" data-key="ersterBrief">
@@ -143,14 +143,14 @@
             </div>
           </div>
 
-          <button id="onb-continue" type="button" disabled
-            class="mt-7 w-full rounded-full bg-mint px-6 py-3.5 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-40">
-            Weiter zum Upload
+          <button id="onb-continue" type="button"
+            class="btn-press mt-7 w-full rounded-full bg-mint px-6 py-3.5 font-bold text-white transition">
+            Übernehmen &amp; zum Upload
           </button>
         </div>
       </section>
 
-      <section id="upload-section" class="hidden">
+      <section id="upload-section">
       <!-- Upload-Island -->
       <section id="upload" class="reveal mx-auto mt-10 w-full max-w-xl scroll-mt-28" style="--reveal-delay:180ms">
         <form id="upload-form" class="rounded-[2.25rem] border border-white/70 bg-white/85 p-2 bezel-soft dark:border-white/10 dark:bg-night-surface">

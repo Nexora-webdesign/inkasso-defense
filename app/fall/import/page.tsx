@@ -21,6 +21,7 @@ export default function ImportCasePage() {
   const [result, setResult] = useState<Result | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [preConsented, setPreConsented] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,10 +29,15 @@ export default function ImportCasePage() {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as { v?: number; ts?: number; result?: Result };
+        const parsed = JSON.parse(raw) as { v?: number; ts?: number; result?: Result; consent?: boolean };
         const fresh = typeof parsed?.ts === "number" && Date.now() - parsed.ts < MAX_AGE_MS;
         if (parsed?.v === 1 && fresh && parsed.result?.stammdaten && parsed.result?.berechnung) {
           setResult(parsed.result);
+          // F5: Einwilligung wurde bereits beim Upload bestätigt -> keine doppelte Abfrage.
+          if (parsed.consent === true) {
+            setConsent(true);
+            setPreConsented(true);
+          }
         }
       }
     } catch {
@@ -121,19 +127,26 @@ export default function ImportCasePage() {
               </dl>
             </div>
 
-            {/* Einwilligung */}
-            <label className="mt-6 flex cursor-pointer gap-3 rounded-2xl border border-white/10 bg-night p-4">
-              <input
-                type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-                className="mt-0.5 h-5 w-5 flex-shrink-0 accent-mint"
-              />
-              <span className="text-sm text-slate-300">
-                Ich willige ein, dass mein Analyse-Ergebnis in meinem Konto gespeichert wird. Das
-                hochgeladene Dokument wird nicht gespeichert. Ich kann den Fall jederzeit löschen.
-              </span>
-            </label>
+            {/* Einwilligung – beim Upload bereits bestätigt? Dann nur Info, keine doppelte Checkbox. */}
+            {preConsented ? (
+              <p className="mt-6 rounded-2xl border border-white/10 bg-night p-4 text-sm text-slate-400">
+                Mit dem Speichern wird dein <strong className="font-semibold text-white">Analyse-Ergebnis</strong> in
+                deinem Konto gesichert (nicht das hochgeladene Dokument). Du kannst den Fall jederzeit selbst löschen.
+              </p>
+            ) : (
+              <label className="mt-6 flex cursor-pointer gap-3 rounded-2xl border border-white/10 bg-night p-4">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 flex-shrink-0 accent-mint"
+                />
+                <span className="text-sm text-slate-300">
+                  Ich willige ein, dass mein Analyse-Ergebnis in meinem Konto gespeichert wird. Das
+                  hochgeladene Dokument wird nicht gespeichert. Ich kann den Fall jederzeit löschen.
+                </span>
+              </label>
+            )}
 
             <button
               type="button"
