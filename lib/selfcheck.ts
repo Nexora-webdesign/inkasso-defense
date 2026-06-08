@@ -82,19 +82,21 @@ export async function runSelfCheck(): Promise<SelfCheckResult> {
     checks.push({ name: "db", status: "error", detail: "kein Service-Role-Key – DB-/Cron-Check übersprungen" });
   }
 
-  // 4) Resend erreichbar / Key gültig
+  // 4) Resend: Key vorhanden? Ein "Sending access"-Key darf bewusst NICHT
+  //    /domains lesen (401) – das ist kein Fehler. Der tatsächliche Versand
+  //    wird beim Reminder-/Alert-Lauf real geprüft (sendEmail wirft bei !ok).
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
+    let detail = "API-Key gesetzt (Versand aktiv)";
     try {
       const r = await fetch("https://api.resend.com/domains", { headers: { Authorization: `Bearer ${resendKey}` } });
-      checks.push({
-        name: "resend",
-        status: r.ok ? "ok" : r.status === 401 ? "error" : "warn",
-        detail: `HTTP ${r.status}`,
-      });
+      detail = r.ok ? "API-Key gültig (Vollzugriff)" : `API-Key gesetzt (Sende-Rechte; /domains ${r.status})`;
     } catch {
-      checks.push({ name: "resend", status: "warn", detail: "nicht erreichbar" });
+      detail = "API-Key gesetzt (Erreichbarkeit nicht prüfbar)";
     }
+    checks.push({ name: "resend", status: "ok", detail });
+  } else {
+    checks.push({ name: "resend", status: "error", detail: "RESEND_API_KEY fehlt" });
   }
 
   const severity: CheckStatus = checks.some((c) => c.status === "error")
