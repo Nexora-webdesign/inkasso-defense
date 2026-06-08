@@ -4,7 +4,7 @@
 // liest das in localStorage zwischengespeicherte Analyse-Ergebnis,
 // holt die DSGVO-Einwilligung ein und speichert es als Fall.
 import { useEffect, useState } from "react";
-import { SiteHeader } from "@/components/blog/SiteHeader";
+import { DashboardShell } from "@/components/account/DashboardShell";
 
 const KEY = "inkassoPendingCase";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 h
@@ -53,7 +53,8 @@ export default function ImportCasePage() {
       const j = await res.json().catch(() => ({}));
       if (res.ok && j?.ok) {
         try { localStorage.removeItem(KEY); } catch { /* ignore */ }
-        window.location.assign("/faelle");
+        // Direkt ins Schutz-Dashboard, wo die Fall-Begleitung aktiviert wird.
+        window.location.assign("/konto");
       } else {
         setError(j?.error || "Speichern fehlgeschlagen. Bitte erneut versuchen.");
       }
@@ -68,11 +69,9 @@ export default function ImportCasePage() {
   const b = result?.berechnung ?? {};
 
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto max-w-xl px-4 pb-24 pt-14 sm:pt-20">
+    <DashboardShell>
         <h1 className="font-display text-3xl font-semibold leading-tight tracking-tightest text-white sm:text-4xl">
-          Fall im Konto speichern
+          Deinen Fall absichern
         </h1>
 
         {!loaded ? (
@@ -138,7 +137,7 @@ export default function ImportCasePage() {
               disabled={!consent || saving}
               className="btn-press mt-5 w-full rounded-2xl bg-mint py-3.5 text-base font-bold text-night shadow-float outline-none focus-visible:ring-2 focus-visible:ring-mint/60 disabled:opacity-60"
             >
-              {saving ? "Speichern …" : "Fall speichern"}
+              {saving ? "Speichern …" : "Fall in das Schutz-Dashboard übernehmen"}
             </button>
             {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
 
@@ -149,7 +148,6 @@ export default function ImportCasePage() {
             </p>
           </>
         )}
-      </main>
-    </>
+    </DashboardShell>
   );
 }
