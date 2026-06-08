@@ -13,6 +13,7 @@ import {
 } from "@/lib/followup";
 import { getLetterGuide, isStatusAdvance } from "@/lib/letter-guide";
 import { letterMatchesCase, type CaseStamm } from "@/lib/casematch";
+import { buildReminderRows } from "@/lib/reminders";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -172,13 +173,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!stErr) statusChanged = true;
   }
 
-  // Erinnerung anlegen, wenn eine Tagesfrist genannt ist (Versand via Cron, nur Premium).
+  // Mehrstufige Erinnerungen anlegen, wenn eine Tagesfrist genannt ist
+  // (Versand via Cron, nur Premium): mehrere Stufen vor der Frist.
   if (analysis.fristTage > 0) {
-    const lead = analysis.fristTage > 3 ? analysis.fristTage - 3 : analysis.fristTage;
-    const dueAt = new Date(Date.now() + lead * 86_400_000).toISOString();
-    await supabase
-      .from("reminders")
-      .insert({ case_id: id, user_id: user.id, type: "widerspruch_14tage", due_at: dueAt });
+    const remRows = buildReminderRows(id, user.id, analysis.fristTage, Date.now());
+    await supabase.from("reminders").insert(remRows);
   }
 
   console.log(`[api/cases/letters] saved type=${f.letter_type} statusChanged=${statusChanged}`);

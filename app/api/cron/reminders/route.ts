@@ -2,12 +2,16 @@
 // Erinnerungen für Fälle mit aktiver Fall-Begleitung (Premium).
 // Geschützt per CRON_SECRET (Vercel sendet Authorization: Bearer <CRON_SECRET>).
 import { createAdminClient } from "@/utils/supabase/admin";
-import { getPremiumUntil } from "@/lib/premium";
+import { getPremiumStatus } from "@/lib/premium";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { SITE_URL } from "@/lib/blog-shared";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+// Nicht-Premium-Erinnerungen, die länger als das hier überfällig sind, werden
+// "konsumiert" (sent_at gesetzt), damit sie nicht ewig erneut verarbeitet werden.
+const STALE_DAYS = 21;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -18,6 +22,7 @@ type DueReminder = {
   type: string;
   case_id: string;
   user_id: string;
+  due_at: string;
   cases: { title: string | null; status: string | null } | null;
 };
 
@@ -51,7 +56,7 @@ export async function GET(req: Request) {
 
   const { data: due, error } = await admin
     .from("reminders")
-    .select("id, type, case_id, user_id, cases(title, status)")
+    .select("id, type, case_id, user_id, due_at, cases(title, status)")
     .is("sent_at", null)
     .lte("due_at", nowIso)
     .limit(200);
@@ -62,53 +67,68 @@ export async function GET(req: Request) {
   }
 
   const reminders = (due ?? []) as unknown as DueReminder[];
-  let sent = 0;
-  let skipped = 0;
+  const consume = (id: string) => admin.from("reminders").update({ sent_at: nowIso }).eq("id", id);
+
+  let sent = 0; // tatsächlich versendet
+  let obsolete = 0; // gegenstandslos (Status nicht mehr offen / veraltet) -> konsumiert
+  let deferred = 0; // bewusst NICHT konsumiert (kein Premium / transienter Fehler) -> Retry
 
   for (const r of reminders) {
     try {
       const status = r.cases?.status ?? "offen";
-      // Für Widerspruchs-Erinnerung nur relevant, solange der Fall offen ist.
+      // Widerspruchs-Erinnerung ist gegenstandslos, sobald der Fall nicht mehr offen ist.
       if (r.type === "widerspruch_14tage" && status !== "offen") {
-        await admin.from("reminders").update({ sent_at: nowIso }).eq("id", r.id);
-        skipped++;
+        await consume(r.id);
+        obsolete++;
         continue;
       }
 
-      // Nur bei aktiver Fall-Begleitung (Premium) versenden.
-      const premiumUntil = await getPremiumUntil(admin, r.user_id);
-      const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
-      if (!isPremium) {
-        await admin.from("reminders").update({ sent_at: nowIso }).eq("id", r.id);
-        skipped++;
+      // Premium fehlertolerant prüfen: bei DB-Fehler NICHT konsumieren (Retry).
+      const prem = await getPremiumStatus(admin, r.user_id);
+      if (prem.error) {
+        deferred++;
+        continue;
+      }
+      if (!prem.active) {
+        // Kein Premium: nicht senden. Nur sehr alte Erinnerungen konsumieren,
+        // damit eine spätere Freischaltung die Erinnerung noch auslösen kann.
+        const ageDays = (Date.now() - new Date(r.due_at).getTime()) / 86_400_000;
+        if (ageDays > STALE_DAYS) {
+          await consume(r.id);
+          obsolete++;
+        } else {
+          deferred++;
+        }
         continue;
       }
 
-      const { data: profile } = await admin
+      // E-Mail holen – bei Fehler/fehlend NICHT konsumieren (Retry).
+      const { data: profile, error: pErr } = await admin
         .from("profiles")
         .select("email")
         .eq("id", r.user_id)
         .maybeSingle();
-      const email = profile?.email as string | undefined;
-      if (!email) {
-        skipped++;
+      if (pErr || !profile?.email) {
+        deferred++;
         continue;
       }
 
       const caseUrl = `${SITE_URL}/fall/${r.case_id}`;
       await sendEmail({
-        to: email,
+        to: profile.email as string,
         subject: "Erinnerung: Frist für deinen Inkasso-Widerspruch",
         html: reminderHtml(r.cases?.title ?? "", caseUrl),
       });
-      await admin.from("reminders").update({ sent_at: nowIso }).eq("id", r.id);
+      // sent_at NUR nach erfolgreichem Versand setzen.
+      await consume(r.id);
       sent++;
     } catch (e) {
-      // Einzelfehler dürfen den Lauf nicht abbrechen; sent_at NICHT setzen → Retry morgen.
-      console.error("[cron/reminders] send error:", (e as Error)?.message);
+      // Versand-/Einzelfehler: NICHT konsumieren -> nächster Lauf versucht es erneut.
+      console.error("[cron/reminders] item error:", (e as Error)?.message);
+      deferred++;
     }
   }
 
-  console.log(`[cron/reminders] due=${reminders.length} sent=${sent} skipped=${skipped}`);
-  return json({ ok: true, due: reminders.length, sent, skipped });
+  console.log(`[cron/reminders] due=${reminders.length} sent=${sent} obsolete=${obsolete} deferred=${deferred}`);
+  return json({ ok: true, due: reminders.length, sent, obsolete, deferred });
 }
