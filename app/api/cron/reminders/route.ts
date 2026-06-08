@@ -129,6 +129,13 @@ export async function GET(req: Request) {
     }
   }
 
+  // Heartbeat (für Selbstcheck/Wächter) – best-effort, ignoriert fehlende Tabelle.
+  try {
+    await admin.from("system_status").upsert({ key: "reminders_cron", updated_at: nowIso }, { onConflict: "key" });
+  } catch {
+    /* system_status evtl. noch nicht migriert – unkritisch */
+  }
+
   console.log(`[cron/reminders] due=${reminders.length} sent=${sent} obsolete=${obsolete} deferred=${deferred}`);
   return json({ ok: true, due: reminders.length, sent, obsolete, deferred });
 }
