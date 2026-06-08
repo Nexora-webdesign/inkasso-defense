@@ -1,5 +1,8 @@
 "use client";
 
+// @deprecated Dunkle Sidebar-Shell des alten Portals. Seit dem hellen B2B-Portal
+// (Route-Group (portal) + components/portal/AppShell) NICHT mehr verwendet.
+// In Schritt 2 (Screen-Migration) ersatzlos löschen.
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

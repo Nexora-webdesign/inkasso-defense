@@ -5,11 +5,10 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { getPremiumUntil } from "@/lib/premium";
+import { getPremiumUntilByKanzlei } from "@/lib/premium";
 import { getEscalation, isCaseStatus, type CaseStatus } from "@/lib/escalation";
 import { getLetterGuide, LETTER_TYPE_LABEL } from "@/lib/letter-guide";
 import type { LetterType } from "@/lib/followup";
-import { DashboardShell } from "@/components/account/DashboardShell";
 import { CaseStatusControl } from "@/components/account/CaseStatusControl";
 import { CopyEmail } from "@/components/account/CopyEmail";
 import { DeleteCaseButton } from "@/components/account/DeleteCaseButton";
@@ -51,12 +50,13 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
   // RLS stellt sicher, dass nur eigene Fälle sichtbar sind.
   const { data: fall } = await supabase
     .from("cases")
-    .select("id,title,status,result_json,created_at")
+    .select("id,title,status,result_json,created_at,kanzlei_id")
     .eq("id", id)
     .maybeSingle();
   if (!fall) notFound();
 
-  const premiumUntil = await getPremiumUntil(supabase, user.id);
+  // Premium gilt auf Kanzlei-Ebene -> Kanzlei des Falls nutzen (RLS-geladen).
+  const premiumUntil = await getPremiumUntilByKanzlei(supabase, fall.kanzlei_id as string);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
   const premiumLabel = premiumUntil ? fmtDateShort(premiumUntil) : "";
 
@@ -87,7 +87,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
   const subject = az ? `Teilwiderspruch – Aktenzeichen ${az}` : "Teilwiderspruch gegen Ihre Forderung";
 
   return (
-    <DashboardShell email={user.email} premiumActive={isPremium} premiumLabel={premiumLabel}>
+    <>
         <Link href="/faelle" className="text-sm font-semibold text-slate-400 hover:text-mint-light">
           ← Meine Fälle
         </Link>
@@ -327,6 +327,6 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             <DeleteCaseButton caseId={fall.id as string} />
           </div>
         </section>
-    </DashboardShell>
+    </>
   );
 }

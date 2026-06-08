@@ -40,11 +40,28 @@ module.exports = {
           inset: '#0e1424',   // eingelassene Kerne
           hair: '#243047',    // feine Border
         },
+
+        // ── B2B-Portal „Editorial Legal-Tech" (hell) ──────────────────
+        // Werte als CSS-Variablen aus .portal-theme (src/input.css) → eine Quelle.
+        // Eigene Namen, damit ink/mint/night (Blog/Funnel) unberührt bleiben.
+        papier: 'var(--papier)',                                   // Hintergrund
+        karte: 'var(--karte)',                                     // Karten
+        tinte: { DEFAULT: 'var(--tinte)', soft: 'var(--tinte-soft)' }, // Text
+        haar: 'var(--haar)',                                       // Haarlinien
+        akten: { DEFAULT: 'var(--akten)', soft: 'var(--akten-soft)' }, // Marke/Aktionen
+        // Status NUR für rechtliche Bedeutung:
+        berechtigt: { DEFAULT: 'var(--berechtigt)', bg: 'var(--berechtigt-bg)' },
+        fraglich: { DEFAULT: 'var(--fraglich)', bg: 'var(--fraglich-bg)' },
+        ueberhoeht: { DEFAULT: 'var(--ueberhoeht)', bg: 'var(--ueberhoeht-bg)' },
       },
 
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
         display: ['Fraunces', 'Georgia', 'serif'],
+        // Portal-Schriften (next/font-Variablen, gesetzt im (portal)-Layout):
+        akte: ['var(--font-spectral)', 'Georgia', 'serif'],       // Überschriften
+        ui: ['var(--font-plex-sans)', 'system-ui', 'sans-serif'], // UI/Text
+        zahl: ['var(--font-plex-mono)', 'monospace'],             // Zahlen, §, Az.
       },
 
       letterSpacing: {

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { getPremiumUntil } from "@/lib/premium";
+import { getPremiumUntilByKanzlei } from "@/lib/premium";
+import { resolveKanzleiId } from "@/lib/kanzlei";
 import { fmtDate, STATUS_LABEL, STATUS_CLS } from "@/lib/format";
-import { DashboardShell } from "@/components/account/DashboardShell";
 
 export const metadata: Metadata = { title: "Meine Fälle", robots: { index: false } };
 
@@ -17,18 +17,19 @@ export default async function FaellePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/faelle");
 
-  const premiumUntil = await getPremiumUntil(supabase, user.id);
+  // Premium gilt auf Kanzlei-Ebene -> Kanzlei serverseitig auflösen.
+  const kres = await resolveKanzleiId(supabase, user.id);
+  const premiumUntil = kres.ok ? await getPremiumUntilByKanzlei(supabase, kres.kanzleiId) : null;
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
   const premiumLabel = premiumUntil ? fmtDate(premiumUntil) : "";
 
   const { data: cases } = await supabase
     .from("cases")
     .select("id,title,status,created_at")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   return (
-    <DashboardShell email={user.email} premiumActive={isPremium} premiumLabel={premiumLabel}>
+    <>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-mint-light">Übersicht</p>
@@ -79,6 +80,6 @@ export default async function FaellePage() {
           </a>
         </div>
       )}
-    </DashboardShell>
+    </>
   );
 }

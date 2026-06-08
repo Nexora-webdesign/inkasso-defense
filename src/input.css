@@ -16,6 +16,32 @@
   --mint: #12b886;
 }
 
+/* ============================================================
+   B2B-Portal „Editorial Legal-Tech" — Token-Quelle (scoped)
+   Nur unter .portal-theme aktiv → Blog/Funnel (dunkel) bleiben unberührt.
+   Tailwind-Farben (papier/karte/tinte/haar/akten/status) lesen diese Variablen.
+   ============================================================ */
+.portal-theme {
+  --papier: #F7F6F2;        /* warmes Papier — Hintergrund */
+  --karte: #FFFFFF;         /* Karten */
+  --tinte: #1B2333;         /* tiefe Tinte — Text */
+  --tinte-soft: #5A6275;    /* sekundärer Text */
+  --haar: #E4E2DB;          /* Haarlinien / Rahmen */
+  --akten: #2D4A7C;         /* Aktenblau — Marke & primäre Aktionen */
+  --akten-soft: #EAEFF6;    /* Aktenblau, sehr hell */
+  --berechtigt: #2F7A5A;    /* grün — berechtigt / geschuldet */
+  --berechtigt-bg: #E8F1EC;
+  --fraglich: #B5751F;      /* amber — fraglich / zu prüfen */
+  --fraglich-bg: #F7EEDD;
+  --ueberhoeht: #B23A2E;    /* rot-clay — klar überhöht */
+  --ueberhoeht-bg: #F6E6E3;
+
+  background-color: var(--papier);
+  color: var(--tinte);
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+  line-height: 1.55;
+}
+
 html { -webkit-text-size-adjust: 100%; }
 
 html, body { -webkit-tap-highlight-color: transparent; }
