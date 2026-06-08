@@ -84,7 +84,7 @@ export default async function FaellePage() {
           <p className="font-akte text-lg font-medium text-tinte">Noch keine Akten</p>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-tinte-soft">
             Neue Akten entstehen aus der Forderungsprüfung. Die Eingangsprüfung wird in Kürze direkt
-            ins Portal integriert – dann legst du hier die erste Akte an.
+            ins Portal integriert – dann legen Sie hier Ihre erste Akte an.
           </p>
         </div>
       )}
