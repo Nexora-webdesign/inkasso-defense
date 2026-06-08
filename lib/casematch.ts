@@ -11,7 +11,7 @@ export function canOpenNewCase(existingCaseCount: number): boolean {
   return (Number(existingCaseCount) || 0) < MAX_CASES_PER_ACCOUNT;
 }
 
-export function norm(s: unknown): string {
+function norm(s: unknown): string {
   return String(s ?? "")
     .toLowerCase()
     .replace(/ß/g, "ss")
@@ -19,20 +19,20 @@ export function norm(s: unknown): string {
 }
 
 /** Aktenzeichen-Schlüssel; "unbekannt"/leer -> "" (= nicht vorhanden). */
-export function azKey(s: unknown): string {
+function azKey(s: unknown): string {
   const n = norm(s);
   return n === "" || n === "unbekannt" ? "" : n;
 }
 
 /** Firmen-/Rechtsform-Floskeln entfernen, damit "Adler & Voß Inkasso GmbH" ~ "Adler & Voss". */
-export function creditorCore(s: unknown): string {
+function creditorCore(s: unknown): string {
   return norm(s).replace(
     /(gmbhcoke?g|gmbh|mbh|kgaa|gmbhco|ag|kg|ohg|ug|co|inkassodienst|inkassoservice|inkassogesellschaft|inkasso|forderungsmanagement|rechtsanwaelte|rechtsanwalt|kanzlei|rae|legal|eg|se)/g,
     "",
   );
 }
 
-export function creditorMatches(a: unknown, b: unknown): boolean {
+function creditorMatches(a: unknown, b: unknown): boolean {
   const ca = creditorCore(a);
   const cb = creditorCore(b);
   if (ca.length < 3 || cb.length < 3) return false;

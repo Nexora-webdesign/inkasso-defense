@@ -14,9 +14,7 @@ import { CaseStatusControl } from "@/components/account/CaseStatusControl";
 import { CopyEmail } from "@/components/account/CopyEmail";
 import { DeleteCaseButton } from "@/components/account/DeleteCaseButton";
 import { LetterUpload } from "@/components/account/LetterUpload";
-
-const dfmt = (d: string | Date) =>
-  new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" });
+import { eur, fmtDateShort } from "@/lib/format";
 
 type CaseLetter = {
   id: string;
@@ -35,9 +33,6 @@ type ResultJson = {
   emailTemplate?: string;
   hinweise?: string[];
 };
-
-const eur = (n: unknown) =>
-  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
 
 const POSTEN_BADGE: Record<string, { label: string; cls: string }> = {
   RECHTENS: { label: "Rechtens", cls: "bg-mint/15 text-mint-light" },
@@ -63,7 +58,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
 
   const premiumUntil = await getPremiumUntil(supabase, user.id);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
-  const premiumLabel = premiumUntil ? dfmt(premiumUntil) : "";
+  const premiumLabel = premiumUntil ? fmtDateShort(premiumUntil) : "";
 
   // Folgeschreiben (Verlauf) – RLS liefert nur eigene.
   const { data: lettersData } = await supabase
@@ -177,7 +172,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             <li className="rounded-3xl border border-white/10 bg-night-surface/60 p-5 bezel-soft">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="rounded-full bg-mint/15 px-2.5 py-1 text-[11px] font-bold text-mint-light">Erstes Inkasso-Schreiben</span>
-                <span className="text-xs text-slate-500">{dfmt(fall.created_at as string)}</span>
+                <span className="text-xs text-slate-500">{fmtDateShort(fall.created_at as string)}</span>
               </div>
               <p className="mt-2 text-sm text-slate-300">
                 Geforderte Summe {eur(orig)} · fairer Kern <span className="font-semibold text-mint-light">{eur(fair)}</span>
@@ -197,7 +192,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
                     <span className={"rounded-full px-2.5 py-1 text-[11px] font-bold " + (g.urgent ? "bg-rose-400/15 text-rose-300" : "bg-mint/15 text-mint-light")}>
                       {LETTER_TYPE_LABEL[l.letter_type]}
                     </span>
-                    <span className="text-xs text-slate-500">{dfmt(l.created_at)}</span>
+                    <span className="text-xs text-slate-500">{fmtDateShort(l.created_at)}</span>
                   </div>
                   {l.summary ? <p className="mt-2 text-sm text-slate-300">{l.summary}</p> : null}
                   <p className="mt-3 font-bold text-white">{g.headline}</p>

@@ -2,6 +2,7 @@
 // im Konto des angemeldeten Nutzers. Datenarm: nur result_json (kein Rohdokument),
 // nur mit ausdrücklicher Einwilligung. Log-Hygiene: keine PII/Inhalte loggen.
 import { cookies } from "next/headers";
+import { json } from "@/lib/http";
 import { createClient } from "@/utils/supabase/server";
 import { canOpenNewCase } from "@/lib/casematch";
 import { buildReminderRows, WIDERSPRUCH_FRIST_TAGE } from "@/lib/reminders";
@@ -11,9 +12,6 @@ export const maxDuration = 15;
 
 const RETENTION_DAYS = 90;
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 type ResultShape = {
   stammdaten?: { inkassoName?: unknown; glaeubiger?: unknown; aktenzeichen?: unknown };

@@ -6,27 +6,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getPremiumUntil } from "@/lib/premium";
 import { CASE_PRICE_LABEL } from "@/lib/pricing";
+import { eur, fmtDate, STATUS_LABEL, STATUS_CLS } from "@/lib/format";
 import { DashboardShell } from "@/components/account/DashboardShell";
 import { BuyAndActivate } from "@/components/account/BuyAndActivate";
 
 export const metadata: Metadata = { title: "Mein Dashboard", robots: { index: false } };
-
-const fmt = (d: Date) => d.toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
-const eur = (n: unknown) =>
-  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
-
-const STATUS_LABEL: Record<string, string> = {
-  offen: "Offen",
-  widerspruch_gesendet: "Widerspruch gesendet",
-  mahnbescheid_erhalten: "Mahnbescheid erhalten",
-  erledigt: "Erledigt",
-};
-const STATUS_CLS: Record<string, string> = {
-  offen: "bg-mint/15 text-mint-light",
-  widerspruch_gesendet: "bg-sky-400/15 text-sky-300",
-  mahnbescheid_erhalten: "bg-amber-400/15 text-amber-300",
-  erledigt: "bg-white/10 text-slate-300",
-};
 
 const BENEFITS = [
   "Wir erinnern dich automatisch an Fristen (z. B. 14-Tage-Widerspruch)",
@@ -58,7 +42,7 @@ export default async function KontoPage() {
 
   const premiumUntil = await getPremiumUntil(supabase, user.id);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
-  const premiumLabel = premiumUntil ? fmt(premiumUntil) : "";
+  const premiumLabel = premiumUntil ? fmtDate(premiumUntil) : "";
 
   const { data: casesData, count } = await supabase
     .from("cases")
@@ -208,7 +192,7 @@ export default async function KontoPage() {
                         <span className={"rounded-full px-2 py-0.5 text-[11px] font-bold " + (STATUS_CLS[c.status] || "bg-white/10 text-slate-300")}>
                           {STATUS_LABEL[c.status] || c.status}
                         </span>
-                        <span>{fmt(new Date(c.created_at))}</span>
+                        <span>{fmtDate(new Date(c.created_at))}</span>
                       </span>
                     </span>
                     <span className="text-mint-light transition-transform group-hover:translate-x-0.5">→</span>

@@ -2,6 +2,7 @@
 // Erinnerungen für Fälle mit aktiver Fall-Begleitung (Premium).
 // Geschützt per CRON_SECRET (Vercel sendet Authorization: Bearer <CRON_SECRET>).
 import { createAdminClient } from "@/utils/supabase/admin";
+import { json } from "@/lib/http";
 import { getPremiumStatus } from "@/lib/premium";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { SITE_URL } from "@/lib/blog-shared";
@@ -13,9 +14,6 @@ export const maxDuration = 60;
 // "konsumiert" (sent_at gesetzt), damit sie nicht ewig erneut verarbeitet werden.
 const STALE_DAYS = 21;
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 type DueReminder = {
   id: string;

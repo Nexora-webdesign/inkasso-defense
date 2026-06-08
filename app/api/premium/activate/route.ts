@@ -3,6 +3,7 @@
 // angemeldeten Account: prüft Echtheit, schützt vor Mehrfacheinlösung (UNIQUE
 // auf license_hash) und gewährt PREMIUM_DAYS Tage Premium.
 import { cookies } from "next/headers";
+import { json } from "@/lib/http";
 import { createClient } from "@/utils/supabase/server";
 import { verifyLicense, LicenseCheckError } from "@/lib/lemonsqueezy";
 import { hashLicense, PREMIUM_DAYS } from "@/lib/premium";
@@ -10,9 +11,6 @@ import { hashLicense, PREMIUM_DAYS } from "@/lib/premium";
 export const runtime = "nodejs";
 export const maxDuration = 15;
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 export async function POST(req: Request) {
   const supabase = createClient(await cookies());

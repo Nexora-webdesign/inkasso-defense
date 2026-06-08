@@ -3,14 +3,12 @@
 // kaputt ist (severity = error). Geschützt per CRON_SECRET.
 // Manuell prüfbar: curl -H "Authorization: Bearer <CRON_SECRET>" .../api/cron/health-alert
 import { runSelfCheck } from "@/lib/selfcheck";
+import { json } from "@/lib/http";
 import { sendEmail, escapeHtml } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
