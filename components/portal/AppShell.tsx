@@ -28,9 +28,9 @@ export function AppShell({ email, children }: { email?: string; children: ReactN
       {/* ── Top-Leiste ──────────────────────────────────────────────── */}
       <header className="border-b border-haar bg-karte">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-4 sm:px-8">
-          {/* Wortmarke */}
+          {/* Wortmarke → Portal-Zuhause */}
           <Link
-            href="/konto"
+            href="/faelle"
             className="flex items-center gap-3 rounded outline-none focus-visible:ring-2 focus-visible:ring-akten/40"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-tinte font-akte text-base font-semibold text-papier">
@@ -60,12 +60,9 @@ export function AppShell({ email, children }: { email?: string; children: ReactN
                 </Link>
               );
             })}
-            <a
-              href="/"
-              className="ml-1 hidden rounded-md border border-akten bg-akten px-3.5 py-2 text-sm font-medium text-white outline-none transition-colors hover:bg-[#24406e] focus-visible:ring-2 focus-visible:ring-akten/40 sm:inline-block"
-            >
-              Forderung prüfen
-            </a>
+            {/* „Forderung prüfen" entfernt: zeigte auf den öffentlichen B2C-Funnel "/"
+                und hätte den eingeloggten Nutzer aus dem Portal geworfen. Kommt zurück,
+                sobald es einen In-Portal-Start-Screen gibt (wie „Mandanten"). */}
             <form action="/auth/signout" method="post">
               <button
                 type="submit"

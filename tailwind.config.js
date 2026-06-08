@@ -48,7 +48,7 @@ module.exports = {
         karte: 'var(--karte)',                                     // Karten
         tinte: { DEFAULT: 'var(--tinte)', soft: 'var(--tinte-soft)' }, // Text
         haar: 'var(--haar)',                                       // Haarlinien
-        akten: { DEFAULT: 'var(--akten)', soft: 'var(--akten-soft)' }, // Marke/Aktionen
+        akten: { DEFAULT: 'var(--akten)', soft: 'var(--akten-soft)', dark: 'var(--akten-dark)' }, // Marke/Aktionen
         // Status NUR für rechtliche Bedeutung:
         berechtigt: { DEFAULT: 'var(--berechtigt)', bg: 'var(--berechtigt-bg)' },
         fraglich: { DEFAULT: 'var(--fraglich)', bg: 'var(--fraglich-bg)' },

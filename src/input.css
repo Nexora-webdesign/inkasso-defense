@@ -29,6 +29,7 @@
   --haar: #E4E2DB;          /* Haarlinien / Rahmen */
   --akten: #2D4A7C;         /* Aktenblau — Marke & primäre Aktionen */
   --akten-soft: #EAEFF6;    /* Aktenblau, sehr hell */
+  --akten-dark: #24406E;    /* Aktenblau, dunkler — Hover/aktive Aktionen */
   --berechtigt: #2F7A5A;    /* grün — berechtigt / geschuldet */
   --berechtigt-bg: #E8F1EC;
   --fraglich: #B5751F;      /* amber — fraglich / zu prüfen */
