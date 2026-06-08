@@ -70,6 +70,8 @@ module.exports = {
 
       boxShadow: {
         float: '0 24px 60px -20px rgba(10, 15, 36, 0.22)',
+        // Portal „Editorial Legal-Tech": ruhige Karten-Elevation (hell).
+        akte: '0 1px 0 rgba(27, 35, 51, 0.03), 0 14px 30px -22px rgba(27, 35, 51, 0.25)',
       },
 
       borderRadius: {
