@@ -31,3 +31,26 @@ export async function getPremiumUntil(
   if (error || !data || data.length === 0) return null;
   return new Date(new Date(data[0].consumed_at as string).getTime() + PREMIUM_DAYS * 86_400_000);
 }
+
+/**
+ * Wie getPremiumUntil, unterscheidet aber „kein Premium" von einem DB-Fehler.
+ * Wichtig für den Cron: bei error=true NICHT als „nicht Premium" behandeln
+ * (sonst würde eine Erinnerung bei einem transienten Fehler fälschlich verbraucht).
+ */
+export async function getPremiumStatus(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{ active: boolean; until: Date | null; error: boolean }> {
+  const sinceMs = Date.now() - PREMIUM_DAYS * 86_400_000;
+  const { data, error } = await supabase
+    .from("consumed_licenses")
+    .select("consumed_at")
+    .eq("user_id", userId)
+    .gte("consumed_at", new Date(sinceMs).toISOString())
+    .order("consumed_at", { ascending: false })
+    .limit(1);
+  if (error) return { active: false, until: null, error: true };
+  if (!data || data.length === 0) return { active: false, until: null, error: false };
+  const until = new Date(new Date(data[0].consumed_at as string).getTime() + PREMIUM_DAYS * 86_400_000);
+  return { active: until.getTime() > Date.now(), until, error: false };
+}

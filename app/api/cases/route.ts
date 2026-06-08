@@ -4,12 +4,12 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { canOpenNewCase } from "@/lib/casematch";
+import { buildReminderRows, WIDERSPRUCH_FRIST_TAGE } from "@/lib/reminders";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
 
 const RETENTION_DAYS = 90;
-const REMINDER_DAYS = 7;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -105,15 +105,11 @@ export async function POST(req: Request) {
     console.error("[api/cases] consent stamp error:", (consentErr as { code?: string }).code);
   }
 
-  // Fristen-Erinnerung planen (nicht-fatal). Versand erfolgt per Cron nur bei
-  // aktiver Fall-Begleitung; fällig nach REMINDER_DAYS Tagen, solange Fall offen.
-  const dueAt = new Date(Date.now() + REMINDER_DAYS * 86_400_000).toISOString();
-  const { error: remErr } = await supabase.from("reminders").insert({
-    case_id: data.id,
-    user_id: user.id,
-    type: "widerspruch_14tage",
-    due_at: dueAt,
-  });
+  // Mehrstufige Fristen-Erinnerungen planen (nicht-fatal). Versand per Cron nur
+  // bei aktiver Fall-Begleitung & solange Fall offen. Mehrere Stufen (7/2/0 Tage
+  // vor der 14-Tage-Frist), damit ein einzelner Ausfall nicht zum Fristverlust führt.
+  const remRows = buildReminderRows(data.id as string, user.id, WIDERSPRUCH_FRIST_TAGE, Date.now());
+  const { error: remErr } = await supabase.from("reminders").insert(remRows);
   if (remErr) {
     console.error("[api/cases] reminder insert error:", (remErr as { code?: string }).code);
   }
