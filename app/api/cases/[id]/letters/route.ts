@@ -19,7 +19,8 @@ import { buildReminderRows } from "@/lib/reminders";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MODEL = "claude-haiku-4-5";
+// Env-pinbar (ANALYZE_MODEL=…-YYYYMMDD) – konsistent mit /api/analyze, für reproduzierbare Ergebnisse.
+const MODEL = process.env.ANALYZE_MODEL || "claude-haiku-4-5";
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const client = new Anthropic();
 

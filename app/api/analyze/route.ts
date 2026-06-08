@@ -20,9 +20,10 @@ export const maxDuration = 60;
 
 const client = new Anthropic(); // ANTHROPIC_API_KEY aus der Env
 
-// MODELL: für reproduzierbare Ergebnisse vor Produktiveinsatz auf einen
-// datierten Snapshot pinnen (z. B. "claude-haiku-4-5-YYYYMMDD").
-const MODEL = "claude-haiku-4-5";
+// MODELL: env-pinbar für reproduzierbare Ergebnisse. In Vercel ANALYZE_MODEL auf
+// einen DATIERTEN Snapshot setzen (z. B. "claude-haiku-4-5-YYYYMMDD"), damit ein
+// serverseitiges Alias-Update nicht zu abweichender Extraktion führt.
+const MODEL = process.env.ANALYZE_MODEL || "claude-haiku-4-5";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
