@@ -5,7 +5,7 @@ import { evaluate } from "@/lib/rule-engine";
 import { CASES, makeFakten, posten } from "@/golden/cases";
 import { REGELN } from "@/lib/rules";
 
-const FREIGABE_HINWEIS = "Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.";
+const FREIGABE_HINWEIS = "Eine mögliche Kürzung ist noch nicht abschließend bestätigt.";
 
 describe("Golden-Suite: Rule-Engine", () => {
   // Informations-Modus: alle Regeln rechnen; Werte wie in den Golden-Fällen.
