@@ -9,6 +9,41 @@
   const EASE_OUT = (t) => 1 - Math.pow(1 - t, 3);
 
   /* ============================================================
+   * 0) Toasts – sanfte Inline-Hinweise statt nativer alert()
+   * ============================================================ */
+  function notify(message, type) {
+    try {
+      let c = document.getElementById('toast-container');
+      if (!c) {
+        c = document.createElement('div');
+        c.id = 'toast-container';
+        c.style.cssText = 'position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:10px;width:min(92vw,440px);pointer-events:none';
+        document.body.appendChild(c);
+      }
+      const accent = type === 'error' ? '#fb7185' : '#6ee7c4';
+      const icon = type === 'error'
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+      const t = document.createElement('div');
+      t.setAttribute('role', 'status');
+      t.setAttribute('aria-live', 'polite');
+      t.style.cssText = 'pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#161f30;color:#e7ecf5;border:1px solid rgba(255,255,255,0.12);border-left:3px solid ' + accent + ';border-radius:16px;padding:13px 15px;font:500 14px/1.45 system-ui,-apple-system,sans-serif;box-shadow:0 18px 44px -16px rgba(0,0,0,0.65);opacity:0;transform:translateY(8px);transition:opacity .22s ease,transform .22s ease';
+      const ic = document.createElement('span');
+      ic.style.cssText = 'flex:0 0 auto;margin-top:1px;color:' + accent;
+      ic.innerHTML = icon;
+      const tx = document.createElement('span');
+      tx.textContent = String(message == null ? '' : message);
+      t.appendChild(ic); t.appendChild(tx);
+      c.appendChild(t);
+      requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateY(0)'; });
+      const ttl = type === 'error' ? 5200 : 3400;
+      setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; setTimeout(() => t.remove(), 260); }, ttl);
+    } catch (_) {
+      try { window.alert(message); } catch (__) {}
+    }
+  }
+
+  /* ============================================================
    * 1) Scroll-Reveal (IntersectionObserver)
    * ============================================================ */
   let revealObserver = null;
@@ -302,8 +337,8 @@
 
     function setFile(f) {
       if (!f) return;
-      if (f.size > MAX) { alert('Die Datei ist zu groß (max. 10 MB).'); return; }
-      if (f.type && !OK.includes(f.type)) { alert('Bitte ein Foto (JPG/PNG) oder PDF hochladen.'); return; }
+      if (f.size > MAX) { notify('Die Datei ist zu groß (max. 10 MB).', 'error'); return; }
+      if (f.type && !OK.includes(f.type)) { notify('Bitte ein Foto (JPG/PNG) oder PDF hochladen.', 'error'); return; }
       file = f;
       nameEl.textContent = f.name;
       pill.classList.remove('hidden'); pill.classList.add('inline-flex');
@@ -319,7 +354,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!file) return;
-      if (consent && !consent.checked) { alert('Bitte bestätige zuerst die Datenschutz-Einwilligung.'); return; }
+      if (consent && !consent.checked) { notify('Bitte bestätige zuerst die Datenschutz-Einwilligung.', 'error'); return; }
       btn.disabled = true;
       label.textContent = 'Analysiere Forderung …';
       if (loader) loader.start();
@@ -355,7 +390,7 @@
         if (loader) loader.finish(go); else go();
       } catch (err) {
         if (loader) loader.stop();
-        alert(err.message || 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.');
+        notify(err.message || 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.', 'error');
         btn.disabled = false;
         label.textContent = 'Forderung jetzt analysieren';
       }
@@ -490,11 +525,22 @@
         : `Alle ${total} Posten halten der rechtlichen Prüfung stand.`));
 
     const paras = Array.from(new Set(posten.filter((p) => p.status !== 'RECHTENS').map((p) => p.paragraph).filter(Boolean)));
-    set('exp-weshalb', paras.length
-      ? `Maßgeblich sind u. a.: ${paras.join(' · ')}.`
-      : 'Die geforderten Beträge sind rechtlich nicht zu beanstanden.');
+    // T1: Klartext-Nutzen zuerst, Paragraphen nur als kleine Beleg-Badges.
+    const belegBadge = (t) => `<span class="inline-block whitespace-nowrap rounded-md bg-black/5 px-1.5 py-0.5 text-[11px] font-semibold text-ink-700/60 dark:bg-white/10 dark:text-slate-400">${esc(t)}</span>`;
 
-    set('exp-warum', 'Mit einem sofortigen Teilwiderspruch zahlst du nur den unstrittigen fairen Kern. Die fertige E-Mail enthält eine Tilgungsbestimmung (§ 366 Abs. 1 BGB) und widerspricht der Übermittlung der bestrittenen Forderung an die SCHUFA (§ 31 BDSG) – so vermeidest du einen negativen Eintrag.');
+    const weshalbEl = $('exp-weshalb');
+    if (weshalbEl) {
+      weshalbEl.innerHTML = paras.length
+        ? 'Diese gesetzlichen Regeln stützen die Kürzung:<span class="mt-2 flex flex-wrap gap-1.5">' + paras.map(belegBadge).join('') + '</span>'
+        : 'Die geforderten Beträge sind rechtlich nicht zu beanstanden.';
+    }
+
+    const warumEl = $('exp-warum');
+    if (warumEl) {
+      warumEl.innerHTML =
+        'So vermeidest du einen negativen SCHUFA-Eintrag: Mit dem sofortigen Teilwiderspruch zahlst du nur den fairen Kern – die fertige E-Mail widerspricht zugleich der Übermittlung der bestrittenen Forderung an die SCHUFA.'
+        + '<span class="mt-2 flex flex-wrap gap-1.5">' + belegBadge('§ 366 BGB') + belegBadge('§ 31 BDSG') + '</span>';
+    }
 
     // E-Mail
     const subject = az ? `Teilwiderspruch – Aktenzeichen ${az}` : 'Teilwiderspruch gegen Ihre Forderung';
@@ -615,7 +661,7 @@
           document.body.appendChild(link); link.click(); link.remove();
           setTimeout(() => URL.revokeObjectURL(url), 4000);
         } catch (err) {
-          alert(err.message || 'PDF-Download fehlgeschlagen. Bitte erneut versuchen.');
+          notify(err.message || 'PDF-Download fehlgeschlagen. Bitte erneut versuchen.', 'error');
         } finally {
           dlBtn.disabled = false; if (dlSpan) dlSpan.textContent = prev;
         }

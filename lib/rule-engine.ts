@@ -136,7 +136,7 @@ export function evaluate(fakten: Fakten, onboarding: Onboarding = DEFAULT_ONBOAR
     hinweise.push("Die automatische Erfassung war unsicher. Bitte lass das Ergebnis anwaltlich prüfen.");
   }
   if (ungepruefteC > 0) {
-    hinweise.push("Eine mögliche Kürzung wartet noch auf anwaltliche Freigabe.");
+    hinweise.push("Eine mögliche Kürzung ist noch nicht abschließend bestätigt.");
   }
   if (fakten.zweite_anwalts_geschaeftsgebuehr) {
     hinweise.push(
