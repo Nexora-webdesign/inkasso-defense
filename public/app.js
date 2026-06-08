@@ -185,10 +185,19 @@
       return Number.isFinite(n) ? n : NaN;
     }
 
+    // Antworten sind OPTIONAL (kein Upload-Gate). Bei jeder Änderung live in
+    // sessionStorage sichern, damit die Analyse sie nutzt – auch ohne Klick auf "Weiter".
     function validate() {
-      const answered = state.ersterBrief !== null && state.bereitsWidersprochen !== null && state.bereitsGezahlt !== null;
-      const amountOk = state.bereitsGezahlt !== true || parseEur(amountInput && amountInput.value) > 0;
-      continueBtn.disabled = !(answered && amountOk);
+      const gezahlt =
+        state.bereitsGezahlt && parseEur(amountInput && amountInput.value) > 0
+          ? Math.round(parseEur(amountInput.value) * 100) / 100
+          : 0;
+      const onboarding = {
+        ersterBrief: state.ersterBrief,
+        bereitsWidersprochen: state.bereitsWidersprochen,
+        bereitsGezahltEur: gezahlt,
+      };
+      try { sessionStorage.setItem('inkassoOnboarding', JSON.stringify(onboarding)); } catch (_) {}
     }
 
     function selectInQuestion(q, val) {
@@ -240,20 +249,9 @@
     } catch (_) {}
 
     continueBtn.addEventListener('click', () => {
-      const onboarding = {
-        ersterBrief: state.ersterBrief,
-        bereitsWidersprochen: state.bereitsWidersprochen,
-        bereitsGezahltEur: state.bereitsGezahlt ? Math.round(parseEur(amountInput.value) * 100) / 100 : 0,
-      };
-      try { sessionStorage.setItem('inkassoOnboarding', JSON.stringify(onboarding)); } catch (_) {}
-
-      onbSection.classList.add('hidden');
-      if (uploadSection) {
-        uploadSection.classList.remove('hidden');
-        uploadSection.classList.add('reveal');
-        if (typeof reveal === 'function') reveal(uploadSection);
-        uploadSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      validate(); // Antworten sichern
+      const target = document.getElementById('upload') || uploadSection;
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   })();
 
@@ -348,7 +346,11 @@
               : `Die Analyse ist fehlgeschlagen (Status ${res.status || '–'}). Bitte erneut versuchen.`);
           throw new Error(msg);
         }
-        sessionStorage.setItem('inkassoResult', JSON.stringify(data.data));
+        // Ergebnis persistent (localStorage) – übersteht Tab-Schließen/Neuladen.
+        localStorage.setItem('inkassoResult', JSON.stringify(data.data));
+        // Einwilligung wurde für die Analyse bereits aktiv bestätigt (Pflicht oben) –
+        // für den späteren Konto-Import vermerken, um doppelte Abfrage zu vermeiden.
+        try { localStorage.setItem('inkassoUploadConsent', '1'); } catch (_) {}
         const go = () => { window.location.href = 'dashboard.html'; };
         if (loader) loader.finish(go); else go();
       } catch (err) {
@@ -367,7 +369,7 @@
     const root = document.getElementById('dashboard');
     if (!root) return;
 
-    const raw = sessionStorage.getItem('inkassoResult');
+    const raw = localStorage.getItem('inkassoResult') || sessionStorage.getItem('inkassoResult');
     if (!raw) { window.location.href = 'index.html'; return; }
     let d; try { d = JSON.parse(raw); } catch (_) { window.location.href = 'index.html'; return; }
 
@@ -383,12 +385,12 @@
       if (typeof reveal === 'function') reveal(hbox);
     }
 
-    // Dynamisches Badge: "Anwaltlich geprüft" nur, wenn alle angewendeten
-    // Regeln freigegeben sind – sonst "Regelbasierte Analyse".
+    // Dynamisches Badge: hervorgehoben, wenn alle angewendeten Regeln freigegeben
+    // sind. KEIN "anwaltlich" (Regeln sind nicht anwaltlich abgenommen).
     const audit = d.audit || {};
     const badgeEl = document.getElementById('analyse-badge-text');
     if (badgeEl) {
-      badgeEl.textContent = audit.alleAngewendetenGeprueft ? 'Anwaltlich geprüft' : 'Regelbasierte Analyse';
+      badgeEl.textContent = audit.alleAngewendetenGeprueft ? 'Basiert auf geltendem Verbraucherrecht' : 'Regelbasierte Analyse';
     }
 
     const stamm = d.stammdaten || {};
@@ -627,7 +629,8 @@
       if (!btn) return;
       btn.addEventListener('click', () => {
         try {
-          localStorage.setItem('inkassoPendingCase', JSON.stringify({ v: 1, ts: Date.now(), result: d }));
+          const consent = localStorage.getItem('inkassoUploadConsent') === '1';
+          localStorage.setItem('inkassoPendingCase', JSON.stringify({ v: 1, ts: Date.now(), result: d, consent }));
         } catch (_) { /* ignore */ }
         window.location.href = '/fall/import';
       });
