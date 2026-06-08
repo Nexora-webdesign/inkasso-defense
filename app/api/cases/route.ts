@@ -4,13 +4,12 @@
 import { cookies } from "next/headers";
 import { json } from "@/lib/http";
 import { createClient } from "@/utils/supabase/server";
-import { canOpenNewCase } from "@/lib/casematch";
+import { resolveKanzleiId, mandantBelongsToKanzlei } from "@/lib/kanzlei";
 import { buildReminderRows, WIDERSPRUCH_FRIST_TAGE } from "@/lib/reminders";
+import { RULES_VERSION } from "@/lib/rules";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
-
-const RETENTION_DAYS = 90;
 
 
 type ResultShape = {
@@ -33,9 +32,9 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) return json({ ok: false, error: "Bitte zuerst anmelden." }, 401);
 
-  let body: { result?: unknown; consent?: unknown };
+  let body: { result?: unknown; consent?: unknown; kanzleiId?: unknown; mandantId?: unknown };
   try {
-    body = (await req.json()) as { result?: unknown; consent?: unknown };
+    body = (await req.json()) as typeof body;
   } catch {
     return json({ ok: false, error: "Ungültiger Request-Body." }, 400);
   }
@@ -56,36 +55,39 @@ export async function POST(req: Request) {
     return json({ ok: false, error: "Kein gültiges Analyse-Ergebnis." }, 400);
   }
 
-  // Regel 1: nur EIN Fall pro Konto (canOpenNewCase). Folgeschreiben werden zum
-  // bestehenden Fall hochgeladen (statt einen zweiten Fall anzulegen).
-  const { data: existing } = await supabase
-    .from("cases")
-    .select("id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!canOpenNewCase(existing ? 1 : 0)) {
-    return json(
-      {
-        ok: false,
-        code: "case_exists",
-        id: existing.id,
-        error: "Pro Konto ist nur ein Fall möglich. Lade weitere Schreiben direkt zu deinem bestehenden Fall hoch.",
-      },
-      409,
-    );
+  // Kanzlei serverseitig auflösen (Anti-Spoofing: Client-Wunsch nur, wenn Mitglied).
+  // Kein „1 Fall pro Konto" mehr – eine Kanzlei verwaltet beliebig viele Akten.
+  const requestedKanzlei = typeof body.kanzleiId === "string" ? body.kanzleiId : undefined;
+  const kres = await resolveKanzleiId(supabase, user.id, requestedKanzlei);
+  if (!kres.ok) {
+    if (kres.code === "no_kanzlei")
+      return json({ ok: false, code: kres.code, error: "Dein Konto ist keiner Kanzlei zugeordnet." }, 409);
+    if (kres.code === "ambiguous_kanzlei")
+      return json({ ok: false, code: kres.code, error: "Bitte Kanzlei wählen." }, 400);
+    if (kres.code === "forbidden_kanzlei")
+      return json({ ok: false, code: kres.code, error: "Kein Zugriff auf diese Kanzlei." }, 403);
+    return json({ ok: false, error: "Kanzlei konnte nicht ermittelt werden." }, 500);
+  }
+  const kanzleiId = kres.kanzleiId;
+
+  // Optionaler Mandantenbezug (nullable): wenn gesetzt, muss er zur Kanzlei gehören
+  // (verhindert Cross-Tenant-Verknüpfung; cases-INSERT-Policy prüft nur die Rolle).
+  const mandantId = typeof body.mandantId === "string" && body.mandantId ? body.mandantId : null;
+  if (mandantId && !(await mandantBelongsToKanzlei(supabase, mandantId, kanzleiId))) {
+    return json({ ok: false, error: "Der gewählte Mandant gehört nicht zu dieser Kanzlei." }, 400);
   }
 
-  const autoDeleteAt = new Date(Date.now() + RETENTION_DAYS * 86_400_000).toISOString();
-
+  // Vorgabe 4: Kanzlei-Akten unterliegen KEINER Auto-Löschung -> auto_delete_at bleibt null.
   const { data, error } = await supabase
     .from("cases")
     .insert({
-      user_id: user.id,
+      kanzlei_id: kanzleiId,
+      created_by: user.id,
+      mandant_id: mandantId,
       title: deriveTitle(result),
       result_json: result,
       status: "offen",
-      auto_delete_at: autoDeleteAt,
+      rules_version: RULES_VERSION,
     })
     .select("id")
     .single();
@@ -106,7 +108,7 @@ export async function POST(req: Request) {
   // Mehrstufige Fristen-Erinnerungen planen (nicht-fatal). Versand per Cron nur
   // bei aktiver Fall-Begleitung & solange Fall offen. Mehrere Stufen (7/2/0 Tage
   // vor der 14-Tage-Frist), damit ein einzelner Ausfall nicht zum Fristverlust führt.
-  const remRows = buildReminderRows(data.id as string, user.id, WIDERSPRUCH_FRIST_TAGE, Date.now());
+  const remRows = buildReminderRows(data.id as string, WIDERSPRUCH_FRIST_TAGE, Date.now(), user.id);
   const { error: remErr } = await supabase.from("reminders").insert(remRows);
   if (remErr) {
     console.error("[api/cases] reminder insert error:", (remErr as { code?: string }).code);

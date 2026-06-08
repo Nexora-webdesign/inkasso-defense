@@ -23,6 +23,7 @@
 // -----------------------------------------------------------------------------
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { mandantBelongsToKanzlei } from "@/lib/kanzlei";
 
 const URL = process.env.SUPABASE_TEST_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -436,6 +437,17 @@ describe.skipIf(!READY)("RLS-Isolation (Migration 0004)", () => {
       expect(data ?? []).toHaveLength(0);
       const { data: check } = await ctx.admin.from("mandanten").select("id").eq("id", ctx.mandantA).single();
       expect(check?.id).toBe(ctx.mandantA);
+    });
+  });
+
+  // ── Mandant Cross-Tenant (Server-Validierung beim cases-Insert) ───────────────
+  describe("mandantBelongsToKanzlei (echte RLS)", () => {
+    it("A: eigener Mandant gehört zur eigenen Kanzlei → true", async () => {
+      expect(await mandantBelongsToKanzlei(ctx.userA, ctx.mandantA, ctx.kanzleiA)).toBe(true);
+    });
+
+    it("A: FREMDER Mandant (B) → false (cases-Insert würde 400 liefern)", async () => {
+      expect(await mandantBelongsToKanzlei(ctx.userA, ctx.mandantB, ctx.kanzleiA)).toBe(false);
     });
   });
 });

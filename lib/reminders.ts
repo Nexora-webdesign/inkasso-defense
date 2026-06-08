@@ -27,17 +27,21 @@ export function reminderOffsets(deadlineInDays: number): number[] {
   return [...set].sort((a, b) => a - b);
 }
 
-/** Baut Reminder-Insert-Zeilen für die mehrstufige Erinnerung. */
+/**
+ * Baut Reminder-Insert-Zeilen für die mehrstufige Erinnerung.
+ * Ab Migration 0004: KEIN kanzlei_id im Insert – das setzt der DB-Trigger zwingend
+ * aus der Eltern-Akte (case_id). createdBy ist optional (Audit, on delete set null).
+ */
 export function buildReminderRows(
   caseId: string,
-  userId: string,
   deadlineInDays: number,
   nowMs: number,
-): { case_id: string; user_id: string; type: "widerspruch_14tage"; due_at: string }[] {
+  createdBy?: string,
+): { case_id: string; type: "widerspruch_14tage"; due_at: string; created_by?: string }[] {
   return reminderOffsets(deadlineInDays).map((d) => ({
     case_id: caseId,
-    user_id: userId,
     type: "widerspruch_14tage" as const,
     due_at: new Date(nowMs + d * 86_400_000).toISOString(),
+    ...(createdBy ? { created_by: createdBy } : {}),
   }));
 }

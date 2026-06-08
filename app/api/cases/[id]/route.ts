@@ -16,12 +16,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   } = await supabase.auth.getUser();
   if (!user) return json({ ok: false, error: "Bitte zuerst anmelden." }, 401);
 
-  // RLS (auth.uid()=user_id) stellt sicher, dass nur eigene Fälle löschbar sind.
+  // RLS (Kanzlei-Mitgliedschaft, Rolle inhaber/anwalt) stellt sicher, dass nur
+  // berechtigte Nutzer Akten der eigenen Kanzlei löschen können.
   const { data, error } = await supabase
     .from("cases")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id)
     .select("id")
     .maybeSingle();
 
