@@ -2,13 +2,11 @@
 // Entfernt den Fall; zugehörige Schreiben (case_letters) und Erinnerungen
 // (reminders) werden per ON DELETE CASCADE automatisch mitgelöscht.
 import { cookies } from "next/headers";
+import { json } from "@/lib/http";
 import { createClient } from "@/utils/supabase/server";
 
 export const runtime = "nodejs";
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

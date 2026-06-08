@@ -2,6 +2,7 @@
 // Folgeschreiben zu einem Fall hochladen → KI ordnet ein → Analyse speichern.
 // Premium-pflichtig (Fall-Begleitung). Speichert NUR die Analyse, kein Rohdokument.
 import Anthropic from "@anthropic-ai/sdk";
+import { json } from "@/lib/http";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getPremiumUntil } from "@/lib/premium";
@@ -22,9 +23,6 @@ const MODEL = "claude-haiku-4-5";
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const client = new Anthropic();
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -5,6 +5,7 @@
 // holt die DSGVO-Einwilligung ein und speichert es als Fall.
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/account/DashboardShell";
+import { eur } from "@/lib/format";
 
 const KEY = "inkassoPendingCase";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 h
@@ -13,9 +14,6 @@ type Result = {
   stammdaten?: { inkassoName?: string; glaeubiger?: string; aktenzeichen?: string; originalSumme?: number };
   berechnung?: { fairerKern?: number; ersparnis?: number };
 };
-
-const eur = (n: unknown) =>
-  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
 
 export default function ImportCasePage() {
   const [result, setResult] = useState<Result | null>(null);

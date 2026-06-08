@@ -1,13 +1,11 @@
 // app/api/cases/[id]/status/route.ts – Status eines Falls ändern (geschützt).
 import { cookies } from "next/headers";
+import { json } from "@/lib/http";
 import { createClient } from "@/utils/supabase/server";
 import { isCaseStatus } from "@/lib/escalation";
 
 export const runtime = "nodejs";
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-}
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
