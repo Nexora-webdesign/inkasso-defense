@@ -5,7 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { json } from "@/lib/http";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
-import { getPremiumUntil } from "@/lib/premium";
+import { getPremiumUntilByKanzlei } from "@/lib/premium";
 import {
   FOLLOWUP_SYSTEM_PROMPT,
   FOLLOWUP_JSON_SCHEMA,
@@ -33,16 +33,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   } = await supabase.auth.getUser();
   if (!user) return json({ ok: false, error: "Bitte zuerst anmelden." }, 401);
 
-  // Fall laden (RLS: nur eigener Fall sichtbar).
+  // Fall laden (RLS: nur Akten der eigenen Kanzlei sichtbar).
   const { data: fall } = await supabase
     .from("cases")
-    .select("id,status,result_json")
+    .select("id,status,result_json,kanzlei_id")
     .eq("id", id)
     .maybeSingle();
   if (!fall) return json({ ok: false, error: "Fall nicht gefunden." }, 404);
 
-  // Premium-Pflicht (Fall-Begleitung).
-  const premiumUntil = await getPremiumUntil(supabase, user.id);
+  // Premium-Pflicht (Fall-Begleitung) – auf Kanzlei-Ebene.
+  const premiumUntil = await getPremiumUntilByKanzlei(supabase, fall.kanzlei_id as string);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
   if (!isPremium) {
     return json({ ok: false, error: "Dafür ist die Fall-Begleitung nötig." }, 402);
@@ -144,11 +144,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     fordertZahlung: f.fordert_zahlung,
   };
 
+  // created_by = Audit; kanzlei_id setzt der DB-Trigger zwingend aus der Eltern-Akte.
   const { data: inserted, error: insErr } = await supabase
     .from("case_letters")
     .insert({
       case_id: id,
-      user_id: user.id,
+      created_by: user.id,
       letter_type: f.letter_type,
       summary: f.kurzzusammenfassung,
       analysis_json: analysis,
@@ -167,15 +168,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const { error: stErr } = await supabase
       .from("cases")
       .update({ status: guide.suggestNext, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .eq("user_id", user.id);
+      .eq("id", id);
     if (!stErr) statusChanged = true;
   }
 
   // Mehrstufige Erinnerungen anlegen, wenn eine Tagesfrist genannt ist
   // (Versand via Cron, nur Premium): mehrere Stufen vor der Frist.
   if (analysis.fristTage > 0) {
-    const remRows = buildReminderRows(id, user.id, analysis.fristTage, Date.now());
+    const remRows = buildReminderRows(id, analysis.fristTage, Date.now(), user.id);
     await supabase.from("reminders").insert(remRows);
   }
 

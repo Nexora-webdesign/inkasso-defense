@@ -1,25 +1,17 @@
 /**
  * test-validation.ts — Reine TypeScript-Validierung der Enforcement-Logik.
- * Prüft Regel 1 (max. 1 Fall pro Konto) und Regel 2 (Folgebrief gehört zum Fall)
- * gegen die ECHTEN Funktionen aus lib/casematch.ts. KEINE LLM, keine Tokens.
+ * Prüft Regel 2 (Folgebrief gehört zum Fall) gegen die ECHTE Funktion aus
+ * lib/casematch.ts. KEINE LLM, keine Tokens.
+ *
+ * (Das frühere „max. 1 Fall pro Konto" / canOpenNewCase ist mit der
+ *  Mehrmandantenfähigkeit – Migration 0004 – entfallen.)
  *
  * Ausführen:
  *   npx tsx test-validation.ts
  *
- * Eigene Fälle: einfach Objekte zu RULE1_CASES / RULE2_CASES hinzufügen.
+ * Eigene Fälle: einfach Objekte zu RULE2_CASES hinzufügen.
  */
-import { canOpenNewCase, letterMatchesCase, type CaseStamm } from "./lib/casematch";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Regel 1: Wie viele Fälle hat das Konto bereits? -> darf es noch einen anlegen?
-// ─────────────────────────────────────────────────────────────────────────────
-type Rule1Case = { name: string; existingCount: number; expect: boolean };
-
-const RULE1_CASES: Rule1Case[] = [
-  { name: "Neues Konto, 0 Fälle -> darf anlegen", existingCount: 0, expect: true },
-  { name: "Bereits 1 Fall -> KEIN zweiter", existingCount: 1, expect: false },
-  { name: "Schon 2 Fälle (Altbestand) -> blockiert", existingCount: 2, expect: false },
-];
+import { letterMatchesCase, type CaseStamm } from "./lib/casematch";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Regel 2: Gehört ein hochgeladenes Folgeschreiben zum bestehenden Fall?
@@ -86,9 +78,6 @@ function check(name: string, actual: boolean, expect: boolean) {
   const detail = ok ? "" : `  (erwartet ${expect}, war ${actual})`;
   console.log(`${tag} ${name}${detail}`);
 }
-
-console.log("\n=== Regel 1: max. 1 Fall pro Konto ===");
-for (const t of RULE1_CASES) check(t.name, canOpenNewCase(t.existingCount), t.expect);
 
 console.log("\n=== Regel 2: Folgebrief gehört zum Fall ===");
 for (const t of RULE2_CASES) check(t.name, letterMatchesCase(t.stamm, t.letter).ok, t.expect);

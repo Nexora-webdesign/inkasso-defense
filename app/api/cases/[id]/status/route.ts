@@ -25,12 +25,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return json({ ok: false, error: "Unbekannter Status." }, 400);
   }
 
-  // RLS (auth.uid()=user_id) stellt sicher, dass nur eigene Fälle änderbar sind.
+  // RLS (Kanzlei-Mitgliedschaft) stellt sicher, dass nur Akten der eigenen
+  // Kanzlei änderbar sind.
   const { data, error } = await supabase
     .from("cases")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("user_id", user.id)
     .select("id")
     .maybeSingle();
 

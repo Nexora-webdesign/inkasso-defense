@@ -3,7 +3,8 @@
 // Geschützt per CRON_SECRET (Vercel sendet Authorization: Bearer <CRON_SECRET>).
 import { createAdminClient } from "@/utils/supabase/admin";
 import { json } from "@/lib/http";
-import { getPremiumStatus } from "@/lib/premium";
+import { getPremiumStatusByKanzlei } from "@/lib/premium";
+import { getReminderEmpfaenger } from "@/lib/kanzlei";
 import { sendEmail, escapeHtml } from "@/lib/email";
 import { SITE_URL } from "@/lib/blog-shared";
 
@@ -19,9 +20,9 @@ type DueReminder = {
   id: string;
   type: string;
   case_id: string;
-  user_id: string;
+  kanzlei_id: string;
   due_at: string;
-  cases: { title: string | null; status: string | null } | null;
+  cases: { title: string | null; status: string | null; assigned_to: string | null } | null;
 };
 
 function reminderHtml(title: string, caseUrl: string): string {
@@ -54,7 +55,7 @@ export async function GET(req: Request) {
 
   const { data: due, error } = await admin
     .from("reminders")
-    .select("id, type, case_id, user_id, due_at, cases(title, status)")
+    .select("id, type, case_id, kanzlei_id, due_at, cases(title, status, assigned_to)")
     .is("sent_at", null)
     .lte("due_at", nowIso)
     .limit(200);
@@ -81,8 +82,8 @@ export async function GET(req: Request) {
         continue;
       }
 
-      // Premium fehlertolerant prüfen: bei DB-Fehler NICHT konsumieren (Retry).
-      const prem = await getPremiumStatus(admin, r.user_id);
+      // Premium (Kanzlei) fehlertolerant prüfen: bei DB-Fehler NICHT konsumieren (Retry).
+      const prem = await getPremiumStatusByKanzlei(admin, r.kanzlei_id);
       if (prem.error) {
         deferred++;
         continue;
@@ -100,23 +101,25 @@ export async function GET(req: Request) {
         continue;
       }
 
-      // E-Mail holen – bei Fehler/fehlend NICHT konsumieren (Retry).
-      const { data: profile, error: pErr } = await admin
-        .from("profiles")
-        .select("email")
-        .eq("id", r.user_id)
-        .maybeSingle();
-      if (pErr || !profile?.email) {
+      // Empfänger ermitteln (assigned_to der Akte, sonst Inhaber der Kanzlei).
+      // getReminderEmpfaenger wirft bei DB-Fehler -> outer catch -> deferred (Retry).
+      const empfaenger = await getReminderEmpfaenger(admin, {
+        kanzleiId: r.kanzlei_id,
+        assignedTo: r.cases?.assigned_to ?? null,
+      });
+      if (empfaenger.length === 0) {
         deferred++;
         continue;
       }
 
       const caseUrl = `${SITE_URL}/fall/${r.case_id}`;
-      await sendEmail({
-        to: profile.email as string,
-        subject: "Erinnerung: Frist für deinen Inkasso-Widerspruch",
-        html: reminderHtml(r.cases?.title ?? "", caseUrl),
-      });
+      for (const to of empfaenger) {
+        await sendEmail({
+          to,
+          subject: "Erinnerung: Frist für deinen Inkasso-Widerspruch",
+          html: reminderHtml(r.cases?.title ?? "", caseUrl),
+        });
+      }
       // sent_at NUR nach erfolgreichem Versand setzen.
       await consume(r.id);
       sent++;
