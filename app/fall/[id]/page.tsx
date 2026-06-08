@@ -12,6 +12,7 @@ import type { LetterType } from "@/lib/followup";
 import { DashboardShell } from "@/components/account/DashboardShell";
 import { CaseStatusControl } from "@/components/account/CaseStatusControl";
 import { CopyEmail } from "@/components/account/CopyEmail";
+import { DeleteCaseButton } from "@/components/account/DeleteCaseButton";
 import { LetterUpload } from "@/components/account/LetterUpload";
 
 const dfmt = (d: string | Date) =>
@@ -321,6 +322,16 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             </div>
           </section>
         ) : null}
+
+        {/* ── Fall verwalten (destruktiv, abgesetzt) ──────────────────── */}
+        <section className="mt-12 border-t border-white/5 pt-6">
+          <p className="text-xs text-slate-500">
+            Fall nicht mehr nötig? Du kannst ihn jederzeit selbst entfernen – inkl. aller gespeicherten Schreiben und Erinnerungen.
+          </p>
+          <div className="mt-2">
+            <DeleteCaseButton caseId={fall.id as string} />
+          </div>
+        </section>
     </DashboardShell>
   );
 }
