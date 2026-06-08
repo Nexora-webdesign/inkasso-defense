@@ -57,6 +57,19 @@ function Logout({ className = "" }: { className?: string }) {
   );
 }
 
+// B2B-Status: dezent pulsierender Mint-Punkt + "Intelligence Layer aktiv".
+function StatusBadge({ className = "" }: { className?: string }) {
+  return (
+    <div className={"inline-flex items-center gap-2 rounded-full border border-gray-800 bg-gray-900/50 px-3 py-1 " + className}>
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75 motion-reduce:animate-none" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+      </span>
+      <span className="text-[10px] font-medium uppercase tracking-widest text-emerald-400/90">Intelligence Layer aktiv</span>
+    </div>
+  );
+}
+
 export function DashboardShell({
   email,
   premiumActive = false,
@@ -117,7 +130,8 @@ export function DashboardShell({
       {/* ── Sidebar (Desktop) ──────────────────────────────────────────── */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-night-surface/40 px-4 py-5 lg:flex">
         <Brand />
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+        <StatusBadge className="mt-4" />
+        <nav className="mt-6 flex flex-1 flex-col gap-1">
           <NavList />
         </nav>
         <div className="space-y-3">
@@ -137,6 +151,9 @@ export function DashboardShell({
         <Brand />
         <Logout />
       </header>
+      <div className="flex justify-center border-b border-white/10 bg-night/80 px-4 py-1.5 lg:hidden">
+        <StatusBadge />
+      </div>
       <nav className="sticky top-[57px] z-20 flex gap-2 overflow-x-auto border-b border-white/10 bg-night/80 px-4 py-2 backdrop-blur-xl lg:hidden">
         <NavList onItem="whitespace-nowrap" />
       </nav>
