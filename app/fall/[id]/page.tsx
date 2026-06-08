@@ -9,7 +9,7 @@ import { getPremiumUntil } from "@/lib/premium";
 import { getEscalation, isCaseStatus, type CaseStatus } from "@/lib/escalation";
 import { getLetterGuide, LETTER_TYPE_LABEL } from "@/lib/letter-guide";
 import type { LetterType } from "@/lib/followup";
-import { SiteHeader } from "@/components/blog/SiteHeader";
+import { DashboardShell } from "@/components/account/DashboardShell";
 import { CaseStatusControl } from "@/components/account/CaseStatusControl";
 import { CopyEmail } from "@/components/account/CopyEmail";
 import { LetterUpload } from "@/components/account/LetterUpload";
@@ -62,6 +62,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
 
   const premiumUntil = await getPremiumUntil(supabase, user.id);
   const isPremium = !!premiumUntil && premiumUntil.getTime() > Date.now();
+  const premiumLabel = premiumUntil ? dfmt(premiumUntil) : "";
 
   // Folgeschreiben (Verlauf) – RLS liefert nur eigene.
   const { data: lettersData } = await supabase
@@ -90,9 +91,7 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
   const subject = az ? `Teilwiderspruch – Aktenzeichen ${az}` : "Teilwiderspruch gegen Ihre Forderung";
 
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 pb-24 pt-14 sm:pt-20">
+    <DashboardShell email={user.email} premiumActive={isPremium} premiumLabel={premiumLabel}>
         <Link href="/faelle" className="text-sm font-semibold text-slate-400 hover:text-mint-light">
           ← Meine Fälle
         </Link>
@@ -322,7 +321,6 @@ export default async function FallPage({ params }: { params: Promise<{ id: strin
             </div>
           </section>
         ) : null}
-      </main>
-    </>
+    </DashboardShell>
   );
 }
