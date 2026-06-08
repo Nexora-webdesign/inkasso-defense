@@ -7,3 +7,6 @@
 - Jede Regeländerung braucht einen Positiv- UND einen Negativfall in golden/cases.ts.
 - Die Golden-Suite ist CI-Gate: kein Merge bei rotem Test.
 - Die UI ist "Orientierungshilfe", keine Rechtsberatung (RDG).
+- Portal-Texte (eingeloggter B2B-Bereich: app/(portal)/*, components/portal/*, components/account/*):
+  durchgängig **Sie / unpersönlich**, niemals "du/dein" – das Portal richtet sich an Kanzleien.
+  Bei allen künftigen Portal-Screens beachten. (Der öffentliche Funnel in public/ ist davon unberührt.)
